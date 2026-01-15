@@ -159,8 +159,42 @@ export default function WaiterMenuForm() {
                                 <span>Grand Total</span>
                                 <span>₹ 1100/-</span>
                             </div>
+
+
                         </div>
                     </Card>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-4 mt-6">
+                        <AppButton
+                            label="Save & Continue"
+                            variant="contained"
+                            className="
+      !bg-green-500
+      hover:!bg-green-600
+      !text-white
+      px-6
+    "
+                            onClick={() => {
+                                console.log("Order saved, continue adding items");
+                            }}
+                        />
+
+                        <AppButton
+                            label="Proceed to Billing"
+                            variant="contained"
+                            className="
+      !bg-blue-500
+      hover:!bg-blue-600
+      !text-white
+      px-6
+    "
+                            onClick={() => {
+                                console.log("Proceed to billing");
+                            }}
+                        />
+                    </div>
+
                 </div>
             </div>
         </Box>
