@@ -6,9 +6,9 @@ export default async function AdminLayout({ children }) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
 
-  // if (!token) {
-  //   redirect("/login");
-  // }
+  if (!token) {
+    redirect("/login");
+  }
 
   // sidebar should be here
 
@@ -18,12 +18,7 @@ export default async function AdminLayout({ children }) {
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 p-6 overflow-y-auto">
-        {children}
-      </main>
+      <main className="flex-1 p-6 overflow-y-auto">{children}</main>
     </div>
   );
 }
-
-
-
