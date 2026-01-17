@@ -1,8 +1,11 @@
+import MenuManagement from '@/Componenets/AdminScreens/AdminMenuManagement/MenuManagement'
 import React from 'react'
 
 const page = () => {
   return (
-    <div>menu</div>
+    <div>
+      <MenuManagement/>
+    </div>
   )
 }
 
