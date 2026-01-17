@@ -75,30 +75,35 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    if (!validate()) return;
-
-    setLoading(true);
-    setApiError("");
-
-    try {
-      const res = await API.post("/auth/login", {
-        email,
-        password,
-      });
-
-      const { user } = res.data;
-
-      if (user.role === "ADMIN") {
-        router.push("/admin");
-      } else if (user.role === "CASHIER") {
-        router.push("/waiter/dashboard");
-      }
-    } catch (err) {
-      setApiError(err.response?.data?.message || "Login failed");
-    } finally {
-      setLoading(false);
-    }
+    router.push("/admin")
   };
+//   const handleLogin = async () => {
+//     if (!validate()) return;
+
+//     setLoading(true);
+//     setApiError("");
+
+//     try {
+//       const res = await API.post("/auth/login", {
+//         email,
+//         password,
+//       });
+
+//       const { user } = res.data;
+
+//       if (user.role === "ADMIN") {
+//         router.push("/admin");
+//       } else if (user.role === "CASHIER") {
+//         router.push("/waiter/dashboard");
+//       }
+//     } catch (err) {
+//       setApiError(err.response?.data?.message || "Login failed");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+
   return (
     <Box className="min-h-screen w-full flex bg-black overflow-x-hidden">
       {/* LEFT IMAGE */}

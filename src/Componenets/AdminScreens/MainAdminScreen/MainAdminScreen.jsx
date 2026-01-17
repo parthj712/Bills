@@ -1,10 +1,11 @@
 import React from 'react'
-import AdminHomePage from '../AdminHomePage/AdminHomePage'
+import AdminDashboard from '../AdminDashboard/AdminDashboard'
+
 
 const MainAdminScreen = () => {
   return (
     <div>
-        <AdminHomePage/>
+        <AdminDashboard/>
     </div>
   )
 }

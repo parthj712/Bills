@@ -1,10 +1,29 @@
-"use client";
+import Sidebar from "@/Componenets/AdminScreens/Sidebar/Sidebar";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export default function AdminLayout({ children }) {
-  const token = cookies().get("token");
-  if (!token) redirect("/login");
+export default async function AdminLayout({ children }) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
 
-  return children;
+  // if (!token) {
+  //   redirect("/login");
+  // }
+
+  // sidebar should be here
+
+  return (
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar />
+
+      {/* Main Content */}
+      <main className="flex-1 p-6 overflow-y-auto">
+        {children}
+      </main>
+    </div>
+  );
 }
+
+
+
