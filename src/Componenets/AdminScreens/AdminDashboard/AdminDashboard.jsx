@@ -22,16 +22,16 @@ import { StatCard } from "./StatCard";
 
 
 
-const sidebarItems = [
-    { label: "Dashboard", icon: <Dashboard fontSize="small" /> },
-    { label: "Table Management", icon: <TableBar fontSize="small" /> },
-    { label: "Menu Management", icon: <RestaurantMenu fontSize="small" /> },
-    { label: "Order Management", icon: <Receipt fontSize="small" /> },
-    { label: "Billing & Payments", icon: <Receipt fontSize="small" /> },
-    { label: "Analytics & Graphs", icon: <BarChart fontSize="small" /> },
-    { label: "Staff Management", icon: <People fontSize="small" /> },
-    { label: "Settings", icon: <Settings fontSize="small" /> },
-];
+// const sidebarItems = [
+//     { label: "Dashboard", icon: <Dashboard fontSize="small" /> },
+//     { label: "Table Management", icon: <TableBar fontSize="small" /> },
+//     { label: "Menu Management", icon: <RestaurantMenu fontSize="small" /> },
+//     { label: "Order Management", icon: <Receipt fontSize="small" /> },
+//     { label: "Billing & Payments", icon: <Receipt fontSize="small" /> },
+//     { label: "Analytics & Graphs", icon: <BarChart fontSize="small" /> },
+//     { label: "Staff Management", icon: <People fontSize="small" /> },
+//     { label: "Settings", icon: <Settings fontSize="small" /> },
+// ];
 
 const stats = [
     {
@@ -80,12 +80,12 @@ const topProducts = [
     { name: "Vegetable Salad", percent: 40, color: "bg-pink-400" },
 ];
 
-export default function AdminHomePage() {
+export default function AdminDashboard() {
     return (
-        <Box className="min-h-screen flex bg-gray-50">
+        <Box className="flex bg-gray-50">
 
             {/* SIDEBAR */}
-            <aside className="w-64 bg-white border-r px-4 py-6 hidden md:block">
+            {/* <aside className="w-64 bg-white border-r px-4 py-6 hidden md:block">
                 <div className="flex items-center gap-2 mb-8">
                     <img src="/Logo.png" className="h-8" />
                 </div>
@@ -101,10 +101,10 @@ export default function AdminHomePage() {
                         </div>
                     ))}
                 </nav>
-            </aside>
+            </aside> */}
 
             {/* MAIN CONTENT */}
-            <main className="flex-1 p-6">
+            <main className="flex-1 p-2">
 
                 {/* Header */}
                 <Typography color="black" fontSize={30} fontWeight={600} mb={4}>
