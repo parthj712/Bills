@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Skeleton, Typography } from "@mui/material";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import AddTable from "./AddTable";
 import { getTables } from "@/service/tableService";
@@ -23,17 +23,19 @@ export default function TableManagement() {
     setSelectedTable(table);
     setOpenEditDialog(true);
   };
+  const [loading, setLoading] = useState(true);
 
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const handleGetTables = async () => {
     try {
+      setLoading(true);
       const res = await getTables();
-      console.log("res", res);
-
       setTables(res);
     } catch (error) {
       console.log("failed to get tables", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,20 +55,29 @@ export default function TableManagement() {
 
       {/* Tables Grid */}
       <div className="grid md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {tables.map((table) => (
-          <div
-            key={table._id}
-            onClick={() => handleTableClick(table)}
-            className={`
-              h-28 w-full flex items-center justify-center
-              rounded-xl text-xl font-semibold
-              border-2 cursor-pointer text-black
-              ${STATUS_STYLE[table.status]}
-            `}
-          >
-            {table.tableNo}
-          </div>
-        ))}
+        {loading
+          ? Array.from({ length: 10 }).map((_, index) => (
+              <Skeleton
+                key={index}
+                variant="rounded"
+                height={112}
+                sx={{ borderRadius: "12px" }}
+              />
+            ))
+          : tables.map((table) => (
+              <div
+                key={table._id}
+                onClick={() => handleTableClick(table)}
+                className={`
+            h-28 w-full flex items-center justify-center
+            rounded-xl text-xl font-semibold
+            border-2 cursor-pointer text-black
+            ${STATUS_STYLE[table.status]}
+          `}
+              >
+                {table.tableNo}
+              </div>
+            ))}
       </div>
 
       {/* Bottom Section */}

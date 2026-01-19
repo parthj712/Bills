@@ -1,9 +1,12 @@
-import React from 'react'
+import MainStaffManagement from "@/Componenets/AdminScreens/StaffManagement/MainStaffManagement";
+import React from "react";
 
 const page = () => {
   return (
-    <div>staff</div>
-  )
-}
+    <div>
+      <MainStaffManagement />
+    </div>
+  );
+};
 
-export default page
+export default page;
