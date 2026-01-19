@@ -74,9 +74,6 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // const handleLogin = async () => {
-  //   router.push("/admin")
-  // };
   const handleLogin = async () => {
     if (!validate()) return;
 
@@ -89,8 +86,13 @@ export default function Login() {
         password,
       });
 
-      const { user } = res.data;
+      const { token, user } = res.data;
 
+      // ✅ SAVE TOKEN
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // ✅ REDIRECT BY ROLE
       if (user.role === "ADMIN") {
         router.push("/admin");
       } else if (user.role === "CASHIER") {
