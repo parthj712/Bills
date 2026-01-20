@@ -96,10 +96,11 @@ export default function Login() {
       if (user.role === "ADMIN") {
         router.push("/admin");
       } else if (user.role === "CASHIER") {
-        router.push("/waiter/dashboard");
+        router.push("/waiter");
       }
     } catch (err) {
-      setApiError(err.response?.data?.message || "Login failed");
+      const message = err?.response?.data?.message || "Something went wrong";
+      setErrors(message);
     } finally {
       setLoading(false);
     }

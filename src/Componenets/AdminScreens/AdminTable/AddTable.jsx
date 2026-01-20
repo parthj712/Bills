@@ -37,7 +37,6 @@ const AddTable = ({ open, onClose, onSuccess }) => {
       });
 
       onSuccess(newTable);
-      onClose();
       setTableNo("");
     } catch (err) {
       console.error(err);
