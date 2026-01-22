@@ -182,7 +182,11 @@ const MainStaffManagement = () => {
           </TableBody>
         </Table>
       </TableContainer>
-      <AddStaff open={openAdd} onClose={() => setOpenAdd(false)} />
+      <AddStaff
+        open={openAdd}
+        onClose={() => setOpenAdd(false)}
+        onSuccess={fetchStaff}
+      />
       <EditStaff
         open={editOpen}
         onClose={() => setEditOpen(false)}

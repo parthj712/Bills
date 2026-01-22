@@ -49,7 +49,7 @@ export default function TableManagement() {
   return (
     <Box className="flex flex-col min-h-full p-2">
       {/* Header */}
-      <Typography fontSize={30} fontWeight={600} mb={6}>
+      <Typography fontSize={30} fontWeight={600} mb={6} sx={{ color: "black" }}>
         Table Management
       </Typography>
 
