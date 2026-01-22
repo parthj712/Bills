@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 import { useSearchParams } from "next/navigation";
 import { finalizeBillAndOrder } from "@/service/orderService";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { clearCart, decreaseQty, increaseQty } from "@/redux/slices/cartSlice";
 
 export default function OrderCart() {
@@ -76,84 +76,86 @@ export default function OrderCart() {
 
   return (
     <>
-      <Card className="p-6 rounded-2xl border-dashed border-2 border-gray-300">
-        {/* Items */}
-        {cartItems.map((item) => (
-          <div
-            key={item.cartId}
-            className="flex justify-between items-center my-3"
-          >
-            <div>
-              <Typography fontSize={14}>
-                {item.name} ({item.portion})
-              </Typography>
-              <Typography fontSize={13} color="text.secondary">
-                ₹ {item.unitPrice}/-
-              </Typography>
+      <Suspense fallback={<div>Loading order...</div>}>
+        <Card className="p-6 rounded-2xl border-dashed border-2 border-gray-300">
+          {/* Items */}
+          {cartItems.map((item) => (
+            <div
+              key={item.cartId}
+              className="flex justify-between items-center my-3"
+            >
+              <div>
+                <Typography fontSize={14}>
+                  {item.name} ({item.portion})
+                </Typography>
+                <Typography fontSize={13} color="text.secondary">
+                  ₹ {item.unitPrice}/-
+                </Typography>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    dispatch(decreaseQty({ tableId, cartId: item.cartId }))
+                  }
+                >
+                  <RemoveIcon fontSize="small" />
+                </IconButton>
+
+                <Typography>{item.qty}</Typography>
+
+                <IconButton
+                  size="small"
+                  onClick={() =>
+                    dispatch(increaseQty({ tableId, cartId: item.cartId }))
+                  }
+                >
+                  <AddIcon fontSize="small" />
+                </IconButton>
+              </div>
+            </div>
+          ))}
+
+          <Divider className="my-4" />
+
+          {/* Totals */}
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>₹ {subtotal.toFixed(2)}</span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <IconButton
-                size="small"
-                onClick={() =>
-                  dispatch(decreaseQty({ tableId, cartId: item.cartId }))
-                }
-              >
-                <RemoveIcon fontSize="small" />
-              </IconButton>
+            <div className="flex justify-between">
+              <span>Tax (approx)</span>
+              <span>₹ {tax.toFixed(2)}</span>
+            </div>
 
-              <Typography>{item.qty}</Typography>
+            <Divider />
 
-              <IconButton
-                size="small"
-                onClick={() =>
-                  dispatch(increaseQty({ tableId, cartId: item.cartId }))
-                }
-              >
-                <AddIcon fontSize="small" />
-              </IconButton>
+            <div className="flex justify-between font-semibold my-3">
+              <span>Grand Total</span>
+              <span>₹ {grandTotal.toFixed(2)}</span>
             </div>
           </div>
-        ))}
+        </Card>
 
-        <Divider className="my-4" />
+        {/* Buttons */}
+        <div className="flex justify-end gap-4 mt-6">
+          <AppButton
+            label="Save & Continue"
+            className="!bg-green-500 hover:!bg-green-600 !text-white px-6"
+            onClick={handleSaveAndContinue}
+          />
 
-        {/* Totals */}
-        <div className="space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>₹ {subtotal.toFixed(2)}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span>Tax (approx)</span>
-            <span>₹ {tax.toFixed(2)}</span>
-          </div>
-
-          <Divider />
-
-          <div className="flex justify-between font-semibold my-3">
-            <span>Grand Total</span>
-            <span>₹ {grandTotal.toFixed(2)}</span>
-          </div>
+          <AppButton
+            label={loading ? "Processing..." : "Proceed to Billing"}
+            disabled={loading}
+            className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
+            onClick={handleProceedToBilling}
+          />
         </div>
-      </Card>
-
-      {/* Buttons */}
-      <div className="flex justify-end gap-4 mt-6">
-        <AppButton
-          label="Save & Continue"
-          className="!bg-green-500 hover:!bg-green-600 !text-white px-6"
-          onClick={handleSaveAndContinue}
-        />
-
-        <AppButton
-          label={loading ? "Processing..." : "Proceed to Billing"}
-          disabled={loading}
-          className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
-          onClick={handleProceedToBilling}
-        />
-      </div>
+      </Suspense>
     </>
   );
 }
