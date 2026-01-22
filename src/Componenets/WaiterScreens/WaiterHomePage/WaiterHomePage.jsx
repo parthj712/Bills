@@ -14,6 +14,7 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -86,17 +87,80 @@ export default function WaiterHomePage() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   return (
-    <Box className="min-h-screen bg-gray-50 p-6">
+    <Box className="min-h-screen bg-gray-50">
       {/* Top Buttons */}
-      <div className="flex items-center gap-4 mb-6">
-        <AppButton
-          label="Swiggy"
-          className="!bg-orange-500 !text-white flex-1"
-        />
-        <AppButton label="Zomato" className="!bg-red-600 !text-white flex-1" />
-      </div>
+      {/* Navbar */}
+      <Card className="mb-6 px-6 py-3 rounded-2xl flex items-center justify-between shadow-sm">
+        {/* Left: Logo */}
+        <Box display={"flex"} flexDirection={"row"} gap={2} alignItems={"center"} >
+          <div className="relative w-8 h-10">
+            <Image
+              src="/LogoIcon.png"   // put logo inside /public folder
+              alt="Billing Logo"
+              fill
+              className="object-contain rounded-full"
+              priority
+            />
+          </div>
 
-      <div className="grid grid-cols-12 gap-6">
+          <Typography fontSize={24} fontWeight={600}>
+            Billing
+          </Typography>
+        </Box>
+
+        {/* Right: Menu + Sign Out */}
+        <div className="flex items-center gap-3">
+          <AppButton
+            label="Swiggy"
+            className="
+    !bg-[#FC8019]
+    !text-white
+    !px-5
+    hover:!bg-[#e56f15]
+  "
+            onClick={() => router.push("/waiter/menu")}
+          />
+
+          <AppButton
+            label="Zomato"
+            className="
+    !bg-[#E23744]
+    !text-white
+    !px-5
+    hover:!bg-[#c92f3a]
+  "
+            onClick={() => router.push("/waiter/menu")}
+          />
+
+          <IconButton onClick={handleMenuOpen}>
+            <Avatar
+              sx={{
+                bgcolor: "#2563EB", // Indigo / Blue
+                fontWeight: 600,
+              }}
+            >
+              A
+            </Avatar>
+          </IconButton>
+
+
+          <Menu
+            anchorEl={anchorEl}
+            open={open}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem onClick={handleLogout}>
+              <LogoutIcon fontSize="small" className="mr-2" />
+              Sign Out
+            </MenuItem>
+          </Menu>
+        </div>
+      </Card>
+
+
+      <div className="grid grid-cols-12 gap-6 p-6">
         {/* LEFT PANEL */}
         <div className="col-span-12 md:col-span-4 lg:col-span-4 flex flex-col gap-4 order-2 md:order-1">
           {/* Takeaway */}
@@ -127,24 +191,7 @@ export default function WaiterHomePage() {
               ))}
             </div>
           </Card>
-          <div className="flex justify-baseline">
-            <IconButton onClick={handleMenuOpen}>
-              <Avatar className="!bg-orange-500">A</Avatar>
-            </IconButton>
 
-            <Menu
-              anchorEl={anchorEl}
-              open={open}
-              onClose={handleClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-            >
-              <MenuItem onClick={handleLogout}>
-                <LogoutIcon fontSize="small" className="mr-2" />
-                Logout
-              </MenuItem>
-            </Menu>
-          </div>
         </div>
 
         {/* RIGHT PANEL */}
