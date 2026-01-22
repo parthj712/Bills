@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Typography, Divider, IconButton } from "@mui/material";
+import { Card, Typography, Divider, IconButton, Box } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
@@ -77,50 +77,97 @@ export default function OrderCart() {
   return (
     <>
       <Suspense fallback={<div>Loading order...</div>}>
-        <Card className="p-6 rounded-2xl border-dashed border-2 border-gray-300">
+        <Card className="p-6 !rounded-2xl border-dashed border-3 border-gray-300">
+
           {/* Items */}
-          {cartItems.map((item) => (
-            <div
-              key={item.cartId}
-              className="flex justify-between items-center my-3"
-            >
-              <div>
-                <Typography fontSize={14}>
-                  {item.name} ({item.portion})
-                </Typography>
-                <Typography fontSize={13} color="text.secondary">
-                  ₹ {item.unitPrice}/-
-                </Typography>
-              </div>
+          {cartItems.length === 0 ? (
+            <div className="my-6 text-center">
+              <Typography
+                fontSize={16}
+                fontWeight={600}
+                color="text.secondary"
+              >
+                No items added yet
+              </Typography>
 
-              <div className="flex items-center gap-2">
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    dispatch(decreaseQty({ tableId, cartId: item.cartId }))
-                  }
-                >
-                  <RemoveIcon fontSize="small" />
-                </IconButton>
-
-                <Typography>{item.qty}</Typography>
-
-                <IconButton
-                  size="small"
-                  onClick={() =>
-                    dispatch(increaseQty({ tableId, cartId: item.cartId }))
-                  }
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
-              </div>
+              <Typography
+                fontSize={14}
+                color="text.secondary"
+                className="mt-1"
+              >
+                Tap on menu items to add them here
+              </Typography>
             </div>
-          ))}
+          ) : (
+            cartItems.map((item) => (
+              <div
+                key={item.cartId}
+                className="flex justify-between items-center my-3"
+              >
+                <div>
+                  <Typography fontSize={16} fontWeight={600}>
+                    {item.name} ({item.portion})
+                  </Typography>
+                  <Typography fontSize={14}>
+                    ₹ {item.unitPrice}/-
+                  </Typography>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {/* Decrease */}
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      dispatch(decreaseQty({ tableId, cartId: item.cartId }))
+                    }
+                    sx={{
+                      backgroundColor: "#f3f4f6",
+                      color: "#374151",
+                      "&:hover": { backgroundColor: "#e5e7eb" },
+                    }}
+                  >
+                    <RemoveIcon fontSize="small" />
+                  </IconButton>
+
+                  {/* Quantity */}
+                  <Typography
+                    fontWeight={700}
+                    sx={{
+                      minWidth: 32,
+                      textAlign: "center",
+                      padding: "4px 10px",
+                      borderRadius: "8px",
+                      border: "1px solid #e5e7eb",
+                      backgroundColor: "#f9fafb",
+                    }}
+                  >
+                    {item.qty}
+                  </Typography>
+
+                  {/* Increase */}
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      dispatch(increaseQty({ tableId, cartId: item.cartId }))
+                    }
+                    sx={{
+                      backgroundColor: "#dcfce7",
+                      color: "#16a34a",
+                      "&:hover": { backgroundColor: "#bbf7d0" },
+                    }}
+                  >
+                    <AddIcon fontSize="small" />
+                  </IconButton>
+                </div>
+              </div>
+            ))
+          )}
+
 
           <Divider className="my-4" />
 
           {/* Totals */}
-          <div className="space-y-2 text-sm">
+          <div className="my-2 space-y-2 text-sm">
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>₹ {subtotal.toFixed(2)}</span>
@@ -133,11 +180,18 @@ export default function OrderCart() {
 
             <Divider />
 
-            <div className="flex justify-between font-semibold my-3">
-              <span>Grand Total</span>
-              <span>₹ {grandTotal.toFixed(2)}</span>
+            <div className="flex justify-between items-center my-4 p-3 rounded-xl bg-green-50">
+              <span className="text-[22px] font-semibold text-gray-800">
+                Grand Total
+              </span>
+
+              <span className="text-[22px] font-bold text-green-700">
+                ₹ {grandTotal.toFixed(2)}
+              </span>
             </div>
+
           </div>
+
         </Card>
 
         {/* Buttons */}
