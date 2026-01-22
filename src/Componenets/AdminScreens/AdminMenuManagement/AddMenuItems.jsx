@@ -9,9 +9,18 @@ import {
   MenuItem,
   Box,
   Typography,
+  IconButton,
+  Divider,
+  InputAdornment,
+  Chip,
 } from "@mui/material";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded";
+import CurrencyRupeeRoundedIcon from "@mui/icons-material/CurrencyRupeeRounded";
+import TagRoundedIcon from "@mui/icons-material/TagRounded";
+
 import AppButton from "@/Componenets/CommonComponents/AppButton";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { addMenuItem } from "@/service/menuService";
 
 const CATEGORIES = ["Main Course", "Chinese", "Snacks"];
@@ -29,19 +38,80 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
     priceFull: "",
     itemCode: "",
   });
+
   const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState({});
+
+  // Reset when dialog opens (premium UX)
+  useEffect(() => {
+    if (open) {
+      setForm({
+        name: "",
+        description: "",
+        category: "",
+        subCategory: "",
+        foodType: "",
+        priceHalf: "",
+        priceFull: "",
+        itemCode: "",
+      });
+      setTouched({});
+      setLoading(false);
+    }
+  }, [open]);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const markTouched = (name) =>
+    setTouched((prev) => ({ ...prev, [name]: true }));
+
+  const errors = useMemo(() => {
+    const e = {};
+    if (!form.name.trim()) e.name = "Item name is required";
+    if (!form.category) e.category = "Category is required";
+    if (!form.foodType) e.foodType = "Food type is required";
+    if (!form.itemCode.trim()) e.itemCode = "Item code is required";
+
+    const half = Number(form.priceHalf);
+    const full = Number(form.priceFull);
+    if (form.priceHalf === "" || !Number.isFinite(half) || half < 0)
+      e.priceHalf = "Enter valid half price";
+    if (form.priceFull === "" || !Number.isFinite(full) || full < 0)
+      e.priceFull = "Enter valid full price";
+    if (
+      Number.isFinite(half) &&
+      Number.isFinite(full) &&
+      full > 0 &&
+      half > full
+    )
+      e.priceHalf = "Half price can’t be more than full";
+    return e;
+  }, [form]);
+
+  const canSubmit = useMemo(() => Object.keys(errors).length === 0, [errors]);
+
   const handleSubmit = async () => {
+    if (!canSubmit) {
+      setTouched({
+        name: true,
+        category: true,
+        subCategory: true,
+        foodType: true,
+        priceHalf: true,
+        priceFull: true,
+        itemCode: true,
+        description: true,
+      });
+      return;
+    }
+
     try {
       setLoading(true);
-      console.log(form);
       await addMenuItem(form);
-      onSuccess();
-      onClose();
+      onSuccess?.();
+      onClose?.();
     } catch (error) {
       alert(error?.response?.data?.message || "Failed to add menu item");
     } finally {
@@ -50,25 +120,196 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle fontWeight={600}>Add Menu Item</DialogTitle>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 4,
+          overflow: "hidden",
+          boxShadow: "0 30px 70px rgba(0,0,0,0.20)",
+        },
+      }}
+    >
+      {/* Premium Header */}
+      <Box
+        sx={{
+          px: 2.5,
+          pt: 2.2,
+          pb: 1.6,
+          background: "linear-gradient(90deg,#0b3c5d,#0ea5e9)",
+        }}
+      >
+        <Box className="flex items-start justify-between gap-3">
+          <Box className="flex items-center gap-2">
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: 3,
+                backgroundColor: "rgba(255,255,255,0.16)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <RestaurantMenuRoundedIcon sx={{ color: "white" }} />
+            </Box>
 
-      <DialogContent>
-        <Box className="grid grid-cols-2 gap-4 mt-2">
+            <Box>
+              <DialogTitle
+                sx={{ p: 0, color: "white", fontWeight: 900, fontSize: 20 }}
+              >
+                Add Menu Item
+              </DialogTitle>
+              <Typography sx={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>
+                Fill details to create a new item.
+              </Typography>
+            </Box>
+          </Box>
+
+          <IconButton
+            onClick={onClose}
+            sx={{
+              color: "white",
+              backgroundColor: "rgba(255,255,255,0.12)",
+              "&:hover": { backgroundColor: "rgba(255,255,255,0.20)" },
+            }}
+          >
+            <CloseRoundedIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        {/* Quick chips preview */}
+        <Box className="flex flex-wrap gap-2 mt-3">
+          {form.category ? (
+            <Chip
+              size="small"
+              label={form.category}
+              sx={{ color: "white", borderColor: "rgba(255,255,255,0.35)" }}
+              variant="outlined"
+            />
+          ) : (
+            <Chip
+              size="small"
+              label="Choose Category"
+              sx={{
+                color: "rgba(255,255,255,0.8)",
+                borderColor: "rgba(255,255,255,0.25)",
+              }}
+              variant="outlined"
+            />
+          )}
+
+          {form.foodType ? (
+            <Chip
+              size="small"
+              label={form.foodType}
+              sx={{ color: "white", borderColor: "rgba(255,255,255,0.35)" }}
+              variant="outlined"
+            />
+          ) : (
+            <Chip
+              size="small"
+              label="Choose Food Type"
+              sx={{
+                color: "rgba(255,255,255,0.8)",
+                borderColor: "rgba(255,255,255,0.25)",
+              }}
+              variant="outlined"
+            />
+          )}
+
+          {form.itemCode?.trim() ? (
+            <Chip
+              size="small"
+              label={`Code: ${form.itemCode}`}
+              sx={{ color: "white", borderColor: "rgba(255,255,255,0.35)" }}
+              variant="outlined"
+            />
+          ) : (
+            <Chip
+              size="small"
+              label="Add Item Code"
+              sx={{
+                color: "rgba(255,255,255,0.8)",
+                borderColor: "rgba(255,255,255,0.25)",
+              }}
+              variant="outlined"
+            />
+          )}
+        </Box>
+      </Box>
+
+      <DialogContent sx={{ p: 2.5, backgroundColor: "#fbfdff" }}>
+        <Typography fontWeight={900} className="text-[#0b3c5d]" mb={1}>
+          Item Details
+        </Typography>
+        <Typography fontSize={12} className="text-gray-500" mb={2}>
+          Keep the name clear, pricing accurate, and add a short description.
+        </Typography>
+
+        <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TextField
             label="Item Name"
             name="name"
             fullWidth
-            size="small"
+            value={form.name}
+            size="medium"
             onChange={handleChange}
+            onBlur={() => markTouched("name")}
+            error={!!(touched.name && errors.name)}
+            helperText={touched.name && errors.name ? errors.name : " "}
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
+          />
+
+          <TextField
+            label="Item Code"
+            name="itemCode"
+            value={form.itemCode}
+            size="medium"
+            onChange={handleChange}
+            onBlur={() => markTouched("itemCode")}
+            error={!!(touched.itemCode && errors.itemCode)}
+            helperText={
+              touched.itemCode && errors.itemCode ? errors.itemCode : " "
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <TagRoundedIcon sx={{ color: "#8a8a8a" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           />
 
           <TextField
             label="Category"
             name="category"
             select
-            size="small"
+            value={form.category}
+            size="medium"
             onChange={handleChange}
+            onBlur={() => markTouched("category")}
+            error={!!(touched.category && errors.category)}
+            helperText={
+              touched.category && errors.category ? errors.category : " "
+            }
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           >
             {CATEGORIES.map((c) => (
               <MenuItem key={c} value={c}>
@@ -81,8 +322,16 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
             label="Sub Category"
             name="subCategory"
             select
-            size="small"
+            value={form.subCategory}
+            size="medium"
             onChange={handleChange}
+            onBlur={() => markTouched("subCategory")}
+            helperText=" "
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           >
             {SUB_CATEGORIES.map((s) => (
               <MenuItem key={s} value={s}>
@@ -95,8 +344,19 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
             label="Food Type"
             name="foodType"
             select
-            size="small"
+            value={form.foodType}
+            size="medium"
             onChange={handleChange}
+            onBlur={() => markTouched("foodType")}
+            error={!!(touched.foodType && errors.foodType)}
+            helperText={
+              touched.foodType && errors.foodType ? errors.foodType : " "
+            }
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           >
             {FOOD_TYPES.map((f) => (
               <MenuItem key={f} value={f}>
@@ -109,42 +369,107 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
             label="Half Price"
             name="priceHalf"
             type="number"
-            size="small"
+            value={form.priceHalf}
+            size="medium"
             onChange={handleChange}
+            onBlur={() => markTouched("priceHalf")}
+            error={!!(touched.priceHalf && errors.priceHalf)}
+            helperText={
+              touched.priceHalf && errors.priceHalf ? errors.priceHalf : " "
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <CurrencyRupeeRoundedIcon sx={{ color: "#8a8a8a" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           />
 
           <TextField
             label="Full Price"
             name="priceFull"
             type="number"
-            size="small"
+            value={form.priceFull}
+            size="medium"
             onChange={handleChange}
-          />
-          <TextField
-            label="Item Code"
-            name="itemCode"
-            size="small"
-            className="col-span-2"
-            onChange={handleChange}
+            onBlur={() => markTouched("priceFull")}
+            error={!!(touched.priceFull && errors.priceFull)}
+            helperText={
+              touched.priceFull && errors.priceFull ? errors.priceFull : " "
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <CurrencyRupeeRoundedIcon sx={{ color: "#8a8a8a" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           />
 
           <TextField
             label="Description"
             name="description"
             multiline
-            rows={2}
-            className="col-span-2"
+            rows={3}
+            value={form.description}
             onChange={handleChange}
+            onBlur={() => markTouched("description")}
+            className="md:col-span-2"
+            helperText=" "
+            sx={{
+              backgroundColor: "white",
+              borderRadius: 3,
+              "& fieldset": { borderColor: "#e5e7eb" },
+            }}
           />
         </Box>
+
+        <Divider sx={{ mt: 1.5 }} />
+        <Typography fontSize={12} className="text-gray-500 mt-2">
+          Tip: Use unique item codes (e.g. <b>MC-101</b>) for faster
+          billing/search.
+        </Typography>
       </DialogContent>
 
-      <DialogActions className="p-4">
-        <AppButton label="Cancel" variant="outlined" onClick={onClose} />
+      <DialogActions sx={{ p: 2.5, backgroundColor: "#fbfdff" }}>
         <AppButton
-          label="Add Item"
+          label="Cancel"
+          variant="outlined"
+          onClick={onClose}
+          sx={{
+            borderRadius: 3,
+            textTransform: "none",
+            fontWeight: 800,
+            px: 2,
+          }}
+          disabled={loading}
+        />
+
+        <AppButton
+          label={loading ? "Adding..." : "Add Item"}
           onClick={handleSubmit}
-          sx={{ backgroundColor: "#06558e", color: "#fff" }}
+          disabled={loading}
+          sx={{
+            backgroundColor: "#0b3c5d",
+            color: "#fff",
+            borderRadius: 3,
+            textTransform: "none",
+            fontWeight: 900,
+            px: 2.5,
+            boxShadow: "0 14px 30px rgba(11,60,93,0.25)",
+            "&:hover": { backgroundColor: "#0a3552" },
+          }}
         />
       </DialogActions>
     </Dialog>

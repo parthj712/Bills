@@ -1,9 +1,12 @@
-import React from 'react'
+import BillsMain from "@/Componenets/AdminScreens/AdminBillsManagment/BillsMain";
+import React from "react";
 
 const page = () => {
   return (
-    <div>bills</div>
-  )
-}
+    <div>
+      <BillsMain />
+    </div>
+  );
+};
 
-export default page
+export default page;
