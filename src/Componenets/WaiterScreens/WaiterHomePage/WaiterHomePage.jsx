@@ -13,23 +13,25 @@ import {
   Avatar,
   Menu,
   MenuItem,
+  Tooltip,
+  Skeleton
 } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
+import WaiterTopProducts from "./WaiterTopProducts/WaiterTopProducts";
 
 const tableStyles = {
-  AVAILABLE: "!bg-green-400 !text-white shadow-md",
-  OCCUPIED: "!bg-red-400 !text-white shadow-md",
+  AVAILABLE:
+    "!bg-white !text-black border border-gray-300 shadow-xl !rounded-2xl",
+
+  OCCUPIED:
+    "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
 };
 
-const topProducts = [
-  { name: "Chicken Chilly", percent: 40, color: "bg-red-500" },
-  { name: "Misal-Pav", percent: 40, color: "bg-green-500" },
-  { name: "Cheese Chilly Toast", percent: 40, color: "bg-yellow-400" },
-  { name: "Cheese Sandwich", percent: 40, color: "bg-purple-400" },
-  { name: "Vegetable Salad", percent: 40, color: "bg-pink-400" },
-];
+
+
 
 export default function WaiterHomePage() {
   const theme = useTheme();
@@ -38,6 +40,11 @@ export default function WaiterHomePage() {
   const router = useRouter();
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // keyboard states
+  const [keyBuffer, setKeyBuffer] = useState("");
+  const [highlightTableNo, setHighlightTableNo] = useState(null);
+
 
   const handleGetTables = async () => {
     try {
@@ -59,6 +66,17 @@ export default function WaiterHomePage() {
   const handleAddTable = async () => {
     await handleGetTables();
   };
+
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [tables, keyBuffer, open]);
+
+
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -86,158 +104,155 @@ export default function WaiterHomePage() {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+  let keyTimeout = null;
+
+  const handleKeyPress = (event) => {
+    // ❌ Disable keyboard when menu is open
+    if (open) return;
+
+    // ❌ Ignore typing in inputs
+    if (
+      event.target.tagName === "INPUT" ||
+      event.target.tagName === "TEXTAREA"
+    ) {
+      return;
+    }
+
+    // ✅ TAKEAWAY shortcut (T)
+    if (event.key.toLowerCase() === "t") {
+      handleTakeaway();
+      return;
+    }
+
+    // ✅ Only number keys (for tables)
+    if (!/^[0-9]$/.test(event.key)) return;
+
+    // Clear previous timeout
+    if (keyTimeout) clearTimeout(keyTimeout);
+
+    const newBuffer = keyBuffer + event.key;
+    setKeyBuffer(newBuffer);
+
+    keyTimeout = setTimeout(() => {
+      const tableNo = Number(newBuffer);
+
+      const table = tables.find(
+        (t) => Number(t.tableNo) === tableNo
+      );
+
+      if (table) {
+        setHighlightTableNo(table.tableNo);
+
+        setTimeout(() => {
+          handleTableClick(table._id, table.tableNo);
+          setHighlightTableNo(null);
+        }, 300);
+      }
+
+      setKeyBuffer("");
+    }, 600);
+  };
+
+
+
+  const handleTakeaway = () => {
+    // router.push("/waiter/menu?type=takeaway");
+    console.log("Takeaway clicked");
+  };
+
+
+
+
   return (
     <Box className="min-h-screen bg-gray-50">
       {/* Top Buttons */}
       {/* Navbar */}
-      <Card className="mb-6 px-6 py-3 rounded-2xl flex items-center justify-between shadow-sm">
-        {/* Left: Logo */}
-        <Box display={"flex"} flexDirection={"row"} gap={2} alignItems={"center"} >
-          <div className="relative w-8 h-10">
-            <Image
-              src="/LogoIcon.png"   // put logo inside /public folder
-              alt="Billing Logo"
-              fill
-              className="object-contain rounded-full"
-              priority
-            />
-          </div>
-
-          <Typography fontSize={24} fontWeight={600}>
-            Billing
-          </Typography>
-        </Box>
-
-        {/* Right: Menu + Sign Out */}
-        <div className="flex items-center gap-3">
-          <AppButton
-            label="Swiggy"
-            className="
-    !bg-[#FC8019]
-    !text-white
-    !px-5
-    hover:!bg-[#e56f15]
-  "
-            onClick={() => router.push("/waiter/menu")}
-          />
-
-          <AppButton
-            label="Zomato"
-            className="
-    !bg-[#E23744]
-    !text-white
-    !px-5
-    hover:!bg-[#c92f3a]
-  "
-            onClick={() => router.push("/waiter/menu")}
-          />
-
-          <IconButton onClick={handleMenuOpen}>
-            <Avatar
-              sx={{
-                bgcolor: "#2563EB", // Indigo / Blue
-                fontWeight: 600,
-              }}
-            >
-              A
-            </Avatar>
-          </IconButton>
-
-
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon fontSize="small" className="mr-2" />
-              Sign Out
-            </MenuItem>
-          </Menu>
-        </div>
-      </Card>
+      <WaiterNavbar />
 
 
       <div className="grid grid-cols-12 gap-6 p-6">
         {/* LEFT PANEL */}
         <div className="col-span-12 md:col-span-4 lg:col-span-4 flex flex-col gap-4 order-2 md:order-1">
           {/* Takeaway */}
-          <AppButton label="Takeaway" className="!bg-orange-500 !text-white" />
+          <AppButton
+            label="Takeaway"
+            className="!bg-orange-500 !text-white"
+            onClick={handleTakeaway}
+          />
+
 
           {/* Top Products */}
-          <Card className="p-6 rounded-xl">
-            <Typography fontSize={26} fontWeight={600} mb={2}>
-              Top Products
-            </Typography>
-
-            <div className="flex flex-col gap-6">
-              {topProducts.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center mb-1">
-                    <Typography fontSize={16}>{item.name}</Typography>
-                    <span className="font-semibold text-[14px] bg-gray-100 px-2 py-0.5 rounded-full">
-                      {item.percent}%
-                    </span>
-                  </div>
-                  <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${item.color}`}
-                      style={{ width: `${item.percent}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <WaiterTopProducts />
 
         </div>
 
         {/* RIGHT PANEL */}
-        <div className="col-span-12 md:col-span-8 lg:col-span-8 order-1 md:order-2">
-          <Card className="p-7 rounded-2xl">
-            <div className="flex items-center gap-3 mb-4">
+        <div className="col-span-12 md:col-span-8 lg:col-span-8 order-1 md:order-2 ">
+          <Card className="p-7 !rounded-4xl shadow-md !bg-[#F1F1F1]" >
+            <div className="flex items-center justify-between mb-4">
               <Typography fontSize={24} fontWeight={600}>
                 Dine-In Orders
               </Typography>
 
               <span
                 className="
-    text-sm
-    font-semibold
-    bg-green-100
-    text-green-700
-    px-3
-    py-1
-    rounded-full
-  "
+                      border-[1px]
+                      border-green-600/90
+                      text-[16px]
+                      font-semibold
+                      bg-green-100
+                      text-green-700
+                      px-3
+                      py-1
+                      rounded-full
+                    "
               >
                 {totalActiveTables} Active
               </span>
             </div>
 
+
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {tables.map((table) => (
-                <Card
-                  key={table._id}
-                  onClick={() => handleTableClick(table._id, table.tableNo)}
-                  className={`
-        h-25
-        flex items-center justify-center
-        rounded-xl
-        cursor-pointer
-        transition
-        hover:shadow-md
-        ${tableStyles[table.status]}
-      `}
-                >
-                  <Typography fontSize={18} fontWeight={600}>
-                    {table.tableNo}
-                  </Typography>
-                </Card>
-              ))}
+              {loading
+                ? Array.from({ length: 9 }).map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    variant="rounded"
+                    height={96}
+                    className="!rounded-2xl"
+                  />
+                ))
+                : tables.map((table) => (
+                  <Tooltip
+                    key={table._id}
+                    title={table.status === "OCCUPIED" ? "Active table" : "Add order"}
+                    arrow
+                    placement="bottom"
+                  >
+                    <Card
+                      onClick={() => handleTableClick(table._id, table.tableNo)}
+                      className={`
+              h-25
+              flex items-center justify-center
+              cursor-pointer
+              transition
+              hover:shadow-md
+              ${tableStyles[table.status]}
+              ${highlightTableNo === table.tableNo
+                          ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+                          : ""
+                        }
+            `}
+                    >
+                      <Typography fontSize={24} fontWeight={600}>
+                        {table.tableNo}
+                      </Typography>
+                    </Card>
+                  </Tooltip>
+                ))}
             </div>
+
           </Card>
         </div>
       </div>
