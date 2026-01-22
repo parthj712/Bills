@@ -1,10 +1,12 @@
 import WaiterMenuForm from "@/Componenets/WaiterScreens/WaiterMenuForm/WaiterMenuForm";
-import React from "react";
+import React, { Suspense } from "react";
 
 const page = () => {
   return (
     <div>
-      <WaiterMenuForm />
+      <Suspense fallback={<div>Loading order...</div>}>
+        <WaiterMenuForm />
+      </Suspense>
     </div>
   );
 };
