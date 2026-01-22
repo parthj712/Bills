@@ -27,6 +27,7 @@ export default function OrderForm() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
+  const [kotMessage, setKotMessage] = useState("");
   // selectedItems: [{ tempId, item, portion, qty }]
 
   useEffect(() => {
@@ -126,11 +127,13 @@ export default function OrderForm() {
           unitPrice,
           qty: x.qty,
           tableId,
+          kotMessage,
         }),
       );
     });
 
     setSelectedItems([]);
+    setKotMessage("");
   };
 
   return (
@@ -146,6 +149,17 @@ export default function OrderForm() {
         fullWidth
         value={search}
         onChange={(e) => setSearch(e.target.value)}
+      />
+      {/* Message for Kitchen */}
+      <TextField
+        label="KOT Message"
+        placeholder="Ex: No onion, extra spicy..."
+        size="small"
+        fullWidth
+        value={kotMessage}
+        onChange={(e) => setKotMessage(e.target.value)}
+        multiline
+        minRows={2}
       />
 
       {/* Category Chips */}
