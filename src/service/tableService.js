@@ -17,3 +17,7 @@ export const updateTable = async (id, data) => {
 export const deleteTable = async (id) => {
   return await API.delete(`/tables/${id}`);
 };
+
+export const updateTableStatus = (tableId, status) => {
+  return API.patch(`/tables/${tableId}/status`, { status });
+};

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 
-const AddStaff = ({ open, onClose }) => {
+const AddStaff = ({ open, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -34,6 +34,7 @@ const AddStaff = ({ open, onClose }) => {
       setLoading(true);
       await registerStaff(formData);
       onClose();
+      onSuccess();
       setFormData({
         name: "",
         email: "",
