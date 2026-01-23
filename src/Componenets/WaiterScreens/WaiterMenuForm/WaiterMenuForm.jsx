@@ -12,6 +12,10 @@ export default function WaiterMenuForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tableNo = searchParams.get("tableNo");
+  const orderType = searchParams.get("orderType") || "DINE-IN";
+
+  const isDineIn = orderType === "DINE-IN";
+
   return (
     <Suspense fallback={<div>Loading order...</div>}>
       <Box className="min-h-screen bg-gray-50 p-6">
@@ -30,11 +34,15 @@ export default function WaiterMenuForm() {
             <ArrowBackIcon />
           </IconButton>
 
-
-          <Typography fontSize={28} fontWeight={"bold"} color="black">
-            {" "}
-            Table Number : {tableNo}
-          </Typography>
+          {isDineIn ? (
+            <Typography fontSize={28} fontWeight={"bold"} color="black">
+              Table Number : {tableNo}
+            </Typography>
+          ) : (
+            <Typography fontSize={24} fontWeight={"bold"} color="black">
+              {orderType} ORDER
+            </Typography>
+          )}
         </div>
 
         <div className="grid grid-cols-12 gap-6">

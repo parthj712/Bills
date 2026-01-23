@@ -107,7 +107,7 @@ export default function MenuManagement() {
     <Box className="flex flex-col gap-6 p-2">
       {/* Premium Header */}
       <Box className="flex flex-col gap-2">
-        <Box className="flex items-start md:items-center justify-between gap-3 flex-col md:flex-row">
+        <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
           <Box>
             <Typography
               fontSize={30}
@@ -121,22 +121,22 @@ export default function MenuManagement() {
             </Typography>
           </Box>
 
-          <AppButton
-            label="Add Menu"
-            startIcon={<Add />}
-            onClick={() => setOpenAdd(true)}
-            sx={{
-              backgroundColor: "#0b3c5d",
-              color: "#fff",
-              px: 2,
-              minWidth: 140,
-              borderRadius: 3,
-              textTransform: "none",
-              fontWeight: 800,
-              boxShadow: "0 10px 20px rgba(11,60,93,0.25)",
-              "&:hover": { backgroundColor: "#0a3552" },
-            }}
-          />
+          <Box className="md:ml-auto">
+            <AppButton
+              label="Add Menu"
+              startIcon={<Add />}
+              onClick={() => setOpenAdd(true)}
+              sx={{
+                backgroundColor: "#0b3c5d",
+                color: "#fff",
+                px: 2,
+                minWidth: 140,
+                height: 40,
+                borderRadius: 3,
+                fontWeight: 800,
+              }}
+            />
+          </Box>
         </Box>
 
         <Box className="h-[4px] w-40 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" />
@@ -240,7 +240,7 @@ export default function MenuManagement() {
                   sx={{
                     backgroundColor: "#0b3c5d",
                     color: "white",
-                    fontWeight: 800,
+                    fontWeight: 400,
                     borderBottom: "none",
                     py: 2,
                   }}
@@ -273,13 +273,13 @@ export default function MenuManagement() {
                     transition: "0.2s",
                   }}
                 >
-                  <TableCell sx={{ fontWeight: 800, color: "#0b3c5d" }}>
+                  <TableCell sx={{ fontWeight: 300, color: "#0b3c5d" }}>
                     {item.itemCode}
                   </TableCell>
 
                   <TableCell>
                     <Box className="flex flex-col">
-                      <Typography fontWeight={800} className="text-black">
+                      <Typography fontWeight={300} className="text-black">
                         {item.name}
                       </Typography>
                       <Typography
@@ -296,7 +296,7 @@ export default function MenuManagement() {
                       size="small"
                       label={item.categoryName || "—"}
                       sx={{
-                        fontWeight: 800,
+                        fontWeight: 300,
                         borderRadius: 2,
                         backgroundColor: "#e3f2fd",
                         color: "#0b3c5d",
@@ -304,7 +304,7 @@ export default function MenuManagement() {
                     />
                   </TableCell>
 
-                  <TableCell sx={{ fontWeight: 800 }}>
+                  <TableCell sx={{ fontWeight: 300 }}>
                     ₹ {item?.price?.half ?? 0} / {item?.price?.full ?? 0}
                   </TableCell>
 
@@ -319,7 +319,7 @@ export default function MenuManagement() {
                         size="small"
                         label={item.isAvailable ? "Available" : "Unavailable"}
                         sx={{
-                          fontWeight: 800,
+                          fontWeight: 300,
                           borderRadius: 2,
                           backgroundColor: item.isAvailable
                             ? "#e8f5e9"
