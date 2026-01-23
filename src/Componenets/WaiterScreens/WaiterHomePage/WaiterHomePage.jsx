@@ -14,7 +14,7 @@ import {
   Menu,
   MenuItem,
   Tooltip,
-  Skeleton
+  Skeleton,
 } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -30,9 +30,6 @@ const tableStyles = {
     "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
 };
 
-
-
-
 export default function WaiterHomePage() {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -44,7 +41,6 @@ export default function WaiterHomePage() {
   // keyboard states
   const [keyBuffer, setKeyBuffer] = useState("");
   const [highlightTableNo, setHighlightTableNo] = useState(null);
-
 
   const handleGetTables = async () => {
     try {
@@ -67,7 +63,6 @@ export default function WaiterHomePage() {
     await handleGetTables();
   };
 
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
 
@@ -75,8 +70,6 @@ export default function WaiterHomePage() {
       window.removeEventListener("keydown", handleKeyPress);
     };
   }, [tables, keyBuffer, open]);
-
-
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -137,9 +130,7 @@ export default function WaiterHomePage() {
     keyTimeout = setTimeout(() => {
       const tableNo = Number(newBuffer);
 
-      const table = tables.find(
-        (t) => Number(t.tableNo) === tableNo
-      );
+      const table = tables.find((t) => Number(t.tableNo) === tableNo);
 
       if (table) {
         setHighlightTableNo(table.tableNo);
@@ -154,22 +145,20 @@ export default function WaiterHomePage() {
     }, 600);
   };
 
-
-
   const handleTakeaway = () => {
     // router.push("/waiter/menu?type=takeaway");
     console.log("Takeaway clicked");
   };
 
-
-
+  const handleOrderTypeClick = (orderType) => {
+    router.push(`/waiter/order?orderType=${orderType}`);
+  };
 
   return (
     <Box className="min-h-screen bg-gray-50">
       {/* Top Buttons */}
       {/* Navbar */}
       <WaiterNavbar />
-
 
       <div className="grid grid-cols-12 gap-6 p-6">
         {/* LEFT PANEL */}
@@ -178,18 +167,16 @@ export default function WaiterHomePage() {
           <AppButton
             label="Takeaway"
             className="!bg-orange-500 !text-white"
-            onClick={handleTakeaway}
+            onClick={() => handleOrderTypeClick("TAKEAWAY")}
           />
-
 
           {/* Top Products */}
           <WaiterTopProducts />
-
         </div>
 
         {/* RIGHT PANEL */}
         <div className="col-span-12 md:col-span-8 lg:col-span-8 order-1 md:order-2 ">
-          <Card className="p-7 !rounded-4xl shadow-md !bg-[#F1F1F1]" >
+          <Card className="p-7 !rounded-4xl shadow-md !bg-[#F1F1F1]">
             <div className="flex items-center justify-between mb-4">
               <Typography fontSize={24} fontWeight={600}>
                 Dine-In Orders
@@ -212,47 +199,52 @@ export default function WaiterHomePage() {
               </span>
             </div>
 
-
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rounded"
-                    height={96}
-                    className="!rounded-2xl"
-                  />
-                ))
+                    <Skeleton
+                      key={index}
+                      variant="rounded"
+                      height={96}
+                      className="!rounded-2xl"
+                    />
+                  ))
                 : tables.map((table) => (
-                  <Tooltip
-                    key={table._id}
-                    title={table.status === "OCCUPIED" ? "Active table" : "Add order"}
-                    arrow
-                    placement="bottom"
-                  >
-                    <Card
-                      onClick={() => handleTableClick(table._id, table.tableNo)}
-                      className={`
+                    <Tooltip
+                      key={table._id}
+                      title={
+                        table.status === "OCCUPIED"
+                          ? "Active table"
+                          : "Add order"
+                      }
+                      arrow
+                      placement="bottom"
+                    >
+                      <Card
+                        onClick={() =>
+                          handleTableClick(table._id, table.tableNo)
+                        }
+                        className={`
               h-25
               flex items-center justify-center
               cursor-pointer
               transition
               hover:shadow-md
               ${tableStyles[table.status]}
-              ${highlightTableNo === table.tableNo
-                          ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-                          : ""
-                        }
+              ${
+                highlightTableNo === table.tableNo
+                  ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+                  : ""
+              }
             `}
-                    >
-                      <Typography fontSize={24} fontWeight={600}>
-                        {table.tableNo}
-                      </Typography>
-                    </Card>
-                  </Tooltip>
-                ))}
+                      >
+                        <Typography fontSize={24} fontWeight={600}>
+                          {table.tableNo}
+                        </Typography>
+                      </Card>
+                    </Tooltip>
+                  ))}
             </div>
-
           </Card>
         </div>
       </div>

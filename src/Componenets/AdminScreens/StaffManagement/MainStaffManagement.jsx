@@ -103,7 +103,7 @@ const MainStaffManagement = () => {
     <Box className="flex flex-col gap-6 p-2">
       {/* Premium Header */}
       <Box className="flex flex-col gap-2">
-        <Box className="flex items-center justify-between gap-3">
+        <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
           <Box>
             <Typography
               fontSize={30}
@@ -117,23 +117,26 @@ const MainStaffManagement = () => {
             </Typography>
           </Box>
 
-          <AppButton
-            label="Add Staff"
-            startIcon={<Add />}
-            onClick={() => setOpenAdd(true)}
-            sx={{
-              backgroundColor: "#0b3c5d",
-              color: "#fff",
-              px: 2,
-              minWidth: 140,
-              borderRadius: 3,
-              textTransform: "none",
-              fontWeight: 700,
-              boxShadow: "0 10px 20px rgba(11,60,93,0.25)",
-              "&:hover": { backgroundColor: "#0a3552" },
-            }}
-            size="medium"
-          />
+          <Box className="md:ml-auto">
+            <AppButton
+              label="Add Staff"
+              startIcon={<Add />}
+              onClick={() => setOpenAdd(true)}
+              sx={{
+                backgroundColor: "#0b3c5d",
+                color: "#fff",
+                px: 2,
+                minWidth: 140,
+                height: 40,
+                borderRadius: 3,
+                textTransform: "none",
+                fontWeight: 700,
+                boxShadow: "0 10px 20px rgba(11,60,93,0.25)",
+                "&:hover": { backgroundColor: "#0a3552" },
+              }}
+              size="medium"
+            />
+          </Box>
         </Box>
 
         <Box className="h-[4px] w-40 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" />

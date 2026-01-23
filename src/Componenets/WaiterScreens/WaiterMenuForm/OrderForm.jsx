@@ -23,14 +23,9 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useRef } from "react";
 
-
-
-
 export default function OrderForm() {
-
   const searchRef = useRef(null);
   const kotRef = useRef(null);
-
 
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
@@ -41,6 +36,8 @@ export default function OrderForm() {
   const [category, setCategory] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [kotMessage, setKotMessage] = useState("");
+  const orderType = searchParams.get("orderType") || "DINE-IN";
+  const cartKey = orderType === "DINE-IN" ? tableId : orderType;
 
   // keyboard shortcuts
   const [activeIndex, setActiveIndex] = useState(0);
@@ -51,17 +48,10 @@ export default function OrderForm() {
     dispatch(fetchMenuItems());
   }, [dispatch]);
 
-
   // keyboatd shortcuts
   useEffect(() => {
     searchRef.current?.focus();
   }, []);
-
-
-
-
-
-
   const categories = useMemo(() => {
     return [...new Set(items.map((i) => i.categoryName).filter(Boolean))];
   }, [items]);
@@ -80,7 +70,6 @@ export default function OrderForm() {
       return name.includes(q) || code.includes(q);
     });
   }, [items, category, search]);
-
 
   useEffect(() => {
     setActiveIndex(0);
@@ -125,8 +114,6 @@ export default function OrderForm() {
     );
   };
 
-  // If you want same item to be a single line even after switching portion,
-  // this keeps it as one line. If you want separate lines for half/full, tell me.
   const updatePortion = (tempId, portion) => {
     setSelectedItems((prev) =>
       prev.map((x) => (x.tempId === tempId ? { ...x, portion } : x)),
@@ -144,14 +131,17 @@ export default function OrderForm() {
     }, 0);
   }, [selectedItems]);
 
+  // From here we add the items to the cart
   const handleAddAllToOrder = () => {
-    if (!tableId || selectedItems.length === 0) return;
+    if (orderType === "DINE-IN" && !tableId) return;
+    if (selectedItems.length === 0) return;
 
     selectedItems.forEach((x) => {
       const unitPrice = getUnitPrice(x.item, x.portion);
 
       dispatch(
         addToCart({
+          cartKey, // ✅ REQUIRED
           cartId: nanoid(),
           _id: x.item._id,
           name: x.item.name,
@@ -159,11 +149,12 @@ export default function OrderForm() {
           portion: x.portion,
           unitPrice,
           qty: x.qty,
-          tableId,
+          orderType,
           kotMessage,
         }),
       );
     });
+
     setSearch("");
     setSelectedItems([]);
     setKotMessage("");
@@ -171,12 +162,9 @@ export default function OrderForm() {
 
   const isItemSelected = (itemId) => {
     return selectedItems.some(
-      (x) => x.item?._id === itemId && x.portion === "full"
+      (x) => x.item?._id === itemId && x.portion === "full",
     );
   };
-
-
-
 
   useEffect(() => {
     if (selectedItems.length === 1) {
@@ -184,13 +172,8 @@ export default function OrderForm() {
     }
   }, [selectedItems]);
 
-
-
-
   return (
     <Suspense fallback={<div>Loading order...</div>}>
-
-
       <Card className="p-6 !rounded-2xl shadow-lg flex flex-col gap-5">
         <Typography fontSize={20} fontWeight={600}>
           Add Order
@@ -205,9 +188,6 @@ export default function OrderForm() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-
-
-
 
         {/* Category Chips */}
         <div className="flex gap-2 flex-wrap">
@@ -254,20 +234,25 @@ export default function OrderForm() {
                         onClick={() => handleSelectItem(item)}
                         className={`
       p-3 cursor-pointer border !rounded-xl transition-all duration-150
-      ${index === activeIndex
-                            ? "border-blue-500 bg-blue-50"
-                            : isItemSelected(item._id)
-                              ? "border-green-500 bg-green-50"
-                              : "border-gray-200 hover:bg-gray-50"
-                          }
+      ${
+        index === activeIndex
+          ? "border-blue-500 bg-blue-50"
+          : isItemSelected(item._id)
+            ? "border-green-500 bg-green-50"
+            : "border-gray-200 hover:bg-gray-50"
+      }
     `}
                       >
-
-
                         <Typography fontWeight={600}>{item.name}</Typography>
-                        <Typography fontSize={14} fontWeight={600} color="text.secondary">
+                        <Typography
+                          fontSize={14}
+                          fontWeight={600}
+                          color="text.secondary"
+                        >
                           ₹ {item?.price?.full ?? 0}
-                          {item?.price?.half ? ` (Half ₹${item.price.half})` : ""}
+                          {item?.price?.half
+                            ? ` (Half ₹${item.price.half})`
+                            : ""}
                         </Typography>
                       </Card>
                     ))}
@@ -291,9 +276,10 @@ export default function OrderForm() {
                   return (
                     <Card key={x.tempId} className="p-5 rounded-xl">
                       <div className="flex items-center justify-between gap-3">
-
                         <div>
-                          <Typography fontWeight={600}>{x.item.name}</Typography>
+                          <Typography fontWeight={600}>
+                            {x.item.name}
+                          </Typography>
                           <Typography fontSize={16} color="text.secondary">
                             ₹ {price} / {x.portion}
                           </Typography>
@@ -311,7 +297,9 @@ export default function OrderForm() {
                             <Chip
                               sx={{ fontWeight: 600 }}
                               label={`Half ₹${x.item.price.half}`}
-                              color={x.portion === "half" ? "primary" : "default"}
+                              color={
+                                x.portion === "half" ? "primary" : "default"
+                              }
                               onClick={() => updatePortion(x.tempId, "half")}
                             />
                           )}
@@ -354,7 +342,7 @@ export default function OrderForm() {
                             onClick={() => updateQty(x.tempId, x.qty + 1)}
                             sx={{
                               backgroundColor: "#dcfce7", // light green
-                              color: "#16a34a",           // green icon
+                              color: "#16a34a", // green icon
                               "&:hover": { backgroundColor: "#bbf7d0" },
                             }}
                           >
@@ -377,7 +365,7 @@ export default function OrderForm() {
                             size="small"
                             sx={{
                               backgroundColor: "#fee2e2", // light red
-                              color: "#dc2626",           // red icon
+                              color: "#dc2626", // red icon
                               "&:hover": {
                                 backgroundColor: "#fecaca",
                               },
@@ -386,20 +374,10 @@ export default function OrderForm() {
                             <DeleteOutlineIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-
-
                       </div>
-
-
-
-
-
-
                     </Card>
                   );
                 })}
-
-
 
                 {/* Message for Kitchen */}
                 <TextField
@@ -414,9 +392,10 @@ export default function OrderForm() {
                   minRows={2}
                 />
 
-
                 <div className="flex items-center justify-center">
-                  <Typography fontSize={20} fontWeight={700}>Total: ₹ {totalAmount}</Typography>
+                  <Typography fontSize={20} fontWeight={700}>
+                    Total: ₹ {totalAmount}
+                  </Typography>
                 </div>
 
                 <AppButton
@@ -429,7 +408,6 @@ export default function OrderForm() {
           )}
         </Box>
       </Card>
-
     </Suspense>
   );
 }

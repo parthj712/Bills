@@ -160,7 +160,7 @@ const BillsMain = () => {
         <Box className="h-[4px] w-32 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400" />
       </Box>
 
-      <Box className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-stretch">
+      <Box className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
         {/* Search */}
         <TextField
           size="medium"
@@ -170,18 +170,18 @@ const BillsMain = () => {
           InputProps={{
             startAdornment: <SearchIcon sx={{ mr: 1, color: "#888" }} />,
           }}
-          className="grid-cols-1"
+          // className="grid-cols-1"
           sx={{
-            gridColumn: { lg: "span 2" },
+            gridColumn: { lg: "span 4" },
             backgroundColor: "#f9fafb",
             borderRadius: 3,
             "& fieldset": { border: "none" },
-            boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.10)",
           }}
         />
 
         {/* Subtotal */}
-        <Paper
+        {/* <Paper
           sx={{
             p: 2,
             borderRadius: 3,
@@ -196,10 +196,10 @@ const BillsMain = () => {
           <Typography fontSize={22} fontWeight={700} color="#1976d2">
             ₹ {totals.subtotal.toFixed(2)}
           </Typography>
-        </Paper>
+        </Paper> */}
 
         {/* GST */}
-        <Paper
+        {/* <Paper
           sx={{
             p: 2,
             borderRadius: 3,
@@ -214,10 +214,10 @@ const BillsMain = () => {
           <Typography fontSize={22} fontWeight={700} color="#ed6c02">
             ₹ {totals.gstAmount.toFixed(2)}
           </Typography>
-        </Paper>
+        </Paper> */}
 
         {/* Grand Total */}
-        <Paper
+        {/* <Paper
           sx={{
             p: 2,
             borderRadius: 3,
@@ -232,7 +232,7 @@ const BillsMain = () => {
           <Typography fontSize={22} fontWeight={700} color="#2e7d32">
             ₹ {totals.grandTotal.toFixed(2)}
           </Typography>
-        </Paper>
+        </Paper> */}
       </Box>
 
       <TableContainer
@@ -259,6 +259,7 @@ const BillsMain = () => {
                     backgroundColor: "#0b3c5d",
                     color: "white",
                     fontWeight: 600,
+                    textAlign: "center",
                   }}
                 >
                   {head}
@@ -276,20 +277,22 @@ const BillsMain = () => {
                   "&:hover": { backgroundColor: "#eef6ff" },
                 }}
               >
-                <TableCell>
+                <TableCell align="center">
                   {new Date(bills.createdAt).toLocaleDateString("en-IN", {
                     day: "2-digit",
                     month: "short",
                     year: "numeric",
                   })}
                 </TableCell>
-                <TableCell fontWeight={600}>{bills.billNo}</TableCell>
-                <TableCell align="right">₹ {bills.subtotal}</TableCell>
-                <TableCell align="right">₹ {bills.gstAmount}</TableCell>
-                <TableCell align="right" fontWeight={700}>
+                <TableCell fontWeight={600} align="center">
+                  {bills.billNo}
+                </TableCell>
+                <TableCell align="center">₹ {bills.subtotal}</TableCell>
+                <TableCell align="center">₹ {bills.gstAmount}</TableCell>
+                <TableCell align="center" fontWeight={700}>
                   ₹ {bills.grandTotal}
                 </TableCell>
-                <TableCell>
+                <TableCell align="center">
                   <IconButton
                     sx={{
                       backgroundColor: "#e3f2fd",
