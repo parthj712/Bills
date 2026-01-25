@@ -23,8 +23,6 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useMemo, useState } from "react";
 import { addMenuItem } from "@/service/menuService";
 
-const CATEGORIES = ["Main Course", "Chinese", "Snacks"];
-const SUB_CATEGORIES = ["Indian", "South Indian"];
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
 export default function AddMenuItems({ open, onClose, onSuccess }) {
@@ -38,10 +36,27 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
     priceFull: "",
     itemCode: "",
   });
-
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [customCategory, setCustomCategory] = useState("");
+  const [customSubCategory, setCustomSubCategory] = useState("");
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});
 
+  useEffect(() => {
+    if (!open) return;
+
+    const loadCategories = async () => {
+      try {
+        const res = await getCatgories();
+        setCategories(res.data);
+      } catch (err) {
+        console.error("Failed to load categories", err);
+      }
+    };
+
+    loadCategories();
+  }, [open]);
   // Reset when dialog opens (premium UX)
   useEffect(() => {
     if (open) {
@@ -66,6 +81,23 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
   const markTouched = (name) =>
     setTouched((prev) => ({ ...prev, [name]: true }));
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+
+    setForm((prev) => ({
+      ...prev,
+      category: value,
+      subCategory: "",
+    }));
+
+    if (value === "Other") {
+      setSubCategories([]);
+      return;
+    }
+
+    const selected = categories.find((c) => c.name === value);
+    setSubCategories(selected?.subCategories || []);
+  };
 
   const errors = useMemo(() => {
     const e = {};
@@ -73,6 +105,16 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
     if (!form.category) e.category = "Category is required";
     if (!form.foodType) e.foodType = "Food type is required";
     if (!form.itemCode.trim()) e.itemCode = "Item code is required";
+    if (form.category === "Other" && !customCategory.trim()) {
+      e.category = "Enter new category name";
+    }
+
+    if (
+      (form.subCategory === "Other" || form.category === "Other") &&
+      !customSubCategory.trim()
+    ) {
+      e.subCategory = "Enter new sub category name";
+    }
 
     const half = Number(form.priceHalf);
     const full = Number(form.priceFull);
@@ -109,7 +151,14 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
     try {
       setLoading(true);
-      await addMenuItem(form);
+      const payload = {
+        ...form,
+        category: form.category === "Other" ? customCategory : form.category,
+        subCategory:
+          form.subCategory === "Other" ? customSubCategory : form.subCategory,
+      };
+
+      await addMenuItem(payload);
       onSuccess?.();
       onClose?.();
     } catch (error) {
@@ -294,51 +343,74 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
           />
 
           <TextField
-            label="Category"
-            name="category"
             select
+            label="Category"
             value={form.category}
-            size="medium"
-            onChange={handleChange}
-            onBlur={() => markTouched("category")}
+            onChange={handleCategoryChange}
+            fullWidth
             error={!!(touched.category && errors.category)}
             helperText={
               touched.category && errors.category ? errors.category : " "
             }
-            sx={{
-              backgroundColor: "white",
-              borderRadius: 3,
-              "& fieldset": { borderColor: "#e5e7eb" },
-            }}
           >
-            {CATEGORIES.map((c) => (
-              <MenuItem key={c} value={c}>
-                {c}
+            {categories.map((cat) => (
+              <MenuItem key={cat._id} value={cat.name}>
+                {cat.name}
               </MenuItem>
             ))}
+            <MenuItem value="Other">Other</MenuItem>
           </TextField>
+          {form.category === "Other" && (
+            <TextField
+              label="New Category"
+              value={customCategory}
+              onChange={(e) => setCustomCategory(e.target.value)}
+              fullWidth
+              sx={{
+                backgroundColor: "white",
+                borderRadius: 3,
+                "& fieldset": { borderColor: "#e5e7eb" },
+              }}
+            />
+          )}
 
           <TextField
-            label="Sub Category"
-            name="subCategory"
             select
+            label="Sub Category"
             value={form.subCategory}
-            size="medium"
-            onChange={handleChange}
-            onBlur={() => markTouched("subCategory")}
-            helperText=" "
-            sx={{
-              backgroundColor: "white",
-              borderRadius: 3,
-              "& fieldset": { borderColor: "#e5e7eb" },
-            }}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, subCategory: e.target.value }))
+            }
+            fullWidth
+            disabled={!form.category}
+            error={!!(touched.subCategory && errors.subCategory)}
+            helperText={
+              touched.subCategory && errors.subCategory
+                ? errors.subCategory
+                : " "
+            }
           >
-            {SUB_CATEGORIES.map((s) => (
-              <MenuItem key={s} value={s}>
-                {s}
+            {subCategories.map((sub) => (
+              <MenuItem key={sub} value={sub}>
+                {sub}
               </MenuItem>
             ))}
+            <MenuItem value="Other">Other</MenuItem>
           </TextField>
+
+          {(form.subCategory === "Other" || form.category === "Other") && (
+            <TextField
+              label="New Sub Category"
+              value={customSubCategory}
+              onChange={(e) => setCustomSubCategory(e.target.value)}
+              fullWidth
+              sx={{
+                backgroundColor: "white",
+                borderRadius: 3,
+                "& fieldset": { borderColor: "#e5e7eb" },
+              }}
+            />
+          )}
 
           <TextField
             label="Food Type"
