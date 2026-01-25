@@ -44,3 +44,7 @@ export const updateMenuAvailability = async (id, data) => {
   const res = await API.patch(`/menu/${id}/availability`, data);
   return res.data;
 };
+
+export const getCatgories = async () => {
+  return await API.get("/menu/categories");
+};
