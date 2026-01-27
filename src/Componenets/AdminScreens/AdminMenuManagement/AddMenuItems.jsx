@@ -21,7 +21,7 @@ import TagRoundedIcon from "@mui/icons-material/TagRounded";
 
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useMemo, useState } from "react";
-import { addMenuItem } from "@/service/menuService";
+import { addMenuItem, getCatgories } from "@/service/menuService";
 
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
@@ -49,6 +49,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
     const loadCategories = async () => {
       try {
         const res = await getCatgories();
+        console.log("categories", res);
         setCategories(res.data);
       } catch (err) {
         console.error("Failed to load categories", err);
@@ -109,10 +110,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       e.category = "Enter new category name";
     }
 
-    if (
-      (form.subCategory === "Other" || form.category === "Other") &&
-      !customSubCategory.trim()
-    ) {
+    if (form.subCategory === "Other" && !customSubCategory.trim()) {
       e.subCategory = "Enter new sub category name";
     }
 
@@ -162,6 +160,14 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       onSuccess?.();
       onClose?.();
     } catch (error) {
+      if (error?.response?.status === 403) {
+        alert(
+          error.response.data?.message ||
+            "Your subscription has expired. Please renew to add new menu items.",
+        );
+        return;
+      }
+
       alert(error?.response?.data?.message || "Failed to add menu item");
     } finally {
       setLoading(false);
