@@ -11,6 +11,7 @@ import {
 import { StatCard } from "./StatCard";
 import { useEffect, useState } from "react";
 import { getBills } from "@/service/billsService";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 const topProducts = [
   { name: "Chicken Chilly", percent: 40 },
@@ -22,6 +23,7 @@ const topProducts = [
 
 export default function AdminDashboard() {
   const [bills, setBills] = useState([]);
+  const [subscription, setSubscription] = useState(null);
 
   const today = new Date();
   const todayDate = today.toDateString();
@@ -30,12 +32,23 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchBills();
+    fetchSubscriptionExpiry();
   }, []);
 
   const fetchBills = async () => {
     try {
       const res = await getBills();
       setBills(Array.isArray(res.data) ? res.data : res.data?.data || []);
+    } catch (error) {
+      console.log(error?.message || error);
+    }
+  };
+  const fetchSubscriptionExpiry = async () => {
+    try {
+      const res = await getSubscriptionExpiry();
+      console.log("res", res);
+
+      setSubscription(res.data);
     } catch (error) {
       console.log(error?.message || error);
     }
@@ -97,6 +110,40 @@ export default function AdminDashboard() {
 
   return (
     <Box className="min-h-screen bg-[#f8fafc] p-4">
+      {subscription && subscription.daysLeft <= 2 && (
+        <Card
+          className="mb-6 p-4 rounded-xl"
+          sx={{
+            background:
+              subscription.daysLeft <= 0
+                ? "linear-gradient(90deg,#991b1b,#ef4444)"
+                : subscription.daysLeft === 1
+                  ? "linear-gradient(90deg,#92400e,#f59e0b)"
+                  : "linear-gradient(90deg,#1e3a8a,#3b82f6)",
+            color: "white",
+          }}
+        >
+          <Typography fontWeight={700}>
+            {subscription.daysLeft > 1 && "⚠️ Subscription Expiring Soon"}
+            {subscription.daysLeft === 1 && "⏰ Subscription Expires Tomorrow"}
+            {subscription.daysLeft <= 0 && "❌ Subscription Expired"}
+          </Typography>
+
+          <Typography fontSize={13} sx={{ opacity: 0.9 }}>
+            {subscription.daysLeft > 1 &&
+              `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.
+To continue uninterrupted service, please contact our support team for renewal assistance at +91 9XXXXXXXXX.`}
+
+            {subscription.daysLeft === 1 &&
+              `Your subscription expires tomorrow.
+Please contact our support team at +91 9XXXXXXXXX to renew and avoid service interruption.`}
+
+            {subscription.daysLeft <= 0 &&
+              `Your subscription has expired.
+To reactivate your account, please contact our support team at +91 9XXXXXXXXX for renewal assistance.`}
+          </Typography>
+        </Card>
+      )}
       {/* HEADER */}
       <Card
         className="mb-6 p-6 rounded-2xl"
