@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/service/api";
+import { useRef } from "react";
 
 const MotionDiv = motion.div;
 
@@ -44,6 +45,10 @@ const slidePanel = {
 
 export default function Login() {
   const router = useRouter();
+
+  const emailRef = useRef(null);
+  const passwordRef = useRef(null);
+  const phoneRef = useRef(null);
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -140,6 +145,11 @@ export default function Login() {
         "
       >
         <Box
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
           className="
             w-full max-w-lg
             px-8 py-10
@@ -207,12 +217,13 @@ export default function Login() {
             />
 
             <AppButton
+              type="submit"
               label={loading ? "Logging in..." : "Log In"}
               variant="contained"
               disabled={loading}
-              onClick={handleLogin}
               className="!bg-orange-500 hover:!bg-orange-600 !text-white px-10"
             />
+
           </div>
         </Box>
       </MotionDiv>

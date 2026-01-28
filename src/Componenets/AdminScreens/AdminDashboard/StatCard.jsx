@@ -1,44 +1,71 @@
-import { Card, Typography } from "@mui/material";
+import { Card, Typography, Box } from "@mui/material";
 
 export const StatCard = ({ stat }) => {
     return (
-        <Card 
-            className={`
-    p-4
-    rounded-3xl
-    ${stat.bg}
-    shadow-none
-    min-h-[120px]
-    flex
-    flex-col
-    justify-between
-  `}
+        <Card
+            sx={{
+                borderRadius: "20px",
+                border: "1px solid rgba(0,0,0,0.06)",
+                background:
+                    "linear-gradient(180deg, #ffffff 0%, #fafafa 100%)",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                    // transform: "translateY(-4px)",
+                    boxShadow: "0 4px 30px rgba(0,0,0,0.08)",
+                },
+            }}
+            className="group p-5 flex flex-row flex-row-reverse items-center justify-between hover:cursor-default"
         >
-            {/* Icon */}
-            <div className={`${stat.iconColor}`}>
-                {stat.icon}
-            </div>
-
-            {/* Value */}
-            <Typography fontSize={26} fontWeight={700} className="text-black">
-                {stat.value}
-            </Typography>
-
-            {/* Title */}
-            <Typography fontSize={18} fontWeight={500} className="text-black">
-                {stat.title}
-            </Typography>
-
-            {/* Change */}
-            {stat.change && (
-                <Typography
-                    fontSize={16}
-                    fontWeight={500}
-                    className={stat.changeColor}
+            {/* Top row */}
+            <Box className="flex items-center justify-between">
+                {/* Icon */}
+                <Box
+                    className="
+            w-13 h-13
+            flex items-center justify-center
+            rounded-xl
+            bg-black/5
+            transition-transform
+            group-hover:scale-110
+          "
                 >
-                    {stat.change}
+                    <span className={`${stat.iconColor} text-lg`}>
+                        {stat.icon}
+                    </span>
+                </Box>
+
+                {/* Change badge */}
+                {stat.change && (
+                    <Typography
+                        fontSize={13}
+                        fontWeight={600}
+                        className={`px-2 py-1 rounded-full ${stat.changeColor} bg-black/5`}
+                    >
+                        {stat.change}
+                    </Typography>
+                )}
+            </Box>
+
+            <Box>
+                {/* Value */}
+                <Typography
+                    fontSize={28}
+                    fontWeight={700}
+                    letterSpacing="-0.5px"
+                    className="text-black"
+                >
+                    {stat.value}
                 </Typography>
-            )}
+
+                {/* Title */}
+                <Typography
+                    fontSize={18}
+                    fontWeight={500}
+                    className="text-gray-500"
+                >
+                    {stat.title}
+                </Typography>
+            </Box>
         </Card>
     );
 };

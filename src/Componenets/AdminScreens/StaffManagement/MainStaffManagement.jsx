@@ -27,6 +27,9 @@ import {
   toggleStaffStatus,
 } from "@/service/staffService";
 import EditStaff from "./EditStaff";
+import KpiPill from "../AdminMenuManagement/KpiPill/KpiPill";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import ViewBillStaffDialog from "../AdminBillsManagment/ViewBillStaffDialog/ViewBillStaffDialog";
 
 const MainStaffManagement = () => {
   const [openAdd, setOpenAdd] = useState(false);
@@ -35,6 +38,11 @@ const MainStaffManagement = () => {
 
   const [editOpen, setEditOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
+
+
+  const [openViewDialog, setOpenViewDialog] = useState(false);
+  // const [selectedStaff, setSelectedStaff] = useState(null);
+
 
   const [search, setSearch] = useState("");
 
@@ -105,15 +113,8 @@ const MainStaffManagement = () => {
       <Box className="flex flex-col gap-2">
         <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
           <Box>
-            <Typography
-              fontSize={30}
-              fontWeight={800}
-              className="text-[#0b3c5d]"
-            >
+            <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
               Staff Management
-            </Typography>
-            <Typography fontSize={13} className="text-gray-500">
-              Manage staff records, status, and actions in one place.
             </Typography>
           </Box>
 
@@ -139,80 +140,41 @@ const MainStaffManagement = () => {
           </Box>
         </Box>
 
-        <Box className="h-[4px] w-40 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" />
+        {/* <Box className="h-[4px] w-40 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" /> */}
       </Box>
 
       {/* Search + Stats */}
-      <Box className="grid grid-cols-1 lg:grid-cols-6 gap-4 items-stretch">
+      <Box className="grid grid-cols-1 lg:grid-cols-6 gap-4">
         <TextField
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, email, phone, Aadhaar, address..."
           InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: "#8a8a8a" }} />,
+            startAdornment: <Search sx={{ mr: 1, color: "#0b3c5d" }} />,
           }}
           sx={{
             gridColumn: { lg: "span 3" },
             backgroundColor: "#f9fafb",
-            borderRadius: 3,
+            borderRadius: 2,
+            height: 44,
+            "& .MuiInputBase-root": {
+              height: 42,
+            },
+            "& input": {
+              fontSize: 14,
+              padding: "8px 0",
+            },
             "& fieldset": { border: "none" },
-            boxShadow: "0 10px 25px rgba(0,0,0,0.06)",
+            boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
+            border: "1px solid",
+            borderColor: "gray.200",
+            bgcolor: "white",
           }}
         />
 
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 14px 30px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography fontSize={12} color="text.secondary">
-            Total Staff
-          </Typography>
-          <Typography fontSize={22} fontWeight={800} color="#0b3c5d">
-            {stats.total}
-          </Typography>
-        </Paper>
-
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 14px 30px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography fontSize={12} color="text.secondary">
-            Active
-          </Typography>
-          <Typography fontSize={22} fontWeight={800} color="#2e7d32">
-            {stats.active}
-          </Typography>
-        </Paper>
-
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 14px 30px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography fontSize={12} color="text.secondary">
-            Inactive
-          </Typography>
-          <Typography fontSize={22} fontWeight={800} color="#d32f2f">
-            {stats.inactive}
-          </Typography>
-        </Paper>
+        <KpiPill label="Total Staff" value={stats.total} color="primary" />
+        <KpiPill label="Active Staff" value={stats.active} color="success" />
+        <KpiPill label="Inactive Staff" value={stats.inactive} color="error" />
       </Box>
 
       {/* Premium Table */}
@@ -231,8 +193,8 @@ const MainStaffManagement = () => {
                 "Name",
                 "Email",
                 "Phone",
-                "Aadhaar",
-                "Address",
+                // "Aadhaar",
+                // "Address",
                 "Joining Date",
                 "Status",
                 "Actions",
@@ -245,6 +207,7 @@ const MainStaffManagement = () => {
                     fontWeight: 700,
                     borderBottom: "none",
                     py: 2,
+                    textAlign: "center",
                   }}
                 >
                   {head}
@@ -273,23 +236,24 @@ const MainStaffManagement = () => {
                     backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
                     "&:hover": { backgroundColor: "#eef6ff" },
                     transition: "0.2s",
+                    textAlign: "center",
                   }}
                 >
-                  <TableCell sx={{ fontWeight: 700, color: "#0b3c5d" }}>
+                  <TableCell sx={{ fontWeight: 700, color: "#0b3c5d", textAlign: "center" }}>
                     {staff.name}
                   </TableCell>
-                  <TableCell>{staff.email}</TableCell>
-                  <TableCell>{staff.phone}</TableCell>
-                  <TableCell>{staff.adharCard}</TableCell>
-                  <TableCell sx={{ maxWidth: 260 }}>
+                  <TableCell sx={{ textAlign: "center" }}>{staff.email}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>{staff.phone}</TableCell>
+                  {/* <TableCell sx={{ textAlign: "center" }}>{staff.adharCard}</TableCell> */}
+                  {/* <TableCell sx={{ maxWidth: 260 }}>
                     <Typography
                       fontSize={13}
                       className="text-gray-700 line-clamp-2"
                     >
                       {staff.address}
                     </Typography>
-                  </TableCell>
-                  <TableCell>
+                  </TableCell> */}
+                  <TableCell sx={{ textAlign: "center" }}>
                     {new Date(staff.createdAt).toLocaleDateString("en-IN", {
                       day: "2-digit",
                       month: "short",
@@ -297,8 +261,8 @@ const MainStaffManagement = () => {
                     })}
                   </TableCell>
 
-                  <TableCell>
-                    <Box className="flex items-center gap-3">
+                  <TableCell sx={{ textAlign: "center" }}>
+                    <Box className="flex items-center justify-center gap-3">
                       <Switch
                         checked={!!staff.isActive}
                         color="success"
@@ -314,13 +278,16 @@ const MainStaffManagement = () => {
                             ? "#e8f5e9"
                             : "#ffebee",
                           color: staff.isActive ? "#2e7d32" : "#d32f2f",
+                          border: staff.isActive
+                            ? "1.5px solid #81c784"
+                            : "1.5px solid #ef9a9a",
                         }}
                       />
                     </Box>
                   </TableCell>
 
-                  <TableCell>
-                    <Box className="flex items-center gap-2">
+                  <TableCell sx={{ textAlign: "right" }}>
+                    <Box className="flex items-center justify-center gap-3">
                       <Tooltip title="Edit Staff" arrow>
                         <IconButton
                           size="small"
@@ -347,6 +314,23 @@ const MainStaffManagement = () => {
                           <Delete fontSize="small" />
                         </IconButton>
                       </Tooltip>
+
+                      <Tooltip title="View">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            backgroundColor: "#e3f2fd",
+                            "&:hover": { backgroundColor: "#bbdefb" },
+                          }}
+                          onClick={() => {
+                            setSelectedStaff(staff);
+                            setOpenViewDialog(true);
+                          }}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -380,6 +364,14 @@ const MainStaffManagement = () => {
         staff={selectedStaff}
         onSuccess={fetchStaff}
       />
+
+
+      <ViewBillStaffDialog
+        open={openViewDialog}
+        onClose={() => setOpenViewDialog(false)}
+        staff={selectedStaff}
+      />
+
     </Box>
   );
 };

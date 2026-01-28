@@ -35,21 +35,21 @@ const mainItems = [
     href: "/admin/menu",
     icon: <RestaurantMenu fontSize="small" />,
   },
-  {
-    label: "Order Management",
-    href: "/admin/orders",
-    icon: <MenuBook fontSize="small" />,
-  },
+  // {
+  //   label: "Order Management",
+  //   href: "/admin/orders",
+  //   icon: <MenuBook fontSize="small" />,
+  // },
   {
     label: "Billing & Payments",
     href: "/admin/bills",
     icon: <Receipt fontSize="small" />,
   },
-  {
-    label: "Analytics & Graphs",
-    href: "/admin/analytics",
-    icon: <BarChart fontSize="small" />,
-  },
+  // {
+  //   label: "Analytics & Graphs",
+  //   href: "/admin/analytics",
+  //   icon: <BarChart fontSize="small" />,
+  // },
   {
     label: "Staff Management",
     href: "/admin/staff",
@@ -83,7 +83,9 @@ const reportItems = [
     href: "/admin/reports/daily",
     icon: <Today fontSize="small" />,
   },
+  
 ];
+
 const settingsItem = {
   label: "Settings",
   href: "/admin/settings",
@@ -101,7 +103,7 @@ export default function Sidebar() {
       initial={{ x: -40, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-64 bg-white border-r px-4 py-6 hidden md:flex flex-col"
+      className="w-64 bg-white border-r px-4 py-6 hidden md:flex flex-col h-screen overflow-hidden"
     >
       {/* Logo */}
       <div className="flex items-center justify-center mb-8">
@@ -140,7 +142,7 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      <div className="mt-8">
+      <div >
         <motion.div
           onClick={() => setOpenReports(!openReports)}
           className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer
@@ -203,6 +205,7 @@ export default function Sidebar() {
           </div>
         </motion.div>
       </div>
+      
       {/* SETTINGS AT BOTTOM */}
       <div className="mt-auto pt-6 border-t">
         <Link href={settingsItem.href}>
