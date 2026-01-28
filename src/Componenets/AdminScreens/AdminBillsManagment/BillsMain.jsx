@@ -11,15 +11,20 @@ import {
   TableRow,
   Typography,
   TextField,
+  Tooltip
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { getBills } from "@/service/billsService";
 import SearchIcon from "@mui/icons-material/Search";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+
 
 const BillsMain = () => {
   const [billsData, setBillsData] = useState([]);
   const [search, setSearch] = useState("");
+  
 
   const fetchBills = async () => {
     try {
@@ -157,10 +162,10 @@ const BillsMain = () => {
           Bills Management
         </Typography>
 
-        <Box className="h-[4px] w-32 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400" />
+        {/* <Box className="h-[4px] w-32 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400" /> */}
       </Box>
 
-      <Box className="grid grid-cols-1 lg:grid-cols-5 gap-4 items-stretch">
+      <Box className="grid grid-cols-1 lg:grid-cols-1 gap-4 items-stretch">
         {/* Search */}
         <TextField
           size="medium"
@@ -168,7 +173,7 @@ const BillsMain = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           InputProps={{
-            startAdornment: <SearchIcon sx={{ mr: 1, color: "#888" }} />,
+            startAdornment: <SearchIcon sx={{ mr: 1, color: "#0b3c5d" }} />,
           }}
           // className="grid-cols-1"
           sx={{
@@ -240,6 +245,7 @@ const BillsMain = () => {
         sx={{
           borderRadius: 4,
           boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+          alignItems: "left",
         }}
       >
         <Table stickyHeader>
@@ -275,6 +281,7 @@ const BillsMain = () => {
                 sx={{
                   backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
                   "&:hover": { backgroundColor: "#eef6ff" },
+                  textAlign: "left",
                 }}
               >
                 <TableCell align="center">
@@ -293,15 +300,45 @@ const BillsMain = () => {
                   ₹ {bills.grandTotal}
                 </TableCell>
                 <TableCell align="center">
-                  <IconButton
-                    sx={{
-                      backgroundColor: "#e3f2fd",
-                      "&:hover": { backgroundColor: "#bbdefb" },
-                    }}
-                  >
-                    <VisibilityIcon fontSize="small" />
-                  </IconButton>
+                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5 }}>
+                    <Tooltip title="View">
+                      <IconButton
+                        size="small"
+                        sx={{
+                          backgroundColor: "#e3f2fd",
+                          "&:hover": { backgroundColor: "#bbdefb" },
+                        }}
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        sx={{
+                          backgroundColor: "#e8f5e9",
+                          "&:hover": { backgroundColor: "#c8e6c9" },
+                        }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title="Delete">
+                      <IconButton
+                        size="small"
+                        sx={{
+                          backgroundColor: "#ffebee",
+                          "&:hover": { backgroundColor: "#ffcdd2" },
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
                 </TableCell>
+
               </TableRow>
             ))}
 

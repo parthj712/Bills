@@ -12,13 +12,14 @@ import {
   Paper,
   Switch,
   IconButton,
+  InputAdornment,
   TextField,
   Tooltip,
   Chip,
   Skeleton,
 } from "@mui/material";
 
-import { Edit, Delete, Add, Search } from "@mui/icons-material";
+import { Edit, Delete, Add, Search,Close } from "@mui/icons-material";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useMemo, useState } from "react";
 import AddMenuItems from "./AddMenuItems";
@@ -29,6 +30,9 @@ import {
   updateMenuItem,
 } from "@/service/menuService";
 import UpdateMenuItem from "./UpdateMenu";
+import KpiPill from "./KpiPill/KpiPill";
+
+
 
 export default function MenuManagement() {
   const [openAdd, setOpenAdd] = useState(false);
@@ -39,6 +43,7 @@ export default function MenuManagement() {
 
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+
 
   const handleFetchMenu = async () => {
     try {
@@ -106,113 +111,81 @@ export default function MenuManagement() {
   return (
     <Box className="flex flex-col gap-6 p-2">
       {/* Premium Header */}
-      <Box className="flex flex-col gap-2">
-        <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
-          <Box>
-            <Typography
-              fontSize={30}
-              fontWeight={800}
-              className="text-[#0b3c5d]"
-            >
-              Menu Management
-            </Typography>
-            <Typography fontSize={13} className="text-gray-500">
-              Manage menu items, pricing, categories, and availability.
-            </Typography>
-          </Box>
+      <Box className="flex flex-row gap-2">
 
-          <Box className="md:ml-auto">
-            <AppButton
-              label="Add Menu"
-              startIcon={<Add />}
-              onClick={() => setOpenAdd(true)}
-              sx={{
-                backgroundColor: "#0b3c5d",
-                color: "#fff",
-                px: 2,
-                minWidth: 140,
-                height: 40,
-                borderRadius: 3,
-                fontWeight: 800,
-              }}
-            />
-          </Box>
+
+        <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
+          Menu Management
+        </Typography>
+
+        <Box className="md:ml-auto">
+          <AppButton
+            label="Add Menu"
+            startIcon={<Add />}
+            onClick={() => setOpenAdd(true)}
+            sx={{
+              backgroundColor: "#0b3c5d",
+              color: "#fff",
+              px: 2,
+              minWidth: 140,
+              height: 40,
+              borderRadius: 3,
+              fontWeight: 800,
+            }}
+          />
         </Box>
 
-        <Box className="h-[4px] w-40 rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" />
       </Box>
 
       {/* Search + KPI Cards */}
-      <Box className="grid grid-cols-1 lg:grid-cols-6 gap-4 items-stretch">
+      <Box className="grid grid-cols-1 lg:grid-cols-6 gap-4 items-center">
         <TextField
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by code, name, description, category..."
+          size="small"
           InputProps={{
-            startAdornment: <Search sx={{ mr: 1, color: "#8a8a8a" }} />,
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search sx={{ color: "#0b3c5d" }} />
+              </InputAdornment>
+            ),
+            endAdornment: search && (
+              <InputAdornment position="end">
+                <IconButton
+                  size="small"
+                  onClick={() => setSearch("")}
+                  sx={{ color: "gray.500" }}
+                >
+                  <Close fontSize="small" />
+                </IconButton>
+              </InputAdornment>
+            ),
           }}
           sx={{
             gridColumn: { lg: "span 3" },
             backgroundColor: "#f9fafb",
-            borderRadius: 3,
+            borderRadius: 2,
+            height: 44,
+            "& .MuiInputBase-root": {
+              height: 44,
+            },
+            "& input": {
+              fontSize: 14,
+              padding: "8px 0",
+            },
             "& fieldset": { border: "none" },
-            boxShadow: "0 10px 25px rgba(0,0,0,0.06)",
+            boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
+            border: "1px solid",
+            borderColor: "gray.200",
+            bgcolor: "white",
           }}
         />
 
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 14px 30px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography fontSize={12} color="text.secondary">
-            Total Items
-          </Typography>
-          <Typography fontSize={22} fontWeight={900} color="#0b3c5d">
-            {stats.total}
-          </Typography>
-        </Paper>
-
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 14px 30px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography fontSize={12} color="text.secondary">
-            Available
-          </Typography>
-          <Typography fontSize={22} fontWeight={900} color="#2e7d32">
-            {stats.available}
-          </Typography>
-        </Paper>
-
-        <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 14px 30px rgba(0,0,0,0.08)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-          }}
-        >
-          <Typography fontSize={12} color="text.secondary">
-            Unavailable
-          </Typography>
-          <Typography fontSize={22} fontWeight={900} color="#d32f2f">
-            {stats.unavailable}
-          </Typography>
-        </Paper>
+          <KpiPill label="Total" value={stats.total} color="primary" />
+          <KpiPill label="Available" value={stats.available} color="success" />
+          <KpiPill label="Unavailable" value={stats.unavailable} color="error" />
+        
       </Box>
 
       {/* Premium Table */}
@@ -221,7 +194,7 @@ export default function MenuManagement() {
         sx={{
           borderRadius: 4,
           overflow: "hidden",
-          boxShadow: "0 20px 45px rgba(0,0,0,0.10)",
+          boxShadow: "0 10px 45px rgba(0,0,0,0.10)",
         }}
       >
         <Table stickyHeader>
@@ -240,7 +213,7 @@ export default function MenuManagement() {
                   sx={{
                     backgroundColor: "#0b3c5d",
                     color: "white",
-                    fontWeight: 400,
+                    fontWeight: 600,
                     borderBottom: "none",
                     py: 2,
                   }}
@@ -300,6 +273,8 @@ export default function MenuManagement() {
                         borderRadius: 2,
                         backgroundColor: "#e3f2fd",
                         color: "#0b3c5d",
+                        border: "1px solid",
+                        borderColor: "#90caf9",
                       }}
                     />
                   </TableCell>
@@ -325,6 +300,10 @@ export default function MenuManagement() {
                             ? "#e8f5e9"
                             : "#ffebee",
                           color: item.isAvailable ? "#2e7d32" : "#d32f2f",
+                          border: "1px solid",
+                          borderColor: item.isAvailable
+                            ? "#81c784"
+                            : "#ef9a9a",
                         }}
                       />
                     </Box>
@@ -386,7 +365,7 @@ export default function MenuManagement() {
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => {}}
+        onSubmit={(data) => { }}
         onSuccess={handleFetchMenu}
       />
 

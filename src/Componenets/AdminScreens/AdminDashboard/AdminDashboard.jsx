@@ -12,6 +12,8 @@ import { StatCard } from "./StatCard";
 import { useEffect, useState } from "react";
 import { getBills } from "@/service/billsService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
+import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
+import { QuickInsights } from "./QuickInsights/QuickInsights";
 
 const topProducts = [
   { name: "Chicken Chilly", percent: 40 },
@@ -109,7 +111,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <Box className="min-h-screen bg-[#f8fafc] p-4">
+    <Box className="min-h-screen bg-[#f8fafc]">
       {subscription && subscription.daysLeft <= 2 && (
         <Card
           className="mb-6 p-4 rounded-xl"
@@ -144,21 +146,20 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
           </Typography>
         </Card>
       )}
+
+
       {/* HEADER */}
-      <Card
-        className="mb-6 p-6 rounded-2xl"
+      <Box
+        className="py-1 mb-3 rounded-2xl"
         sx={{
-          background: "linear-gradient(90deg,#7c2d12,#f97316)",
-          color: "white",
+          // background: "linear-gradient(90deg,#7c2d12,#f97316)",
+          color: "black",
         }}
       >
-        <Typography fontSize={26} fontWeight={800}>
+         <Typography fontSize={30} fontWeight={700}  className="text-[#0b3c5d]">
           Dashboard Overview
         </Typography>
-        <Typography fontSize={13} sx={{ opacity: 0.85 }}>
-          Real-time restaurant performance summary
-        </Typography>
-      </Card>
+      </Box>
 
       {/* STATS */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -170,66 +171,11 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
       {/* CONTENT */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* TOP PRODUCTS */}
-        <Card className="p-6 rounded-2xl shadow-sm">
-          <Typography fontWeight={700} mb={1}>
-            Top Selling Products
-          </Typography>
-          <Typography fontSize={12} color="text.secondary" mb={3}>
-            Based on current month sales
-          </Typography>
 
-          <div className="space-y-4">
-            {topProducts.map((item, index) => (
-              <div key={index}>
-                <div className="flex justify-between mb-1 text-sm">
-                  <span>{item.name}</span>
-                  <span className="text-gray-500">{item.percent}%</span>
-                </div>
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-orange-500"
-                    style={{ width: `${item.percent}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+        <TopProductsCard topProducts={topProducts} />
 
         {/* SPEED DIAL */}
-        <Card className="p-6 rounded-2xl shadow-sm lg:col-span-2">
-          <Typography fontWeight={700} mb={1}>
-            Quick Insights
-          </Typography>
-          <Typography fontSize={12} color="text.secondary" mb={2}>
-            Fast access to key metrics
-          </Typography>
-
-          <Divider className="mb-4" />
-
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
-            {[
-              "Total Orders",
-              "Active Tables",
-              "Peak Hours",
-              "Top Item",
-              "Cancelled Orders",
-              "Revenue Growth",
-            ].map((item, index) => (
-              <Card
-                key={index}
-                className="p-4 rounded-xl text-center cursor-pointer hover:shadow-md transition"
-              >
-                <div className="h-10 w-10 mx-auto mb-2 rounded-full bg-orange-100 flex items-center justify-center">
-                  <TrendingUp className="text-orange-600" />
-                </div>
-                <Typography fontSize={13} fontWeight={600}>
-                  {item}
-                </Typography>
-              </Card>
-            ))}
-          </div>
-        </Card>
+        <QuickInsights />
       </div>
     </Box>
   );
