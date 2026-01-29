@@ -25,6 +25,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 /* Excel */
 import * as XLSX from "xlsx";
+import dayjs from "dayjs";
 import { saveAs } from "file-saver";
 import BillDetails from "../AdminBillsManagment/BillDetails";
 
@@ -35,6 +36,20 @@ export default function SalesReport() {
 
   const [openBill, setOpenBill] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
+
+  const [showReport, setShowReport] = useState(false);
+
+
+  const quickRanges = [
+    { label: "1 Day", days: 0 },
+    { label: "1 Week", days: 7 },
+    { label: "1 Month", months: 1 },
+    { label: "6 Months", months: 6 },
+  ];
+
+  const [activeRange, setActiveRange] = useState(null);
+
+
 
   useEffect(() => {
     getBills().then((res) => {
@@ -96,11 +111,11 @@ export default function SalesReport() {
   };
 
   return (
-    <Box className="min-h-screen bg-[#f4f7fb] p-6">
+    <Box className="min-h-screen p-4">
       {/* Header */}
       <Box className="flex items-center justify-between mb-6">
         <Box>
-          <Typography fontSize={30} fontWeight={700} color="#0b3c5d">
+          <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
             Sales Report
           </Typography>
           <Typography fontSize={14} color="text.secondary">
@@ -132,104 +147,181 @@ export default function SalesReport() {
           border: "1px solid #e5e7eb",
         }}
       >
-        <Box display="flex" gap={3} alignItems="center">
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="From Date"
-              value={fromDate}
-              onChange={setFromDate}
-            />
-            <DatePicker label="To Date" value={toDate} onChange={setToDate} />
-          </LocalizationProvider>
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="space-between"
+          gap={3}
+          flexWrap="wrap"
+        >
+          {/* LEFT SIDE */}
+          <Box display="flex" flexDirection="column" alignItems={"flex-start"} gap={4}>
+            {/* Quick Date Shortcuts */}
+            <Box display="flex" gap={1} flexWrap="wrap">
+              {quickRanges.map((range) => (
+                <Chip
+                  key={range.label}
+                  size="small"
+                  label={range.label}
+                  clickable
+                  variant={activeRange === range.label ? "filled" : "outlined"}
+                  color={activeRange === range.label ? "primary" : "default"}
+                  onClick={() => {
+                    const today = dayjs();
+                    setToDate(today);
 
-          <Chip
-            label={`${filteredBills.length} Bills`}
-            color="primary"
-            variant="outlined"
-          />
+                    if (range.days !== undefined) {
+                      setFromDate(today.subtract(range.days, "day"));
+                    } else {
+                      setFromDate(today.subtract(range.months, "month"));
+                    }
+
+                    setActiveRange(range.label);
+                    setShowReport(false);
+                  }}
+                  sx={{
+                    fontSize: 14,
+                    px: 1.5,
+                    fontWeight: activeRange === range.label ? 600 : 500,
+                  }}
+                />
+              ))}
+            </Box>
+
+            {/* Date Pickers */}
+            <Box display="flex" gap={3} flexWrap="wrap">
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="From Date"
+                  value={fromDate}
+                  onChange={(val) => {
+                    setFromDate(val);
+                    setShowReport(false);
+                  }}
+                  sx={{ minWidth: 420 }}
+                />
+
+                <DatePicker
+                  label="To Date"
+                  value={toDate}
+                  onChange={(val) => {
+                    setToDate(val);
+                    setShowReport(false);
+                  }}
+                  sx={{ minWidth: 420 }}
+                />
+              </LocalizationProvider>
+            </Box>
+
+          </Box>
+
+          {/* RIGHT SIDE CTA */}
+          <Box>
+            <Button
+              variant="contained"
+              onClick={() => setShowReport(true)}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                px: 4,
+                py: 1.2,
+                background: "linear-gradient(135deg, #2563EB, #22D3EE)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #1E40AF, #06B6D4)",
+                },
+              }}
+            >
+              Get Report
+            </Button>
+          </Box>
         </Box>
       </Paper>
 
+
+
       {/* Sales Table */}
-      <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
-        <TableContainer sx={{ maxHeight: 520 }}>
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "#0b3c5d" }}>
-                {["Date", "Bill No", "Subtotal", "GST", "Total", "Action"].map(
-                  (h) => (
-                    <TableCell
-                      key={h}
-                      align="center"
-                      sx={{
-                        color: "white",
-                        fontWeight: 600,
-                        backgroundColor: "#0b3c5d",
-                      }}
-                    >
-                      {h}
+      {showReport && (
+        <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
+          <TableContainer sx={{ maxHeight: 660 }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: "#0b3c5d" }}>
+                  {["Date", "Bill No", "Subtotal", "GST", "Total", "Action"].map(
+                    (h) => (
+                      <TableCell
+                        key={h}
+                        align="center"
+                        sx={{
+                          color: "white",
+                          fontWeight: 600,
+                          backgroundColor: "#0b3c5d",
+                        }}
+                      >
+                        {h}
+                      </TableCell>
+                    ),
+                  )}
+                </TableRow>
+              </TableHead>
+
+              <TableBody>
+                {filteredBills.map((b) => (
+                  <TableRow
+                    key={b._id}
+                    hover
+                    sx={{ "&:hover": { backgroundColor: "#f1f5f9" } }}
+                  >
+                    <TableCell align="center">
+                      {new Date(b.createdAt).toLocaleDateString("en-IN")}
                     </TableCell>
-                  ),
+                    <TableCell align="center">{b.billNo}</TableCell>
+                    <TableCell align="center">₹ {b.subtotal}</TableCell>
+                    <TableCell align="center">₹ {b.gstAmount}</TableCell>
+                    <TableCell align="center" fontWeight={700}>
+                      ₹ {b.grandTotal}
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        onClick={() => {
+                          setSelectedBill(b);
+                          setOpenBill(true);
+                        }}
+                        sx={{
+                          backgroundColor: "#e3f2fd",
+                          "&:hover": { backgroundColor: "#bbdefb" },
+                        }}
+                      >
+                        <VisibilityIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+
+                {/* Totals */}
+                {filteredBills.length > 0 && (
+                  <TableRow sx={{ backgroundColor: "#f8fafc" }}>
+                    <TableCell align="center" fontWeight={700}>
+                      TOTAL
+                    </TableCell>
+                    <TableCell />
+                    <TableCell align="center" fontWeight={700}>
+                      ₹ {totals.subtotal.toFixed(2)}
+                    </TableCell>
+                    <TableCell align="center" fontWeight={700}>
+                      ₹ {totals.gst.toFixed(2)}
+                    </TableCell>
+                    <TableCell align="center" fontWeight={700}>
+                      ₹ {totals.total.toFixed(2)}
+                    </TableCell>
+                    <TableCell />
+                  </TableRow>
                 )}
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {filteredBills.map((b) => (
-                <TableRow
-                  key={b._id}
-                  hover
-                  sx={{ "&:hover": { backgroundColor: "#f1f5f9" } }}
-                >
-                  <TableCell align="center">
-                    {new Date(b.createdAt).toLocaleDateString("en-IN")}
-                  </TableCell>
-                  <TableCell align="center">{b.billNo}</TableCell>
-                  <TableCell align="center">₹ {b.subtotal}</TableCell>
-                  <TableCell align="center">₹ {b.gstAmount}</TableCell>
-                  <TableCell align="center" fontWeight={700}>
-                    ₹ {b.grandTotal}
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      onClick={() => {
-                        setSelectedBill(b);
-                        setOpenBill(true);
-                      }}
-                      sx={{
-                        backgroundColor: "#e3f2fd",
-                        "&:hover": { backgroundColor: "#bbdefb" },
-                      }}
-                    >
-                      <VisibilityIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-
-              {/* Totals */}
-              {filteredBills.length > 0 && (
-                <TableRow sx={{ backgroundColor: "#f8fafc" }}>
-                  <TableCell align="center" fontWeight={700}>
-                    TOTAL
-                  </TableCell>
-                  <TableCell />
-                  <TableCell align="center" fontWeight={700}>
-                    ₹ {totals.subtotal.toFixed(2)}
-                  </TableCell>
-                  <TableCell align="center" fontWeight={700}>
-                    ₹ {totals.gst.toFixed(2)}
-                  </TableCell>
-                  <TableCell align="center" fontWeight={700}>
-                    ₹ {totals.total.toFixed(2)}
-                  </TableCell>
-                  <TableCell />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      )}
 
       {/* Monthly Summary */}
       <Box mt={6}>
