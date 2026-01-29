@@ -16,12 +16,12 @@ import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
 import { QuickInsights } from "./QuickInsights/QuickInsights";
 
 const topProducts = [
-  { name: "Chicken Chilly", percent: 40 },
-  { name: "Misal Pav", percent: 35 },
-  { name: "Cheese Chilly Toast", percent: 30 },
-  { name: "Cheese Sandwich", percent: 25 },
-  { name: "Vegetable Salad", percent: 20 },
+  { name: "Paneer Butter Masala", percent: 72 },
+  { name: "Veg Biryani", percent: 65 },
+  { name: "Butter Naan", percent: 54 },
+  { name: "Cold Coffee", percent: 41 },
 ];
+
 
 export default function AdminDashboard() {
   const [bills, setBills] = useState([]);
@@ -156,7 +156,7 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
           color: "black",
         }}
       >
-         <Typography fontSize={30} fontWeight={700}  className="text-[#0b3c5d]">
+        <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
           Dashboard Overview
         </Typography>
       </Box>

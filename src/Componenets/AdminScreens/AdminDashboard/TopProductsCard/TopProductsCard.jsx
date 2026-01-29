@@ -1,4 +1,5 @@
 import { Card, Typography, Box } from "@mui/material";
+import { BarChart } from "@mui/x-charts/BarChart";
 
 export const TopProductsCard = ({ topProducts }) => {
     return (
@@ -12,69 +13,48 @@ export const TopProductsCard = ({ topProducts }) => {
             className="p-6"
         >
             {/* Header */}
-            <Box mb={2}>
+            <Box mb={3}>
                 <Typography fontSize={20} fontWeight={700}>
                     Top Selling Products
                 </Typography>
-                {/* <Typography fontSize={13} className="text-gray-500">
-                    Based on current month sales
-                </Typography> */}
+                <Typography fontSize={13} color="text.secondary">
+                    Sales contribution (%)
+                </Typography>
             </Box>
 
-            {/* List */}
-            <div className="space-y-5">
-                {topProducts.map((item, index) => (
-                    <div
-                        key={index}
-                        className="group transition-all"
-                    >
-                        {/* Name & Percentage */}
-                        <div className="flex justify-between items-center mb-2">
-                            <Typography
-                                fontSize={14}
-                                fontWeight={600}
-                                className="text-black"
-                            >
-                                {item.name}
-                            </Typography>
-
-                            <span
-                                className="
-                                    text-xs
-                                    font-semibold
-                                    text-gray-600
-                                    px-1.5
-                                    py-0.5
-                                    rounded-full
-                                    bg-black/5
-                                    border
-                                    border-black/10
-                                "
-                            >
-                                {item.percent}%
-                            </span>
-
-                        </div>
-
-                        {/* Progress bar */}
-                        <div className="h-1.5 bg-black/10 rounded-full overflow-hidden">
-                            <div
-                                className="
-                  h-full
-                  rounded-full
-                  bg-gradient-to-r
-                  from-orange-400
-                  to-orange-600
-                  transition-all
-                  duration-500
-                  group-hover:to-orange-700
-                "
-                                style={{ width: `${item.percent}%` }}
-                            />
-                        </div>
-                    </div>
-                ))}
-            </div>
+            {/* Graph */}
+            <BarChart
+                height={210}
+                layout="horizontal"
+                series={[
+                    {
+                        data: topProducts.map((p) => p.percent),
+                        label: "Sales %",
+                    },
+                ]}
+                yAxis={[
+                    {
+                        scaleType: "band",
+                        data: topProducts.map((p) => p.name),
+                    },
+                ]}
+                xAxis={[
+                    {
+                        max: 100,
+                        label: "Percentage",
+                    },
+                ]}
+                colors={["#f97316"]} // orange
+                sx={{
+                    "& .MuiChartsAxis-tickLabel": {
+                        fontSize: 12,
+                        fill: "#444",
+                    },
+                    "& .MuiChartsAxis-label": {
+                        fontSize: 12,
+                    },
+                }}
+            />
         </Card>
     );
 };
