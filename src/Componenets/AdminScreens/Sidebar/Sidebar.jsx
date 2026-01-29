@@ -16,12 +16,14 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   Assessment,
-  ReceiptLong,
   Group,
   Today,
   ExpandMore,
 } from "@mui/icons-material";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+
 import { useState } from "react";
+
 
 const mainItems = [
   { label: "Dashboard", href: "/admin", icon: <Dashboard fontSize="small" /> },
@@ -64,26 +66,26 @@ const reportItems = [
     icon: <Assessment fontSize="small" />,
   },
   {
-    label: "Order Report",
-    href: "/admin/reports/orders",
-    icon: <ReceiptLong fontSize="small" />,
+    label: "Item Report",
+    href: "/admin/reports/itemsreport",
+    icon: <Inventory2Icon fontSize="small" />,
   },
-  {
-    label: "GST Report",
-    href: "/admin/reports/gst",
-    icon: <Receipt fontSize="small" />,
-  },
-  {
-    label: "Staff Report",
-    href: "/admin/reports/staff",
-    icon: <Group fontSize="small" />,
-  },
-  {
-    label: "Daily Summary",
-    href: "/admin/reports/daily",
-    icon: <Today fontSize="small" />,
-  },
-  
+  // {
+  //   label: "GST Report",
+  //   href: "/admin/reports/gst",
+  //   icon: <Receipt fontSize="small" />,
+  // },
+  // {
+  //   label: "Staff Report",
+  //   href: "/admin/reports/staff",
+  //   icon: <Group fontSize="small" />,
+  // },
+  // {
+  //   label: "Daily Summary",
+  //   href: "/admin/reports/daily",
+  //   icon: <Today fontSize="small" />,
+  // },
+
 ];
 
 const settingsItem = {
@@ -97,6 +99,8 @@ export default function Sidebar() {
   const [openReports, setOpenReports] = useState(
     pathname.startsWith("/admin/reports"),
   );
+
+
 
   return (
     <motion.aside
@@ -180,11 +184,10 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
                             text-[15px] cursor-pointer
-                            ${
-                              isActive
-                                ? "font-semibold text-orange-600"
-                                : "text-gray-700"
-                            }`}
+                            ${isActive
+                        ? "font-semibold text-orange-600"
+                        : "text-gray-700"
+                      }`}
                   >
                     {isActive && (
                       <motion.span
@@ -205,7 +208,7 @@ export default function Sidebar() {
           </div>
         </motion.div>
       </div>
-      
+
       {/* SETTINGS AT BOTTOM */}
       <div className="mt-auto pt-6 border-t">
         <Link href={settingsItem.href}>
@@ -213,11 +216,10 @@ export default function Sidebar() {
             whileHover={{ x: 6 }}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg
           text-[17px] cursor-pointer
-          ${
-            pathname === settingsItem.href
-              ? "font-semibold text-orange-600"
-              : "text-black"
-          }
+          ${pathname === settingsItem.href
+                ? "font-semibold text-orange-600"
+                : "text-black"
+              }
         `}
           >
             {settingsItem.icon}
