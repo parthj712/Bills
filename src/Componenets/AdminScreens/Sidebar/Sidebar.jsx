@@ -14,16 +14,11 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import {
-  Assessment,
-  Group,
-  Today,
-  ExpandMore,
-} from "@mui/icons-material";
+import { Assessment, ExpandMore } from "@mui/icons-material";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { getShopName } from "@/service/shopService";
 
 const mainItems = [
   { label: "Dashboard", href: "/admin", icon: <Dashboard fontSize="small" /> },
@@ -85,7 +80,6 @@ const reportItems = [
   //   href: "/admin/reports/daily",
   //   icon: <Today fontSize="small" />,
   // },
-
 ];
 
 const settingsItem = {
@@ -95,12 +89,24 @@ const settingsItem = {
 };
 
 export default function Sidebar() {
+  const [shopName, setShopName] = useState("");
   const pathname = usePathname();
+  const fetchShopName = async () => {
+    try {
+      const res = await getShopName();
+      console.log("shopname", res.data);
+      setShopName(res.data?.data?.shopName);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchShopName();
+  }, []);
   const [openReports, setOpenReports] = useState(
     pathname.startsWith("/admin/reports"),
   );
-
-
 
   return (
     <motion.aside
@@ -112,6 +118,18 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="flex items-center justify-center mb-8">
         <img src="/Logo.png" className="h-8" alt="Logo" />
+      </div>
+      <div className="border-t mb-4"></div>
+      <div className="mb-8 px-3">
+        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center shadow-sm">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">
+            Logged in Shop
+          </p>
+
+          <h2 className="text-lg font-semibold text-orange-600 mt-1 truncate">
+            {shopName || "Loading..."}
+          </h2>
+        </div>
       </div>
 
       {/* MAIN NAV */}
@@ -146,7 +164,7 @@ export default function Sidebar() {
           );
         })}
       </nav>
-      <div >
+      <div>
         <motion.div
           onClick={() => setOpenReports(!openReports)}
           className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer
@@ -184,10 +202,11 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
                             text-[15px] cursor-pointer
-                            ${isActive
-                        ? "font-semibold text-orange-600"
-                        : "text-gray-700"
-                      }`}
+                            ${
+                              isActive
+                                ? "font-semibold text-orange-600"
+                                : "text-gray-700"
+                            }`}
                   >
                     {isActive && (
                       <motion.span
@@ -216,10 +235,11 @@ export default function Sidebar() {
             whileHover={{ x: 6 }}
             className={`flex items-center gap-3 px-3 py-2 rounded-lg
           text-[17px] cursor-pointer
-          ${pathname === settingsItem.href
-                ? "font-semibold text-orange-600"
-                : "text-black"
-              }
+          ${
+            pathname === settingsItem.href
+              ? "font-semibold text-orange-600"
+              : "text-black"
+          }
         `}
           >
             {settingsItem.icon}
