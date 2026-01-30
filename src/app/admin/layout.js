@@ -1,17 +1,24 @@
 import Sidebar from "@/Componenets/AdminScreens/Sidebar/Sidebar";
+import MobileNav from "@/Componenets/AdminScreens/Sidebar/MobileNav";
 import AdminGuard from "./AdminGuard";
 
 export default async function AdminLayout({ children }) {
-  // sidebar should be here
-
   return (
     <AdminGuard>
       <div className="flex min-h-screen bg-gray-50">
-        {/* Sidebar */}
+        {/* Desktop Sidebar */}
         <Sidebar />
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+        {/* Main Section */}
+        <div className="flex-1 flex flex-col">
+          {/* ✅ Mobile Top Bar */}
+          <MobileNav />
+
+          {/* Page Content */}
+          <main className="flex-1 p-6 overflow-y-auto">
+            {children}
+          </main>
+        </div>
       </div>
     </AdminGuard>
   );

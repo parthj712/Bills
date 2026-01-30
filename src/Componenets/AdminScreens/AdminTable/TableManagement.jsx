@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import AddTable from "./AddTable";
 import { getTables } from "@/service/tableService";
@@ -48,6 +48,16 @@ export const STATUS_CONFIG = {
 
 
 export default function TableManagement() {
+
+
+  const theme = useTheme();
+
+  // BREAKPOINTS
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
   // ✅ tables must be state
   const [tables, setTables] = useState([]);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -80,17 +90,19 @@ export default function TableManagement() {
     await handleGetTables();
   };
 
+
+
   return (
     <Box className="flex flex-col min-h-full p-2">
       {/* Header */}
 
-      <Box display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} mb={4}>
-        <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
+      <Box display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={isMobile ? "flex-start" : "center"} mb={4} gap={isMobile ? 2 : 0}>
+        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
           Table Management
         </Typography>
 
         {/* Bottom Section */}
-        <Box className=" flex items-center justify-between">
+        <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"space-between"}>
           {/* Legend */}
           <Box className="flex gap-8 text-[20px]">
             {/* <span className="flex items-center gap-3">
@@ -114,21 +126,28 @@ export default function TableManagement() {
             className="!bg-yellow-400 !text-black px-8"
           /> */}
 
+
             <AppButton
-              label="Add Tables"
+              fullWidth={isMobile}
+              label={isMobile ? " " : "Add Tables"}
               startIcon={<Add />}
               // className="!bg-green-500 !text-white px-8"
               onClick={() => setOpenAddDialog(true)}
               sx={{
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: isMobile ? 14 : 16,
                 backgroundColor: "#0b3c5d",
                 color: "#fff",
                 px: 2,
-                minWidth: 140,
+                minWidth: isMobile ? " " : 140,
                 height: 40,
                 borderRadius: 3,
                 fontWeight: 800,
               }}
             />
+
+
           </Box>
         </Box>
 
