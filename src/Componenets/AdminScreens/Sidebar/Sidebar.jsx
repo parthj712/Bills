@@ -19,6 +19,7 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 
 import { useEffect, useState } from "react";
 import { getShopName } from "@/service/shopService";
+import { Box, Typography } from "@mui/material";
 
 const mainItems = [
   { label: "Dashboard", href: "/admin", icon: <Dashboard fontSize="small" /> },
@@ -122,21 +123,48 @@ export default function Sidebar() {
         "
     >
       {/* Logo */}
-      <div className="flex items-center justify-center mb-8">
+      <div className="flex items-center justify-center mb-4">
         <img src="/Logo.png" className="h-8" alt="Logo" />
       </div>
       <div className="border-t mb-4"></div>
-      <div className="mb-8 px-3">
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 text-center shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">
-            Logged in Shop
-          </p>
+      <Box className="mb-8 px-3">
+        <motion.div
+          className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-4 text-center shadow-sm"
+        >
+          {/* ✨ SHIMMER / MIRROR REFLECTION */}
+          <motion.span
+            initial={{ x: "-100%" }}
+            animate={{ x: "120%" }}
+            transition={{
+              repeat: Infinity,
+              duration: 1.5,
+              ease: "linear",
+            }}
+            className="
+              pointer-events-none
+              absolute top-0 left-0
+              h-full w-1/3
+              bg-gradient-to-r
+              from-transparent
+              via-white/60
+              to-transparent
+              rotate-6
+            "
+          />
 
-          <h2 className="text-lg font-semibold text-orange-600 mt-1 truncate">
+          {/* CONTENT */}
+          <Typography fontSize={14} color="black">
+            Logged in Shop
+          </Typography>
+
+          <Typography
+            fontWeight={600}
+            className="text-lg font-semibold text-orange-600 mt-1 truncate"
+          >
             {shopName || "Loading..."}
-          </h2>
-        </div>
-      </div>
+          </Typography>
+        </motion.div>
+      </Box>
 
       {/* MAIN NAV */}
       <nav className="space-y-4">
@@ -208,11 +236,10 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
                             text-[15px] cursor-pointer
-                            ${
-                              isActive
-                                ? "font-semibold text-orange-600"
-                                : "text-gray-700"
-                            }`}
+                            ${isActive
+                        ? "font-semibold text-orange-600"
+                        : "text-gray-700"
+                      }`}
                   >
                     {isActive && (
                       <motion.span
@@ -241,11 +268,10 @@ export default function Sidebar() {
             whileHover={{ x: 6 }}
             className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[17px] cursor-pointer
-          ${
-            pathname === settingsItem.href
-              ? "font-semibold text-orange-600"
-              : "text-black"
-          }
+          ${pathname === settingsItem.href
+                ? "font-semibold text-orange-600"
+                : "text-black"
+              }
         `}
           >
             {settingsItem.icon}
