@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
 import WaiterTopProducts from "./WaiterTopProducts/WaiterTopProducts";
+import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
 
 const tableStyles = {
   AVAILABLE:
@@ -154,6 +155,14 @@ export default function WaiterHomePage() {
     router.push(`/waiter/order?orderType=${orderType}`);
   };
 
+  const topProducts = [
+    { name: "Paneer Butter Masala", percent: 72 },
+    { name: "Veg Biryani", percent: 65 },
+    { name: "Butter Naan", percent: 54 },
+    { name: "Cold Coffee", percent: 41 },
+  ];
+  
+
   return (
     <Box className="min-h-screen bg-gray-50">
       {/* Top Buttons */}
@@ -164,29 +173,42 @@ export default function WaiterHomePage() {
         {/* LEFT PANEL */}
         <div className="col-span-12 md:col-span-4 lg:col-span-4 flex flex-col gap-4 order-2 md:order-1">
           {/* Takeaway */}
-          <AppButton
-            label="Takeaway"
-            className="!bg-orange-500 !text-white"
-            onClick={() => handleOrderTypeClick("TAKEAWAY")}
-          />
 
+          {isDesktop && (
+            <AppButton
+              label="Takeaway"
+              className="!bg-orange-500 !text-white "
+              onClick={() => handleOrderTypeClick("TAKEAWAY")}
+            />
+          )}
           {/* Top Products */}
-          <WaiterTopProducts />
+          <TopProductsCard topProducts={topProducts} />
         </div>
 
         {/* RIGHT PANEL */}
         <div className="col-span-12 md:col-span-8 lg:col-span-8 order-1 md:order-2 ">
-          <Card className="p-7 !rounded-4xl shadow-md !bg-[#F1F1F1]">
+
+          {!isDesktop && !isTablet && (
+
+
+            <AppButton
+              label="Takeaway"
+              className="!bg-orange-500 !text-white"
+              onClick={() => handleOrderTypeClick("TAKEAWAY")}
+            />
+          )}
+
+          <Card className="p-7 my-6 !rounded-4xl shadow-md !bg-[#F1F1F1]">
             <div className="flex items-center justify-between mb-4">
-              <Typography fontSize={24} fontWeight={600}>
+              <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
                 Dine-In Orders
               </Typography>
 
               <span
                 className="
                       border-[1px]
-                      border-green-600/90
-                      text-[16px]
+                      border-green-600/90 text-[14px]
+                      md:test-[16px] lg:text-[16px]
                       font-semibold
                       bg-green-100
                       text-green-700
@@ -202,48 +224,47 @@ export default function WaiterHomePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                    <Skeleton
-                      key={index}
-                      variant="rounded"
-                      height={96}
-                      className="!rounded-2xl"
-                    />
-                  ))
+                  <Skeleton
+                    key={index}
+                    variant="rounded"
+                    height={96}
+                    className="!rounded-2xl"
+                  />
+                ))
                 : tables.map((table) => (
-                    <Tooltip
-                      key={table._id}
-                      title={
-                        table.status === "OCCUPIED"
-                          ? "Active table"
-                          : "Add order"
+                  <Tooltip
+                    key={table._id}
+                    title={
+                      table.status === "OCCUPIED"
+                        ? "Active table"
+                        : "Add order"
+                    }
+                    arrow
+                    placement="bottom"
+                  >
+                    <Card
+                      onClick={() =>
+                        handleTableClick(table._id, table.tableNo)
                       }
-                      arrow
-                      placement="bottom"
-                    >
-                      <Card
-                        onClick={() =>
-                          handleTableClick(table._id, table.tableNo)
-                        }
-                        className={`
+                      className={`
               h-25
               flex items-center justify-center
               cursor-pointer
               transition
               hover:shadow-md
               ${tableStyles[table.status]}
-              ${
-                highlightTableNo === table.tableNo
-                  ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-                  : ""
-              }
+              ${highlightTableNo === table.tableNo
+                          ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+                          : ""
+                        }
             `}
-                      >
-                        <Typography fontSize={24} fontWeight={600}>
-                          {table.tableNo}
-                        </Typography>
-                      </Card>
-                    </Tooltip>
-                  ))}
+                    >
+                      <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
+                        {table.tableNo}
+                      </Typography>
+                    </Card>
+                  </Tooltip>
+                ))}
             </div>
           </Card>
         </div>

@@ -196,7 +196,7 @@ export default function OrderCart() {
       </Card>
 
       {/* Buttons */}
-      <div className="flex justify-end gap-4 mt-6">
+      <div className="flex flex-col lg:flex-row md:flex-row  justify-end gap-4 mt-6">
         {isDineIn ? (
           <AppButton
             label="Save & Continue"

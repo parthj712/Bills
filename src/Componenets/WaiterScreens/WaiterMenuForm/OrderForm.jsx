@@ -226,23 +226,23 @@ export default function OrderForm() {
                     No items found.
                   </Typography>
                 ) : (
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                     {filteredItems.map((item, index) => (
                       <Card
                         key={item._id}
                         elevation={0}
                         onClick={() => handleSelectItem(item)}
                         className={`
-      p-3 cursor-pointer border !rounded-xl transition-all duration-150
-      ${
-        index === activeIndex
-          ? "border-blue-500 bg-blue-50"
-          : isItemSelected(item._id)
-            ? "border-green-500 bg-green-50"
-            : "border-gray-200 hover:bg-gray-50"
-      }
-    `}
-                      >
+                        p-3 cursor-pointer border !rounded-xl transition-all duration-150
+                        ${
+                          index === activeIndex
+                            ? "border-blue-500 bg-blue-50"
+                            : isItemSelected(item._id)
+                              ? "border-green-500 bg-green-50"
+                              : "border-gray-200 hover:bg-gray-50"
+                        }
+                      `}
+                                        >
                         <Typography fontWeight={600}>{item.name}</Typography>
                         <Typography
                           fontSize={14}
@@ -275,8 +275,8 @@ export default function OrderForm() {
                   const price = getUnitPrice(x.item, x.portion);
                   return (
                     <Card key={x.tempId} className="p-5 rounded-xl">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
+                      <div className="flex flex-col lg:flex-row md:flex-col items-start lg:items-center md:items-center justify-between gap-3">
+                        <div className="flex gap-3">
                           <Typography fontWeight={600}>
                             {x.item.name}
                           </Typography>
