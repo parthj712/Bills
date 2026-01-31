@@ -9,15 +9,25 @@ import {
   Switch,
   FormControlLabel,
   Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Settings() {
   const router = useRouter();
 
+
+  const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
+
+
   // ❌ DO NOT TOUCH SIGN OUT LOGIC
   const handleLogout = () => {
-    if (!confirm("Are you sure you want to log out?")) return;
+    // if (!confirm("Are you sure you want to log out?")) return;
     localStorage.removeItem("token");
     router.push("/login");
   };
@@ -104,13 +114,51 @@ export default function Settings() {
           <Button
             variant="contained"
             color="error"
+            onClick={() => setOpenLogoutDialog(true)}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            Sign Out
+          </Button>
+
+        </Paper>
+      </Box>
+
+
+      <Dialog
+        open={openLogoutDialog}
+        onClose={() => setOpenLogoutDialog(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle fontWeight={700}>
+          Confirm Sign Out
+        </DialogTitle>
+
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to sign out from the admin panel?
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button
+            onClick={() => setOpenLogoutDialog(false)}
+            sx={{ textTransform: "none" }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="error"
             onClick={handleLogout}
             sx={{ textTransform: "none", fontWeight: 600 }}
           >
             Sign Out
           </Button>
-        </Paper>
-      </Box>
+        </DialogActions>
+      </Dialog>
+
     </Box>
   );
 }
