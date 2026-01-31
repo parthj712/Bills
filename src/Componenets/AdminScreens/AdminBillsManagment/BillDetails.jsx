@@ -5,25 +5,34 @@ import {
   DialogContent,
   Typography,
   Box,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
 export default function BillDetails({ open, onClose, bill }) {
   if (!bill) return null;
 
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth sx={{borderRadius : 6}}>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth sx={{ borderRadius: 2 }}>
       <DialogTitle
         sx={{
           color: "white",
-          backgroundColor: "#2563EB",
+          backgroundColor: isMobile ? "#2563EB" : "#1E40AF",
         }}>
         <Box
           display="flex"
-          flexDirection="row"
+          flexDirection={isMobile ? "column" : "row"}
           justifyContent="space-between"
           alignItems="center"
         >
-          <Typography variant="h6" fontWeight={700}>
+          <Typography variant={isMobile ? "h6" : "h5"} fontWeight={isMobile ? 600 : 700}>
             Bill No: {bill.billNo}
           </Typography>
           <Typography fontSize={16} fontWeight={600}>

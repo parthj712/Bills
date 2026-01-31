@@ -127,25 +127,23 @@ export default function TableManagement() {
           /> */}
 
 
-            <AppButton
-              fullWidth={isMobile}
-              label={isMobile ? " " : "Add Tables"}
-              startIcon={<Add />}
-              // className="!bg-green-500 !text-white px-8"
-              onClick={() => setOpenAddDialog(true)}
-              sx={{
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: isMobile ? 14 : 16,
-                backgroundColor: "#0b3c5d",
-                color: "#fff",
-                px: 2,
-                minWidth: isMobile ? " " : 140,
-                height: 40,
-                borderRadius: 3,
-                fontWeight: 800,
-              }}
-            />
+            {!isMobile && (
+              <AppButton
+                label="Add Tables"
+                startIcon={<Add />}
+                onClick={() => setOpenAddDialog(true)}
+                sx={{
+                  backgroundColor: "#0b3c5d",
+                  color: "#fff",
+                  px: 2,
+                  minWidth: 140,
+                  height: 40,
+                  borderRadius: 3,
+                  fontWeight: 800,
+                }}
+              />
+            )}
+
 
 
           </Box>
@@ -219,6 +217,39 @@ export default function TableManagement() {
         onClose={() => setOpenEditDialog(false)}
         onSuccess={handleGetTables}
       />
+
+
+
+      {isMobile && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          className="fixed bottom-9 right-8 z-50"
+        >
+          <Box
+            onClick={() => setOpenAddDialog(true)}
+            sx={{
+              height: 56,
+              width: 56,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #FF7A18, #FFB347)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 12px 30px rgba(255,122,24,0.45)",
+              cursor: "pointer",
+              transition: "0.2s",
+              "&:active": {
+                transform: "scale(0.95)",
+              },
+            }}
+          >
+            <Add sx={{ color: "#fff", fontSize: 28 }} />
+          </Box>
+        </motion.div>
+      )}
+
     </Box>
   );
 }

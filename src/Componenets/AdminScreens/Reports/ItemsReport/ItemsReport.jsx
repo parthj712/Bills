@@ -12,6 +12,8 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 
@@ -25,8 +27,17 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import React, { useEffect, useMemo, useState } from "react";
 import { getOrders } from "@/service/orderService";
+import { motion } from "framer-motion";
+import ItemReportCard from "./ItemReportCard";
 
 const ItemsReport = () => {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
 
@@ -130,11 +141,7 @@ const ItemsReport = () => {
         {/* Header */}
         <Box className="flex items-center justify-between mb-6">
           <Box>
-            <Typography
-              fontSize={30}
-              fontWeight={700}
-              className="text-[#0b3c5d]"
-            >
+            <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
               Items Report
             </Typography>
             <Typography fontSize={14} color="text.secondary">
@@ -142,19 +149,21 @@ const ItemsReport = () => {
             </Typography>
           </Box>
 
-          <Button
-            variant="contained"
-            startIcon={<DownloadIcon />}
-            onClick={exportExcel}
-            disabled={itemsReport.length === 0}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
-            }}
-          >
-            Export Excel
-          </Button>
+          {isDesktop && (
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon />}
+              onClick={exportExcel}
+              disabled={itemsReport.length === 0}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
+              }}
+            >
+              Export Excel
+            </Button>
+          )}
         </Box>
 
         {/* Filters */}
@@ -162,7 +171,7 @@ const ItemsReport = () => {
           elevation={0}
           sx={{
             p: 3,
-            mb: 4,
+            mb: isMobile ? 8 : 4,
             borderRadius: 3,
             border: "1px solid #e5e7eb",
           }}
@@ -225,7 +234,7 @@ const ItemsReport = () => {
                       setFromDate(val);
                       setShowReport(false);
                     }}
-                    sx={{ minWidth: 420 }}
+                    sx={{ minWidth: isMobile ? "100%" : 420 }}
                   />
 
                   <DatePicker
@@ -235,7 +244,7 @@ const ItemsReport = () => {
                       setToDate(val);
                       setShowReport(false);
                     }}
-                    sx={{ minWidth: 420 }}
+                    sx={{ minWidth: isMobile ? "100%" : 420 }}
                   />
                 </LocalizationProvider>
               </Box>
@@ -265,7 +274,7 @@ const ItemsReport = () => {
         </Paper>
 
         {/* Report Table */}
-        {showReport && (
+        {showReport && isDesktop && (
           <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
             <TableContainer sx={{ maxHeight: 660 }}>
               <Table stickyHeader>
@@ -367,7 +376,53 @@ const ItemsReport = () => {
             </TableContainer>
           </Paper>
         )}
+
+
+
+
+        {/* MOBILE + TABLET CARDS */}
+        {showReport && !isDesktop && (
+          <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            {itemsReport.length > 0 ? (
+              itemsReport.map((row, index) => (
+                <ItemReportCard key={index} row={row} />
+              ))
+            ) : (
+              <Box className="col-span-full text-center py-6">
+                <Typography color="text.secondary">
+                  No data found
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+
       </Box>
+
+
+      {isMobile && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          className="fixed bottom-9 right-8 z-50"
+        >
+          <Box
+            onClick={exportExcel}
+            className="
+                          h-14 w-14
+                          rounded-full
+                          bg-[#0b3c5d]
+                          flex items-center justify-center
+                          shadow-lg
+                          cursor-pointer
+            active:scale-95
+                  "
+          >
+            <DownloadIcon sx={{ color: "#fff", fontSize: 28 }} />
+          </Box>
+        </motion.div>
+      )}
     </div>
   );
 };

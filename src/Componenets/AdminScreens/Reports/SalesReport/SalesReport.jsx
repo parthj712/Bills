@@ -13,11 +13,14 @@ import {
   Typography,
   Button,
   Chip,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import { useEffect, useMemo, useState } from "react";
 import { getBills } from "@/service/billsService";
+import { motion } from "framer-motion";
 
 /* Date Picker */
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -27,9 +30,19 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
 import { saveAs } from "file-saver";
-import BillDetails from "../AdminBillsManagment/BillDetails";
+import BillDetails from "../../AdminBillsManagment/BillDetails";
+import SalesBillCard from "./SalesBillCard";
+import MonthlySummaryCard from "./MonthlySummaryCard";
 
 export default function SalesReport() {
+
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
   const [billsData, setBillsData] = useState([]);
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -115,7 +128,7 @@ export default function SalesReport() {
       {/* Header */}
       <Box className="flex items-center justify-between mb-6">
         <Box>
-          <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
+          <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
             Sales Report
           </Typography>
           <Typography fontSize={14} color="text.secondary">
@@ -123,18 +136,20 @@ export default function SalesReport() {
           </Typography>
         </Box>
 
-        <Button
-          variant="contained"
-          startIcon={<DownloadIcon />}
-          onClick={exportExcel}
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
-          }}
-        >
-          Export Excel
-        </Button>
+        {isDesktop && (
+          <Button
+            variant="contained"
+            startIcon={<DownloadIcon />}
+            onClick={exportExcel}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
+            }}
+          >
+            Export Excel
+          </Button>
+        )}
       </Box>
 
       {/* Filters */}
@@ -142,7 +157,7 @@ export default function SalesReport() {
         elevation={0}
         sx={{
           p: 3,
-          mb: 4,
+          mb: isMobile ? 8 : 4,
           borderRadius: 3,
           border: "1px solid #e5e7eb",
         }}
@@ -181,7 +196,7 @@ export default function SalesReport() {
                   }}
                   sx={{
                     fontSize: 14,
-                    px: 1.5,
+                    px: isMobile ? 0.5 : 1.5,
                     fontWeight: activeRange === range.label ? 600 : 500,
                   }}
                 />
@@ -198,7 +213,7 @@ export default function SalesReport() {
                     setFromDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: 420 }}
+                  sx={{ minWidth: isMobile ? "100%" : 420 }}
                 />
 
                 <DatePicker
@@ -208,7 +223,7 @@ export default function SalesReport() {
                     setToDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: 420 }}
+                  sx={{ minWidth: isMobile ? "100%" : 420 }}
                 />
               </LocalizationProvider>
             </Box>
@@ -241,7 +256,7 @@ export default function SalesReport() {
 
 
       {/* Sales Table */}
-      {showReport && (
+      {showReport && isDesktop && (
         <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
           <TableContainer sx={{ maxHeight: 660 }}>
             <Table stickyHeader>
@@ -323,39 +338,91 @@ export default function SalesReport() {
         </Paper>
       )}
 
-      {/* Monthly Summary */}
-      <Box mt={6}>
-        <Typography fontSize={24} fontWeight={700} mb={2} color="#0b3c5d">
-          Monthly Summary
-        </Typography>
 
-        <Paper sx={{ borderRadius: 3 }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell fontWeight={600}>Month</TableCell>
-                <TableCell align="right" fontWeight={600}>
-                  GST
-                </TableCell>
-                <TableCell align="right" fontWeight={600}>
-                  Total
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {Object.entries(monthlySummary).map(([m, v]) => (
-                <TableRow key={m} hover>
-                  <TableCell>{m}</TableCell>
-                  <TableCell align="right">₹ {v.gst}</TableCell>
+      {/* MOBILE + TABLET CARDS */}
+      {showReport && !isDesktop && (
+        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          {filteredBills.map((bill) => (
+            <SalesBillCard
+              key={bill._id}
+              bill={bill}
+              onView={(b) => {
+                setSelectedBill(b);
+                setOpenBill(true);
+              }}
+            />
+          ))}
+
+          {filteredBills.length === 0 && (
+            <Box className="col-span-full text-center py-8">
+              <Typography color="text.secondary">
+                No sales data found
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
+
+
+      {/* Monthly Summary */}
+      {isDesktop && (
+        <Box mt={6}>
+          <Typography fontSize={24} fontWeight={700} mb={2} color="#0b3c5d">
+            Monthly Summary
+          </Typography>
+
+          <Paper sx={{ borderRadius: 3 }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell fontWeight={600}>Month</TableCell>
                   <TableCell align="right" fontWeight={600}>
-                    ₹ {v.total}
+                    GST
+                  </TableCell>
+                  <TableCell align="right" fontWeight={600}>
+                    Total
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-      </Box>
+              </TableHead>
+              <TableBody>
+                {Object.entries(monthlySummary).map(([m, v]) => (
+                  <TableRow key={m} hover>
+                    <TableCell>{m}</TableCell>
+                    <TableCell align="right">₹ {v.gst}</TableCell>
+                    <TableCell align="right" fontWeight={600}>
+                      ₹ {v.total}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        </Box>
+      )}
+
+
+      {/* MOBILE + TABLET MONTHLY SUMMARY */}
+      {/* {!isDesktop && (
+        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {Object.entries(monthlySummary).map(([month, v]) => (
+            <MonthlySummaryCard
+              key={month}
+              month={month}
+              gst={v.gst}
+              total={v.total}
+            />
+          ))}
+
+          {Object.keys(monthlySummary).length === 0 && (
+            <Box className="col-span-full text-center py-6">
+              <Typography color="text.secondary">
+                No summary data available
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )} */}
+
 
       {/* Bill Modal */}
       <BillDetails
@@ -363,6 +430,31 @@ export default function SalesReport() {
         onClose={() => setOpenBill(false)}
         bill={selectedBill}
       />
+
+
+      {isMobile && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          className="fixed bottom-9 right-8 z-50"
+        >
+          <Box
+            onClick={exportExcel}
+            className="
+                          h-14 w-14
+                          rounded-full
+                          bg-[#0b3c5d]
+                          flex items-center justify-center
+                          shadow-lg
+                          cursor-pointer
+            active:scale-95
+                  "
+          >
+            <DownloadIcon sx={{ color: "#fff", fontSize: 28 }} />
+          </Box>
+        </motion.div>
+      )}
     </Box>
   );
 }
