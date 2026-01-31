@@ -1,4 +1,4 @@
-import { Card, Typography } from '@mui/material'
+import { Card, Typography, useMediaQuery, useTheme } from '@mui/material'
 import React from 'react'
 
 
@@ -41,10 +41,18 @@ const colorMap = {
 
 
 const WaiterTopProducts = () => {
+
+    const theme = useTheme();
+
+    // BREAKPOINTS
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
     return (
         <div>
             <Card className="p-6 !rounded-2xl">
-                <Typography fontSize={26} fontWeight={600} mb={2}>
+                <Typography fontSize={isMobile ? 22 : 24} fontWeight={600} mb={2}>
                     Top Products
                 </Typography>
 
@@ -66,7 +74,7 @@ const WaiterTopProducts = () => {
                                         ${colorMap[item.color].border}
                                         ${colorMap[item.color].text}
                                     `}
-                                                                    >
+                                >
                                     {item.percent}%
                                 </span>
 

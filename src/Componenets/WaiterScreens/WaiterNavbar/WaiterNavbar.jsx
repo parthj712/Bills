@@ -9,6 +9,8 @@ import {
   Menu,
   MenuItem,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
@@ -19,6 +21,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const WaiterNavbar = () => {
+
+  const theme = useTheme();
+
+  // BREAKPOINTS
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [kbAnchorEl, setKbAnchorEl] = useState(null);
@@ -77,78 +88,82 @@ const WaiterNavbar = () => {
           </Typography>
         </Box>
 
-        {/* Right: Menu + Sign Out */}
-        <div className="flex items-center gap-3">
-          <IconButton onClick={handleKbOpen}>
-            <KeyboardIcon />
-          </IconButton>
+        {isDesktop && (
+          <>
+            {/* Right: Menu + Sign Out */}
+            <div className="flex items-center gap-3">
+              <IconButton onClick={handleKbOpen}>
+                <KeyboardIcon />
+              </IconButton>
 
-          <AppButton
-            label="Swiggy"
-            className="
+              <AppButton
+                label="Swiggy"
+                className="
               !bg-[#FC8019]
               !text-white
               !px-5
               hover:!bg-[#e56f15]
             "
-            onClick={() => handleOrderTypeClick("SWIGGY")}
-          />
+                onClick={() => handleOrderTypeClick("SWIGGY")}
+              />
 
-          <AppButton
-            label="Zomato"
-            className="
+              <AppButton
+                label="Zomato"
+                className="
               !bg-[#E23744]
               !text-white
               !px-5
               hover:!bg-[#c92f3a]
             "
-            onClick={() => handleOrderTypeClick("ZOMATO")}
-          />
+                onClick={() => handleOrderTypeClick("ZOMATO")}
+              />
 
-          <IconButton onClick={handleMenuOpen}>
-            <Avatar
-              sx={{
-                bgcolor: "#2563EB", // Indigo / Blue
-                fontWeight: 600,
-              }}
-            >
-              A
-            </Avatar>
-          </IconButton>
+              <IconButton onClick={handleMenuOpen}>
+                <Avatar
+                  sx={{
+                    bgcolor: "#2563EB", // Indigo / Blue
+                    fontWeight: 600,
+                  }}
+                >
+                  A
+                </Avatar>
+              </IconButton>
 
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon fontSize="small" className="mr-2" />
-              Sign Out
-            </MenuItem>
-          </Menu>
-        </div>
-
-        <Dialog open={kbOpen} onClose={handleKbClose} maxWidth="xs" fullWidth>
-          <DialogTitle className="flex items-center justify-between">
-            <Typography fontWeight={600}>Keyboard Shortcuts</Typography>
-
-            <IconButton onClick={handleKbClose}>
-              <CloseIcon />
-            </IconButton>
-          </DialogTitle>
-
-          <DialogContent>
-            <div className="flex flex-col gap-3 text-sm">
-              <ShortcutRow label="Select Table" keys="1 – 99" />
-              <ShortcutRow label="Takeaway" keys="T" />
-              <ShortcutRow label="Swiggy Orders" keys="S" />
-              <ShortcutRow label="Zomato Orders" keys="Z" />
-              <ShortcutRow label="Close Dialog" keys="ESC" />
+              <Menu
+                anchorEl={anchorEl}
+                open={open}
+                onClose={handleClose}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <MenuItem onClick={handleLogout}>
+                  <LogoutIcon fontSize="small" className="mr-2" />
+                  Sign Out
+                </MenuItem>
+              </Menu>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            <Dialog open={kbOpen} onClose={handleKbClose} maxWidth="xs" fullWidth>
+              <DialogTitle className="flex items-center justify-between">
+                <Typography fontWeight={600}>Keyboard Shortcuts</Typography>
+
+                <IconButton onClick={handleKbClose}>
+                  <CloseIcon />
+                </IconButton>
+              </DialogTitle>
+
+              <DialogContent>
+                <div className="flex flex-col gap-3 text-sm">
+                  <ShortcutRow label="Select Table" keys="1 – 99" />
+                  <ShortcutRow label="Takeaway" keys="T" />
+                  <ShortcutRow label="Swiggy Orders" keys="S" />
+                  <ShortcutRow label="Zomato Orders" keys="Z" />
+                  <ShortcutRow label="Close Dialog" keys="ESC" />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
       </Card>
     </div>
   );
