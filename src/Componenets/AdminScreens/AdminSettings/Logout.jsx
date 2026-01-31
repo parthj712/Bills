@@ -1,13 +1,12 @@
 "use client";
 
+import { addWebsite, adminInfo } from "@/service/shopService";
 import {
   Box,
   Paper,
   Typography,
   TextField,
   Button,
-  Switch,
-  FormControlLabel,
   Divider,
   Dialog,
   DialogTitle,
@@ -15,85 +14,221 @@ import {
   DialogContentText,
   DialogActions,
 } from "@mui/material";
+
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import InfoRow from "./InfoCard";
 
 export default function Settings() {
   const router = useRouter();
 
-
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
 
+  const [loading, setLoading] = useState(true);
+  const [editWebsite, setEditWebsite] = useState(false);
+
+  // ✅ Store admin + shop info
+  const [shopData, setShopData] = useState({
+    businessName: "",
+    phone: "",
+    email: "",
+    address: "",
+    gst: "",
+    website: "",
+  });
+
+  // ✅ Fetch Admin Info
+  useEffect(() => {
+    const fetchInfo = async () => {
+      try {
+        const res = await adminInfo();
+
+        const shop = res.data.data[0].shopId;
+
+        setShopData({
+          businessName: shop?.shopName ?? "",
+          phone: shop?.phone ?? "",
+          email: shop?.email ?? "",
+          address: shop?.address ?? "",
+          gst: shop?.gstNumber ?? "",
+          website: shop?.website ?? "",
+        });
+
+        setLoading(false);
+      } catch (err) {
+        console.log("Failed to fetch admin info", err);
+        setLoading(false);
+      }
+    };
+
+    fetchInfo();
+  }, []);
+
+  // ✅ Website Edit Change
+  const handleWebsiteChange = (e) => {
+    setShopData({ ...shopData, website: e.target.value });
+  };
+
+  // ✅ Save Website Update
+  const handleSaveWebsite = async () => {
+    try {
+      await addWebsite({
+        website: shopData.website,
+      });
+
+      alert("Website Updated Successfully ✅");
+    } catch (err) {
+      console.log(err);
+      alert("Failed to update website ❌");
+    }
+  };
+  console.log("shopdata", shopData);
 
   // ❌ DO NOT TOUCH SIGN OUT LOGIC
   const handleLogout = () => {
-    // if (!confirm("Are you sure you want to log out?")) return;
     localStorage.removeItem("token");
     router.push("/login");
   };
 
+  if (loading) {
+    return (
+      <Typography p={4} color="black">
+        Loading Settings...
+      </Typography>
+    );
+  }
+
   return (
     <Box className="min-h-screen p-4 bg-[#f9fafb]">
       {/* PAGE TITLE */}
-      <Typography
-        fontSize={28}
-        fontWeight={700}
-        className="text-[#0b3c5d]"
-        mb={3}
-      >
+      <Typography fontSize={28} fontWeight={700} mb={3} color="black">
         Settings
       </Typography>
 
       <Box className="flex flex-col gap-6 max-w-4xl">
         {/* BUSINESS SETTINGS */}
         <SettingsCard title="Business Information">
-          <TextField label="Business Name" fullWidth />
-          <TextField label="Phone Number" fullWidth />
-          <TextField label="Email" fullWidth />
-          <TextField label="Address" multiline rows={2} fullWidth />
-          <TextField label="GST Number" fullWidth />
-          <TextField label="Website (If Any)" fullWidth />
+          {/* BUSINESS NAME */}
+          <InfoRow label="Business Name" value={shopData.businessName} />
 
-          <SaveButton />
+          {/* PHONE */}
+          <InfoRow label="Phone Number" value={shopData.phone} />
+
+          {/* EMAIL */}
+          <InfoRow label="Email" value={shopData.email} />
+
+          {/* ADDRESS */}
+          <InfoRow label="Address" value={shopData.address} multiline />
+
+          {/* GST */}
+          <InfoRow label="GST Number" value={shopData.gst} />
+
+          {/* WEBSITE Editable */}
+          <Box>
+            <Typography fontWeight={600} fontSize={14} mb={0.5}>
+              Website Link
+            </Typography>
+
+            {/* If no website → show input directly */}
+            {!shopData.website ? (
+              <TextField
+                value={shopData.website}
+                onChange={handleWebsiteChange}
+                fullWidth
+                size="small"
+                placeholder="Enter website link"
+                onBlur={handleSaveWebsite} // auto save when user leaves field
+              />
+            ) : (
+              <>
+                {/* Website exists */}
+                {!editWebsite ? (
+                  <Box display="flex" alignItems="center" gap={1}>
+                    {/* Clickable Website */}
+                    <Typography
+                      component="a"
+                      href={
+                        shopData.website.startsWith("http")
+                          ? shopData.website
+                          : `https://${shopData.website}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      sx={{
+                        fontSize: 15,
+                        fontWeight: 600,
+                        color: "#0b3c5d",
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {shopData.website}
+                    </Typography>
+
+                    {/* Edit Icon */}
+                    <Button
+                      size="small"
+                      onClick={() => setEditWebsite(true)}
+                      sx={{
+                        minWidth: "auto",
+                        padding: "4px",
+                        borderRadius: "50%",
+                      }}
+                    >
+                      ✏️
+                    </Button>
+                  </Box>
+                ) : (
+                  <>
+                    {/* Edit Mode Input */}
+                    <TextField
+                      value={shopData.website}
+                      onChange={handleWebsiteChange}
+                      fullWidth
+                      size="small"
+                      autoFocus
+                      placeholder="Enter website link"
+                      sx={{ mt: 1 }}
+                    />
+
+                    {/* Action Buttons */}
+                    <Box
+                      display="flex"
+                      justifyContent="flex-end"
+                      gap={1}
+                      mt={1}
+                    >
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => setEditWebsite(false)}
+                      >
+                        Cancel
+                      </Button>
+
+                      <Button
+                        size="small"
+                        variant="contained"
+                        onClick={() => {
+                          handleSaveWebsite();
+                          setEditWebsite(false);
+                        }}
+                        sx={{
+                          backgroundColor: "#0b3c5d",
+                          textTransform: "none",
+                        }}
+                      >
+                        Save
+                      </Button>
+                    </Box>
+                  </>
+                )}
+              </>
+            )}
+          </Box>
         </SettingsCard>
 
-        {/* BILLING SETTINGS */}
-        {/* <SettingsCard title="Billing & Tax">
-          <TextField label="GST Percentage" type="number" />
-          <TextField label="Invoice Prefix" />
-
-          <FormControlLabel control={<Switch />} label="Enable GST" />
-          <FormControlLabel control={<Switch />} label="Round off total" />
-
-          <SaveButton />
-        </SettingsCard> */}
-
-        {/* ORDER SETTINGS */}
-        {/* <SettingsCard title="Order Settings">
-          <FormControlLabel
-            control={<Switch />}
-            label="Allow order cancellation"
-          />
-          <FormControlLabel
-            control={<Switch />}
-            label="Auto close unpaid orders"
-          />
-
-          <SaveButton />
-        </SettingsCard> */}
-
-        {/* STAFF / SECURITY */}
-        {/* <SettingsCard title="Security">
-          <TextField label="Change Password" type="password" fullWidth />
-          <FormControlLabel
-            control={<Switch />}
-            label="Auto logout after inactivity"
-          />
-
-          <SaveButton />
-        </SettingsCard> */}
-
-        {/* SIGN OUT (SEPARATE & SAFE) */}
+        {/* SIGN OUT */}
         <Paper
           sx={{
             p: 3,
@@ -110,7 +245,6 @@ export default function Settings() {
             You will be logged out from this admin panel.
           </Typography>
 
-          {/* ❗ SAME SIGN OUT FUNCTIONALITY */}
           <Button
             variant="contained"
             color="error"
@@ -119,46 +253,32 @@ export default function Settings() {
           >
             Sign Out
           </Button>
-
         </Paper>
       </Box>
 
-
+      {/* LOGOUT DIALOG */}
       <Dialog
         open={openLogoutDialog}
         onClose={() => setOpenLogoutDialog(false)}
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle fontWeight={700}>
-          Confirm Sign Out
-        </DialogTitle>
+        <DialogTitle fontWeight={700}>Confirm Sign Out</DialogTitle>
 
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to sign out from the admin panel?
+            Are you sure you want to sign out?
           </DialogContentText>
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
-            onClick={() => setOpenLogoutDialog(false)}
-            sx={{ textTransform: "none" }}
-          >
-            Cancel
-          </Button>
+          <Button onClick={() => setOpenLogoutDialog(false)}>Cancel</Button>
 
-          <Button
-            variant="contained"
-            color="error"
-            onClick={handleLogout}
-            sx={{ textTransform: "none", fontWeight: 600 }}
-          >
+          <Button variant="contained" color="error" onClick={handleLogout}>
             Sign Out
           </Button>
         </DialogActions>
       </Dialog>
-
     </Box>
   );
 }
@@ -180,26 +300,5 @@ function SettingsCard({ title, children }) {
 
       <Box className="flex flex-col gap-3">{children}</Box>
     </Paper>
-  );
-}
-
-function SaveButton() {
-  return (
-    <>
-      <Divider sx={{ my: 1 }} />
-      <Box textAlign="right">
-        <Button
-          variant="contained"
-          sx={{
-            textTransform: "none",
-            fontWeight: 600,
-            backgroundColor: "#0b3c5d",
-            "&:hover": { backgroundColor: "#0a3552" },
-          }}
-        >
-          Save Changes
-        </Button>
-      </Box>
-    </>
   );
 }

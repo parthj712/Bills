@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 export const TopProductsCard = () => {
   const [orders, setOrders] = useState([]);
 
+  console.log();
   // ✅ Fetch Orders Dynamically
   useEffect(() => {
     getOrders().then((res) => {
