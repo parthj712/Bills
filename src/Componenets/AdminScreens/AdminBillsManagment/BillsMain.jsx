@@ -11,7 +11,9 @@ import {
   TableRow,
   Typography,
   TextField,
-  Tooltip
+  Tooltip,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -19,12 +21,24 @@ import { getBills } from "@/service/billsService";
 import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BillCard from "./BillCard";
 
 
 const BillsMain = () => {
+
+
+  const theme = useTheme();
+
+  // BREAKPOINTS
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
+
   const [billsData, setBillsData] = useState([]);
   const [search, setSearch] = useState("");
-  
+
 
   const fetchBills = async () => {
     try {
@@ -158,7 +172,7 @@ const BillsMain = () => {
   return (
     <Box className="flex flex-col gap-6 p-2">
       <Box className="flex flex-col gap-2 w-full">
-        <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
+        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
           Bills Management
         </Typography>
 
@@ -239,119 +253,138 @@ const BillsMain = () => {
           </Typography>
         </Paper> */}
       </Box>
+      {isDesktop && (
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 4,
+            boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+            alignItems: "left",
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                {[
+                  "Date",
+                  "Bill No",
+                  "SubTotal",
+                  "GST Amount",
+                  "Grand Total",
+                  "Action",
+                ].map((head) => (
+                  <TableCell
+                    key={head}
+                    sx={{
+                      backgroundColor: "#0b3c5d",
+                      color: "white",
+                      fontWeight: 600,
+                      textAlign: "center",
+                    }}
+                  >
+                    {head}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
 
-      <TableContainer
-        component={Paper}
-        sx={{
-          borderRadius: 4,
-          boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
-          alignItems: "left",
-        }}
-      >
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              {[
-                "Date",
-                "Bill No",
-                "SubTotal",
-                "GST Amount",
-                "Grand Total",
-                "Action",
-              ].map((head) => (
-                <TableCell
-                  key={head}
+            <TableBody>
+              {filteredBills.map((bills, index) => (
+                <TableRow
+                  key={bills._id}
                   sx={{
-                    backgroundColor: "#0b3c5d",
-                    color: "white",
-                    fontWeight: 600,
-                    textAlign: "center",
+                    backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
+                    "&:hover": { backgroundColor: "#eef6ff" },
+                    textAlign: "left",
                   }}
                 >
-                  {head}
-                </TableCell>
+                  <TableCell align="center">
+                    {new Date(bills.createdAt).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </TableCell>
+                  <TableCell fontWeight={600} align="center">
+                    {bills.billNo}
+                  </TableCell>
+                  <TableCell align="center">₹ {bills.subtotal}</TableCell>
+                  <TableCell align="center">₹ {bills.gstAmount}</TableCell>
+                  <TableCell align="center" fontWeight={700}>
+                    ₹ {bills.grandTotal}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5 }}>
+                      <Tooltip title="View">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            backgroundColor: "#e3f2fd",
+                            "&:hover": { backgroundColor: "#bbdefb" },
+                          }}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Edit">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            backgroundColor: "#e8f5e9",
+                            "&:hover": { backgroundColor: "#c8e6c9" },
+                          }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
+                      <Tooltip title="Delete">
+                        <IconButton
+                          size="small"
+                          sx={{
+                            backgroundColor: "#ffebee",
+                            "&:hover": { backgroundColor: "#ffcdd2" },
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
+
+                </TableRow>
               ))}
-            </TableRow>
-          </TableHead>
 
-          <TableBody>
-            {filteredBills.map((bills, index) => (
-              <TableRow
-                key={bills._id}
-                sx={{
-                  backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
-                  "&:hover": { backgroundColor: "#eef6ff" },
-                  textAlign: "left",
-                }}
-              >
-                <TableCell align="center">
-                  {new Date(bills.createdAt).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </TableCell>
-                <TableCell fontWeight={600} align="center">
-                  {bills.billNo}
-                </TableCell>
-                <TableCell align="center">₹ {bills.subtotal}</TableCell>
-                <TableCell align="center">₹ {bills.gstAmount}</TableCell>
-                <TableCell align="center" fontWeight={700}>
-                  ₹ {bills.grandTotal}
-                </TableCell>
-                <TableCell align="center">
-                  <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5 }}>
-                    <Tooltip title="View">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "#e3f2fd",
-                          "&:hover": { backgroundColor: "#bbdefb" },
-                        }}
-                      >
-                        <VisibilityIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+              {filteredBills.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                    <Typography color="text.secondary">No bills found</Typography>
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-                    <Tooltip title="Edit">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "#e8f5e9",
-                          "&:hover": { backgroundColor: "#c8e6c9" },
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+      {/* MOBILE + TABLET CARDS */}
+      {!isDesktop && (
+        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          {filteredBills.map((bill) => (
+            <BillCard key={bill._id} bill={bill} />
+          ))}
 
-                    <Tooltip title="Delete">
-                      <IconButton
-                        size="small"
-                        sx={{
-                          backgroundColor: "#ffebee",
-                          "&:hover": { backgroundColor: "#ffcdd2" },
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </TableCell>
+          {filteredBills.length === 0 && (
+            <Box className="col-span-full text-center py-8">
+              <Typography color="text.secondary">
+                No bills found
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      )}
 
-              </TableRow>
-            ))}
-
-            {filteredBills.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                  <Typography color="text.secondary">No bills found</Typography>
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
     </Box>
   );
 };

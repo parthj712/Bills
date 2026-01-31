@@ -8,6 +8,8 @@ import {
     Divider,
     Box,
     IconButton,
+    useTheme,
+    useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -15,6 +17,14 @@ import EmailIcon from "@mui/icons-material/Email";
 
 const ViewBillStaffDialog = ({ open, onClose, staff }) => {
     if (!staff) return null;
+
+
+    const theme = useTheme();
+
+    // BREAKPOINTS
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
     return (
         <Dialog
@@ -31,9 +41,9 @@ const ViewBillStaffDialog = ({ open, onClose, staff }) => {
         >
             {/* Header */}
             <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <Typography fontSize={20} fontWeight={700}>Staff Details</Typography>
+                <Typography fontSize={isMobile ? 18 : 20} fontWeight={700}>Staff Details</Typography>
                 <IconButton onClick={onClose}>
-                    <CloseIcon />
+                    <CloseIcon  />
                 </IconButton>
             </DialogTitle>
 
@@ -44,14 +54,14 @@ const ViewBillStaffDialog = ({ open, onClose, staff }) => {
                 <Box className="flex flex-col gap-4">
                     {/* Aadhaar */}
                     <Box className="flex items-center gap-3">
-                        <Box className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                        <Box className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg bg-blue-100 flex items-center justify-center">
                             <BadgeIcon className="text-blue-600" />
                         </Box>
                         <Box>
                             <Typography fontSize={12} color="text.secondary">
                                 Aadhaar Number
                             </Typography>
-                            <Typography fontSize={16} fontWeight={600}>
+                            <Typography fontSize={isMobile ? 14 : 16} fontWeight={600}>
                                 {staff.adharCard || "—"}
                             </Typography>
                         </Box>
@@ -59,7 +69,7 @@ const ViewBillStaffDialog = ({ open, onClose, staff }) => {
 
                     {/* Email */}
                     <Box className="flex items-center gap-3">
-                        <Box className="h-10 w-10 rounded-lg bg-green-100 flex items-center justify-center">
+                        <Box className="h-8 w-8 lg:h-10 lg:w-10 rounded-lg bg-green-100 flex items-center justify-center">
                             <EmailIcon className="text-green-600" />
                         </Box>
                         <Box>

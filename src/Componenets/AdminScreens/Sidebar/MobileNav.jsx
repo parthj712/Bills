@@ -10,7 +10,7 @@ export default function MobileNav() {
 
     return (
         <>
-            <div className="md:hidden flex items-center px-4 py-6 border-b bg-white">
+            <div className="lg:hidden flex items-center px-4 py-6 border-b bg-white">
                 <MenuIcon
                     onClick={() => setOpen(true)}
                     className="cursor-pointer text-orange-500"

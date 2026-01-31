@@ -15,7 +15,15 @@ export default async function AdminLayout({ children }) {
           <MobileNav />
 
           {/* Page Content */}
-          <main className="flex-1 p-6 overflow-y-auto">
+          <main
+            className="
+          lg:ml-64 md:m-4 m-3
+          flex-1
+          overflow-y-auto
+          bg-[#f9fafb]
+          p-4
+        "
+          >
             {children}
           </main>
         </div>

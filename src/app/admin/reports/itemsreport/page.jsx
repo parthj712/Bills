@@ -1,4 +1,4 @@
-import ItemsReport from '@/Componenets/AdminScreens/Reports/ItemsReport'
+import ItemsReport from '@/Componenets/AdminScreens/Reports/ItemsReport/ItemsReport'
 import React from 'react'
 
 const page = () => {

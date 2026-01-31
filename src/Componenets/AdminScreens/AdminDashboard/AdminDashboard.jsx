@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Card, Typography, Divider } from "@mui/material";
+import { Box, Card, Typography, Divider, useTheme, useMediaQuery } from "@mui/material";
 import {
   ShoppingCart,
   CurrencyRupee,
@@ -24,6 +24,14 @@ const topProducts = [
 
 
 export default function AdminDashboard() {
+
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
   const [bills, setBills] = useState([]);
   const [subscription, setSubscription] = useState(null);
 
@@ -156,7 +164,7 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
           color: "black",
         }}
       >
-        <Typography fontSize={30} fontWeight={700} className="text-[#0b3c5d]">
+        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
           Dashboard Overview
         </Typography>
       </Box>

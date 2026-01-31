@@ -113,7 +113,13 @@ export default function Sidebar() {
       initial={{ x: -40, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-64 bg-white border-r px-4 py-6 hidden md:flex flex-col h-screen overflow-hidden"
+      className="
+          fixed left-0 top-0
+          w-64 h-screen
+          bg-white border-r
+          px-4 py-6
+          hidden lg:flex flex-col
+        "
     >
       {/* Logo */}
       <div className="flex items-center justify-center mb-8">
@@ -229,11 +235,11 @@ export default function Sidebar() {
       </div>
 
       {/* SETTINGS AT BOTTOM */}
-      <div className="mt-auto pt-6 border-t">
+      <div className="mt-auto">
         <Link href={settingsItem.href}>
           <motion.div
             whileHover={{ x: 6 }}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg
+            className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[17px] cursor-pointer
           ${
             pathname === settingsItem.href

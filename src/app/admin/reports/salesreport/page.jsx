@@ -1,4 +1,4 @@
-import SalesReport from "@/Componenets/AdminScreens/Reports/SalesReport";
+import SalesReport from "@/Componenets/AdminScreens/Reports/SalesReport/SalesReport";
 import React from "react";
 
 const page = () => {

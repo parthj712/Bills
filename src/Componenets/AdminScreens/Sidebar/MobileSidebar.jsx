@@ -90,7 +90,7 @@ export default function MobileSidebar({ open, onClose }) {
                         </nav>
 
                         {/* Reports */}
-                        <div className="mt-4">
+                        <div className="">
                             <div
                                 onClick={() => setOpenReports(!openReports)}
                                 className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-black"
