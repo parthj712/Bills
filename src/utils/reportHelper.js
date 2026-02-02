@@ -4,9 +4,8 @@
 export const getOrdersPerDay = (bills) => {
   const weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  // Initialize counts
   const map = {};
-  const dateMap = {}; // ✅ Store full date for tooltip
+  const dateMap = {};
 
   weekDays.forEach((day) => {
     map[day] = 0;
@@ -23,7 +22,7 @@ export const getOrdersPerDay = (bills) => {
     if (map[day] !== undefined) {
       map[day] += 1;
 
-      // Store latest full date for tooltip
+      // ✅ Tooltip Date Format: 02 Feb 2026
       dateMap[day] = billDate.toLocaleDateString("en-GB", {
         day: "2-digit",
         month: "short",
@@ -35,9 +34,10 @@ export const getOrdersPerDay = (bills) => {
   return {
     labels: weekDays,
     values: weekDays.map((day) => map[day]),
-    tooltipDates: weekDays.map((day) => dateMap[day] || "No Data"),
+    tooltipDates: weekDays.map((day) => dateMap[day] || "No Orders"),
   };
 };
+
 // Peak Hours (Line Chart)
 export const getPeakHours = (bills) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -84,4 +84,43 @@ export const getDineInTakeAway = (bills) => {
       { label: "Take Away", value: takeAwayTotal },
     ],
   };
+};
+
+export const filterBillsByRange = (bills, range, customFrom, customTo) => {
+  if (!bills?.length) return [];
+
+  const now = new Date();
+
+  return bills.filter((bill) => {
+    const billDate = new Date(bill.createdAt);
+
+    if (range === "today") {
+      return billDate.toDateString() === now.toDateString();
+    }
+
+    if (range === "week") {
+      const last7 = new Date();
+      last7.setDate(now.getDate() - 7);
+      return billDate >= last7;
+    }
+
+    if (range === "month") {
+      const last30 = new Date();
+      last30.setDate(now.getDate() - 30);
+      return billDate >= last30;
+    }
+
+    // ✅ Custom Date Range
+    if (range === "custom" && customFrom && customTo) {
+      const from = new Date(customFrom);
+      const to = new Date(customTo);
+
+      // include full "to" day
+      to.setHours(23, 59, 59, 999);
+
+      return billDate >= from && billDate <= to;
+    }
+
+    return true;
+  });
 };
