@@ -1,6 +1,13 @@
 "use client";
 
-import { Box, Card, Typography, Divider, useTheme, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Card,
+  Typography,
+  Divider,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import {
   ShoppingCart,
   CurrencyRupee,
@@ -14,6 +21,7 @@ import { getBills } from "@/service/billsService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
 import { QuickInsights } from "./QuickInsights/QuickInsights";
+import { Skeleton, CircularProgress } from "@mui/material";
 
 const topProducts = [
   { name: "Paneer Butter Masala", percent: 72 },
@@ -22,23 +30,26 @@ const topProducts = [
   { name: "Cold Coffee", percent: 41 },
 ];
 
-
 export default function AdminDashboard() {
-
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-
+  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  // const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const [bills, setBills] = useState([]);
   const [subscription, setSubscription] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(true);
 
   const today = new Date();
   const todayDate = today.toDateString();
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
+
+  const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
+
+  const hasAccess =
+    subscription?.status === "ACTIVE" &&
+    allowedPlans.includes(subscription.planType);
 
   useEffect(() => {
     fetchBills();
@@ -56,11 +67,11 @@ export default function AdminDashboard() {
   const fetchSubscriptionExpiry = async () => {
     try {
       const res = await getSubscriptionExpiry();
-      console.log("res", res);
-
       setSubscription(res.data);
     } catch (error) {
       console.log(error?.message || error);
+    } finally {
+      setLoadingSub(false); // ✅ stop loading
     }
   };
 
@@ -154,37 +165,134 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
           </Typography>
         </Card>
       )}
-
-
       {/* HEADER */}
-      <Box
-        className="py-1 mb-3 rounded-2xl"
-        sx={{
-          // background: "linear-gradient(90deg,#7c2d12,#f97316)",
-          color: "black",
-        }}
-      >
-        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+
+      <Box className="min-h-screen bg-[#f8fafc] p-4">
+        {/* HEADER */}
+        <Typography
+          fontSize={isMobile ? 24 : 30}
+          fontWeight={700}
+          className="text-[#0b3c5d]"
+          mb={3}
+        >
           Dashboard Overview
         </Typography>
+
+        {/* ================= LOADING STATE ================= */}
+        {loadingSub ? (
+          <Box>
+            {/* Loading Spinner */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mb: 4,
+              }}
+            >
+              <CircularProgress />
+            </Box>
+
+            {/* Skeleton Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton
+                  key={i}
+                  variant="rounded"
+                  height={120}
+                  sx={{ borderRadius: "18px" }}
+                />
+              ))}
+            </div>
+
+            {/* Skeleton Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Skeleton
+                variant="rounded"
+                height={260}
+                sx={{ borderRadius: "18px" }}
+              />
+              <Skeleton
+                variant="rounded"
+                height={260}
+                sx={{ borderRadius: "18px" }}
+              />
+              <Skeleton
+                variant="rounded"
+                height={260}
+                sx={{ borderRadius: "18px" }}
+              />
+            </div>
+          </Box>
+        ) : (
+          /* ================= DASHBOARD CONTENT ================= */
+          <Box sx={{ position: "relative" }}>
+            {/* MAIN DASHBOARD UI */}
+            <Box
+              sx={{
+                filter: hasAccess ? "none" : "blur(6px)",
+                pointerEvents: hasAccess ? "auto" : "none",
+                transition: "0.3s ease",
+              }}
+            >
+              {/* STATS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {stats.map((stat, index) => (
+                  <StatCard key={index} stat={stat} />
+                ))}
+              </div>
+
+              {/* CONTENT */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <TopProductsCard topProducts={topProducts} />
+                <QuickInsights />
+              </div>
+            </Box>
+
+            {/* ================= LOCK OVERLAY ================= */}
+            {!hasAccess && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  background: "rgba(255,255,255,0.65)",
+                  borderRadius: "20px",
+                  textAlign: "center",
+                  backdropFilter: "blur(3px)",
+                }}
+              >
+                <Typography fontSize={28} fontWeight={800}>
+                  🔒 Locked Features
+                </Typography>
+
+                <Typography fontSize={14} sx={{ mt: 1, opacity: 0.8 }}>
+                  Upgrade your subscription to view analytics, reports &
+                  insights.
+                </Typography>
+
+                <Card
+                  sx={{
+                    mt: 3,
+                    px: 4,
+                    py: 1.5,
+                    borderRadius: "14px",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    background: "linear-gradient(90deg,#2563eb,#3b82f6)",
+                    color: "white",
+                  }}
+                >
+                  Upgrade to Premium 🚀
+                </Card>
+              </Box>
+            )}
+          </Box>
+        )}
       </Box>
-
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => (
-          <StatCard key={index} stat={stat} />
-        ))}
-      </div>
-
-      {/* CONTENT */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* TOP PRODUCTS */}
-
-        <TopProductsCard topProducts={topProducts} />
-
-        {/* SPEED DIAL */}
-        <QuickInsights />
-      </div>
     </Box>
   );
 }

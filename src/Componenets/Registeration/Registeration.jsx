@@ -77,12 +77,42 @@ export default function RegisterScreen() {
   const validate = () => {
     const newErrors = {};
 
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
-      newErrors.email = "Enter a valid email address";
+    // ✅ Strong Email Validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(email)) {
+      newErrors.email = "Enter a valid email (example@gmail.com)";
     }
 
-    if (!/^[6-9]\d{9}$/.test(phone)) {
-      newErrors.phone = "Enter a valid 10-digit phone number";
+    // ✅ Indian Phone Validation (10 digits only)
+    const phoneRegex = /^[6-9]\d{9}$/;
+
+    if (!phoneRegex.test(phone)) {
+      newErrors.phone = "Enter a valid 10-digit mobile number";
+    }
+
+    // ✅ GST Validation (15-digit official format)
+    const gstRegex =
+      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+
+    if (gstNumber && !gstRegex.test(gstNumber.toUpperCase())) {
+      newErrors.gstNumber =
+        "Enter a valid GST number (example: 27ABCDE1234F1Z5)";
+    }
+
+    // ✅ Name Validation
+    if (!ownerName.trim()) {
+      newErrors.ownerName = "Full name is required";
+    }
+
+    // ✅ Business Name Validation
+    if (!shopName.trim()) {
+      newErrors.shopName = "Business name is required";
+    }
+
+    // ✅ Password Validation (min 6 chars)
+    if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     setErrors(newErrors);
@@ -184,6 +214,8 @@ export default function RegisterScreen() {
             fullWidth
             value={ownerName}
             onChange={(e) => setOwnerName(e.target.value)}
+            error={!!errors.ownerName}
+            helperText={errors.ownerName}
           />
 
           <TextField
@@ -191,6 +223,8 @@ export default function RegisterScreen() {
             fullWidth
             value={shopName}
             onChange={(e) => setShopName(e.target.value)}
+            error={!!errors.shopName}
+            helperText={errors.shopName}
           />
 
           <div className="flex gap-4">
@@ -213,10 +247,12 @@ export default function RegisterScreen() {
             />
           </div>
           <TextField
-            label="GST NO"
+            label="GST No"
             fullWidth
             value={gstNumber}
             onChange={(e) => setGstNumber(e.target.value)}
+            error={!!errors.gstNumber}
+            helperText={errors.gstNumber}
           />
 
           <TextField
@@ -231,6 +267,8 @@ export default function RegisterScreen() {
             fullWidth
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            error={!!errors.password}
+            helperText={errors.password}
           />
 
           {/* Actions */}
