@@ -22,6 +22,7 @@ import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
 import { QuickInsights } from "./QuickInsights/QuickInsights";
 import { Skeleton, CircularProgress } from "@mui/material";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 const topProducts = [
   { name: "Paneer Butter Masala", percent: 72 },
@@ -42,9 +43,11 @@ export default function AdminDashboard() {
 
   const today = new Date();
   const todayDate = today.toDateString();
+  const yesterday = new Date();
+
   const currentMonth = today.getMonth();
   const currentYear = today.getFullYear();
-
+  yesterday.setDate(today.getDate() - 1);
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
 
   const hasAccess =
@@ -95,8 +98,21 @@ export default function AdminDashboard() {
     return billDate === todayDate ? sum + bill.grandTotal : sum;
   }, 0);
 
-  const satisfactionPercent =
-    bills.length === 0 ? 0 : Math.round((todaysOrders / bills.length) * 100);
+  // Yesterday's Orders
+  const yesterdaysOrders = bills.filter((bill) => {
+    const d = new Date(bill.createdAt);
+    return d.toDateString() === yesterday.toDateString();
+  }).length;
+
+  // Growth %
+  const OrdersGrowthToday =
+    yesterdaysOrders === 0
+      ? todaysOrders > 0
+        ? 100
+        : 0
+      : Math.round(
+          ((todaysOrders - yesterdaysOrders) / yesterdaysOrders) * 100,
+        );
 
   const stats = [
     {
@@ -120,12 +136,19 @@ export default function AdminDashboard() {
       bg: "bg-purple-100",
       iconColor: "text-purple-600",
     },
+    // {
+    //   title: "Order Growth Today",
+    //   value: `${OrdersGrowthToday}%`,
+    //   icon: <EmojiEmotions fontSize="large" />,
+    //   bg: "bg-yellow-100",
+    //   iconColor: "text-yellow-600",
+    // },
     {
-      title: "Customer Satisfaction",
-      value: `${satisfactionPercent}%`,
-      icon: <EmojiEmotions fontSize="large" />,
-      bg: "bg-yellow-100",
-      iconColor: "text-yellow-600",
+      title: "Order Growth Today",
+      value: `${OrdersGrowthToday}%`,
+      icon: <TrendingUpIcon fontSize="large" />,
+      bg: "bg-green-100",
+      iconColor: "text-green-600",
     },
   ];
 

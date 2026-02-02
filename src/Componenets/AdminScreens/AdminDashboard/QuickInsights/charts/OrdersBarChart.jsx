@@ -1,38 +1,61 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { Card, Typography, Box } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { getOrdersPerDay } from "@/utils/reportHelper";
+
+import { filterBillsByRange, getOrdersPerDay } from "@/utils/reportHelper";
+import DateRangeFilter from "@/Componenets/CommonComponents/DateRangeFilter";
 
 export default function OrdersBarChart({ bills }) {
-  if (!bills?.length) return null;
+  const [range, setRange] = useState("week");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
 
-  const { labels, values, tooltipDates } = getOrdersPerDay(bills);
+  // ✅ Filter Bills
+  const filteredBills = useMemo(() => {
+    return filterBillsByRange(bills, range);
+  }, [bills, range]);
+
+  // ✅ Chart Data
+  const { labels, values, tooltipDates } = useMemo(() => {
+    return getOrdersPerDay(filteredBills);
+  }, [filteredBills]);
 
   return (
     <Card
       sx={{
         borderRadius: "22px",
         border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 8px 25px rgba(0,0,0,0.06)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
         p: 3,
-        background: "linear-gradient(180deg,#ffffff,#fafafa)",
+        background: "linear-gradient(180deg,#fff,#fafafa)",
       }}
     >
       {/* Header */}
       <Box mb={2}>
-        <Typography fontSize={18} fontWeight={700}>
-          📊 Orders This Week
+        <Typography fontSize={18} fontWeight={800}>
+          📊 Orders Report
         </Typography>
 
         <Typography fontSize={13} sx={{ opacity: 0.65 }}>
-          Weekly order activity overview
+          Weekly order activity with premium insights
         </Typography>
       </Box>
 
-      {/* Premium Chart */}
+      {/* ✅ Common Filter */}
+      <DateRangeFilter
+        range={range}
+        setRange={setRange}
+        customFrom={customFrom}
+        setCustomFrom={setCustomFrom}
+        customTo={customTo}
+        setCustomTo={setCustomTo}
+      />
+
+      {/* ✅ Premium Bar Chart */}
       <BarChart
-        height={260}
+        height={280}
         xAxis={[
           {
             scaleType: "band",
@@ -48,23 +71,37 @@ export default function OrdersBarChart({ bills }) {
           {
             data: values,
 
-            // ✅ Tooltip shows full date + orders
+            // ✅ Tooltip: Show Date + Orders
             valueFormatter: (value, context) => {
               const index = context.dataIndex;
               return `${tooltipDates[index]} • ${value} Orders`;
             },
 
-            barRadius: 10,
+            // ✅ Rounded Premium Bars
+            barRadius: 12,
           },
         ]}
         tooltip={{ trigger: "item" }}
+        // ✅ Reduce Bar Width + Premium Shape
         slotProps={{
           bar: {
-            rx: 6,
-            width: 18,
+            rx: 10,
+            width: 14, // ✅ Thin Premium Bars
           },
         }}
         sx={{
+          // ✅ Smooth Animation
+          "& .MuiBarElement-root": {
+            transition: "all 0.35s ease",
+          },
+
+          // ✅ Hover Effect (Premium Highlight)
+          "& .MuiBarElement-root:hover": {
+            opacity: 0.85,
+            transform: "scaleY(1.08)",
+          },
+
+          // Axis styling
           "& .MuiChartsAxis-line": {
             opacity: 0.15,
           },
