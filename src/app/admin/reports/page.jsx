@@ -1,11 +1,9 @@
-"use client"
+"use client";
 
-import React from 'react'
+import React from "react";
 
-const page = () => {
-  return (
-    <div>reports</div>
-  )
-}
+const ReportsPage = () => {
+  return <div>reports</div>;
+};
 
-export default page
+export default ReportsPage;
