@@ -215,73 +215,91 @@ export default function WaiterHomePage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                    <Skeleton
-                      key={index}
-                      variant="rounded"
-                      height={96}
-                      className="!rounded-2xl"
-                    />
-                  ))
+                  <Skeleton
+                    key={index}
+                    variant="rounded"
+                    height={96}
+                    className="!rounded-2xl"
+                  />
+                ))
                 : tables.map((table) => (
-                    <Tooltip
-                      key={table._id}
-                      title={
-                        table.status === "OCCUPIED"
-                          ? "Active table"
-                          : "Add order"
-                      }
-                      arrow
-                      placement="bottom"
-                    >
-                      <Card
-                        onClick={() =>
-                          handleTableClick(table._id, table.tableNo)
+                  <Tooltip
+                    key={table._id}
+                    title={
+                      table.status === "OCCUPIED"
+                        ? "Active table"
+                        : "Add order"
+                    }
+                    arrow
+                    placement="bottom"
+                  >
+                    <div
+                      onClick={() => handleTableClick(table._id, table.tableNo)}
+                      className={`
+                              relative
+                              h-28 w-full
+                              rounded-2xl
+                              border
+                              cursor-pointer
+                              flex flex-col
+                              items-center
+                              justify-between
+                              px-4 py-3
+                              text-black
+                              shadow-sm
+                              hover:shadow-lg
+                              ${tableStyles[table.status]}
+                              ${highlightTableNo === table.tableNo
+                          ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+                          : ""
                         }
-                        className={`
-    relative
-    h-[95px]
-    flex flex-col items-center justify-center
-    cursor-pointer
-    transition-all duration-200
-    hover:shadow-lg
-    ${tableStyles[table.status]}
-    ${
-      highlightTableNo === table.tableNo
-        ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-        : ""
-    }
-  `}
-                      >
-                        {/* ✅ Table Number */}
-                        <Typography fontSize={26} fontWeight={800}>
+                            `}
+                    >
+
+                      <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
+
+                        {/* ✅ BIG Table Number */}
+                        <Typography
+                          fontSize={24}
+                          fontWeight={600}
+                        >
                           {table.tableNo}
                         </Typography>
 
-                        {/* ✅ Running Time (only for occupied) */}
-                        {table.status === "OCCUPIED" && table.occupiedAt && (
-                          <span className="mt-1 text-[13px] font-semibold text-green-700 bg-green-100 px-3 py-[2px] rounded-full">
-                            ⏱ {getRunningTime(table.occupiedAt)}
-                          </span>
-                        )}
-
                         {/* ✅ Status Badge */}
-                        <span
-                          className={`absolute top-2 right-2 text-[10px] px-2 py-[2px] rounded-full font-bold
-      ${
-        table.status === "OCCUPIED"
-          ? "bg-green-600 text-white"
-          : "bg-gray-300 text-gray-700"
-      }
-    `}
+                        <Typography
+                          fontSize={14}
+                          fontWeight={500}
+                          className={`
+                              ${table.status === "OCCUPIED"
+                              ? "bg-green-600 text-white"
+                              : "bg-gray-300 text-gray-700"
+                            }
+                    `}
                         >
                           {table.status}
-                        </span>
-                      </Card>
-                    </Tooltip>
-                  ))}
+                        </Typography>
+
+                      </Box>
+
+
+                      {/* ✅ Time (only if occupied) */}
+
+                      <div className="font-semibold text-green-700 bg-green-100 px-2 py-[2px] rounded-full">
+                        <div> ⏱ </div>
+                        {table.status === "OCCUPIED" && table.occupiedAt && (
+                          <div> {getRunningTime(table.occupiedAt)} </div>
+                        )}
+                      </div>
+
+                    </div>
+
+
+                  </Tooltip>
+                ))}
             </div>
           </Card>
         </div>
