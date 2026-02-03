@@ -1,8 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL:
-    "https://billing-web-8ieunevf3-yashwalhekars-projects.vercel.app/api",
+  baseURL: "https://billing-web-app-coral.vercel.app/api",
   // withCredentials: true,
 });
 
