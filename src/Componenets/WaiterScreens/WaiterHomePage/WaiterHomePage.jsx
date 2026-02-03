@@ -193,7 +193,7 @@ export default function WaiterHomePage() {
           )}
 
           <Card className="p-7 my-6 !rounded-4xl shadow-md !bg-[#F1F1F1]">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between  mb-4">
               <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
                 Dine-In Orders
               </Typography>
@@ -218,27 +218,29 @@ export default function WaiterHomePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rounded"
-                    height={96}
-                    className="!rounded-2xl"
-                  />
-                ))
+                    <Skeleton
+                      key={index}
+                      variant="rounded"
+                      height={96}
+                      className="!rounded-2xl"
+                    />
+                  ))
                 : tables.map((table) => (
-                  <Tooltip
-                    key={table._id}
-                    title={
-                      table.status === "OCCUPIED"
-                        ? "Active table"
-                        : "Add order"
-                    }
-                    arrow
-                    placement="bottom"
-                  >
-                    <div
-                      onClick={() => handleTableClick(table._id, table.tableNo)}
-                      className={`
+                    <Tooltip
+                      key={table._id}
+                      title={
+                        table.status === "OCCUPIED"
+                          ? "Active table"
+                          : "Add order"
+                      }
+                      arrow
+                      placement="bottom"
+                    >
+                      <div
+                        onClick={() =>
+                          handleTableClick(table._id, table.tableNo)
+                        }
+                        className={`
                               relative
                               h-28 w-full
                               rounded-2xl
@@ -248,58 +250,56 @@ export default function WaiterHomePage() {
                               items-center
                               justify-between
                               px-4 py-3
+                       
                               text-black
                               shadow-sm
                               hover:shadow-lg
                               ${tableStyles[table.status]}
-                              ${highlightTableNo === table.tableNo
-                          ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-                          : ""
-                        }
+                              ${
+                                highlightTableNo === table.tableNo
+                                  ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+                                  : ""
+                              }
                             `}
-                    >
-
-                      <Box display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"center"}>
-
-                        {/* ✅ BIG Table Number */}
-                        <Typography
-                          fontSize={24}
-                          fontWeight={600}
+                      >
+                        <Box
+                          display={"flex"}
+                          flexDirection={"column"}
+                          alignItems={"center"}
+                          justifyContent={"center"}
                         >
-                          {table.tableNo}
-                        </Typography>
+                          {/* ✅ BIG Table Number */}
+                          <Typography fontSize={24} fontWeight={600}>
+                            {table.tableNo}
+                          </Typography>
 
-                        {/* ✅ Status Badge */}
-                        <Typography
-                          fontSize={14}
-                          fontWeight={500}
-                          className={`
-                              ${table.status === "OCCUPIED"
-                              ? "bg-green-600 text-white"
-                              : "bg-gray-300 text-gray-700"
-                            }
+                          {/* ✅ Status Badge */}
+                          <Typography
+                            fontSize={14}
+                            fontWeight={500}
+                            className={`
+                              ${
+                                table.status === "OCCUPIED"
+                                  ? "bg-green-600 text-white"
+                                  : "bg-gray-300 text-gray-700"
+                              }
                     `}
-                        >
-                          {table.status}
-                        </Typography>
+                          >
+                            {table.status}
+                          </Typography>
+                        </Box>
 
-                      </Box>
+                        {/* ✅ Time (only if occupied) */}
 
-
-                      {/* ✅ Time (only if occupied) */}
-
-                      <div className="font-semibold text-green-700 bg-green-100 px-2 py-[2px] rounded-full">
-                        <div> ⏱ </div>
-                        {table.status === "OCCUPIED" && table.occupiedAt && (
-                          <div> {getRunningTime(table.occupiedAt)} </div>
-                        )}
+                        <div className="font-semibold text-green-700 bg-green-100 px-2 py-[2px] rounded-full">
+                          <div> ⏱ </div>
+                          {table.status === "OCCUPIED" && table.occupiedAt && (
+                            <div> {getRunningTime(table.occupiedAt)} </div>
+                          )}
+                        </div>
                       </div>
-
-                    </div>
-
-
-                  </Tooltip>
-                ))}
+                    </Tooltip>
+                  ))}
             </div>
           </Card>
         </div>

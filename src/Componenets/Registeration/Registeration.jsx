@@ -9,7 +9,7 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
-  Button
+  Button,
 } from "@mui/material";
 import Image from "next/image";
 import AppButton from "../CommonComponents/AppButton";
@@ -18,6 +18,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/service/api";
 import RealStepper from "./RealStepper";
+import OtpBoxes from "../CommonComponents/OTPBoxes";
 
 const MotionDiv = motion.div;
 
@@ -26,11 +27,9 @@ export default function RegisterScreen() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-
   // ✅ Stepper State
   // 0 = Basic Info, 1 = OTP, 2 = Business Setup
   const [step, setStep] = useState(0);
-
 
   // ✅ Form Fields
   const [form, setForm] = useState({
@@ -50,7 +49,6 @@ export default function RegisterScreen() {
   const [resendTimer, setResendTimer] = useState(0);
 
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
-
 
   // ✅ UI States
   const [loading, setLoading] = useState(false);
@@ -96,7 +94,6 @@ export default function RegisterScreen() {
     setOtpSent(true);
     // setResendTimer(30);
 
-
     try {
       await API.post("/auth/send-otp", { email: form.email });
 
@@ -119,7 +116,6 @@ export default function RegisterScreen() {
     if (!otp) return alert("Enter OTP");
 
     setOtpLoading(true);
-
 
     try {
       await API.post("/auth/verify-otp", {
@@ -146,7 +142,7 @@ export default function RegisterScreen() {
     if (!otpVerified) return alert("Please verify your email OTP first!");
 
     setLoading(true);
-
+    console.log("form", form);
     try {
       await API.post("/auth/register", form);
       alert("Registration Successful ✅");
@@ -181,8 +177,6 @@ export default function RegisterScreen() {
     return () => clearInterval(timer);
   }, [resendTimer]);
 
-
-
   useEffect(() => {
     if (!otpDialogOpen) return;
 
@@ -193,16 +187,16 @@ export default function RegisterScreen() {
     return () => clearTimeout(timer);
   }, [otpDialogOpen]);
 
-
-
-
   const Stepper = ({ step }) => {
     const steps = ["Basic Info", "OTP", "Setup"];
 
     return (
       <Box className="flex items-center justify-between mb-8">
         {steps.map((label, index) => (
-          <Box key={label} className="flex-1 flex flex-col items-center relative">
+          <Box
+            key={label}
+            className="flex-1 flex flex-col items-center relative"
+          >
             {/* Connector line */}
             {index !== 0 && (
               <Box
@@ -235,83 +229,70 @@ export default function RegisterScreen() {
     );
   };
 
+  // const OtpBoxes = ({ otp, setOtp }) => {
+  //   const inputsRef = useRef([]);
 
+  //   const handleChange = (value, index) => {
+  //     if (!/^\d?$/.test(value)) return;
 
-  const OtpBoxes = ({ otp, setOtp }) => {
+  //     const otpArr = otp.padEnd(6, "").split("");
+  //     otpArr[index] = value;
+  //     const newOtp = otpArr.join("");
+  //     setOtp(newOtp);
 
-    const inputsRef = useRef([]);
+  //     // 👉 move forward
+  //     if (value && index < 5) {
+  //       inputsRef.current[index + 1]?.focus();
+  //     }
 
-    const handleChange = (value, index) => {
-      if (!/^\d?$/.test(value)) return;
+  //     // ✅ auto-submit (safe)
+  //     if (newOtp.length === 6 && !newOtp.includes("") && onComplete) {
+  //       onComplete(newOtp);
+  //     }
+  //   };
 
-      const otpArr = otp.padEnd(6, "").split("");
-      otpArr[index] = value;
-      const newOtp = otpArr.join("");
-      setOtp(newOtp);
+  //   const handleKeyDown = (e, index) => {
+  //     if (e.key === "Backspace" && !otp[index] && index > 0) {
+  //       inputsRef.current[index - 1]?.focus();
+  //     }
+  //   };
 
-      // 👉 move forward
-      if (value && index < 5) {
-        inputsRef.current[index + 1]?.focus();
-      }
+  //   return (
+  //     <Box display="flex" gap={2} justifyContent="center">
+  //       {[...Array(6)].map((_, i) => (
+  //         <TextField
+  //           key={i}
+  //           value={otp.padEnd(6, "")[i]}
+  //           inputRef={(el) => (inputsRef.current[i] = el)}
+  //           onChange={(e) => handleChange(e.target.value, i)}
+  //           onKeyDown={(e) => handleKeyDown(e, i)}
+  //           inputProps={{
+  //             maxLength: 1,
+  //             inputMode: "numeric",
+  //             pattern: "[0-9]*",
+  //             style: {
+  //               textAlign: "center",
+  //               fontSize: 18,
+  //             },
+  //           }}
+  //           sx={{ width: 48 }}
+  //         />
+  //       ))}
+  //     </Box>
+  //   );
+  // };
 
-      // ✅ auto-submit (safe)
-      if (newOtp.length === 6 && !newOtp.includes("") && onComplete) {
-        onComplete(newOtp);
-      }
-    };
-
-
-    const handleKeyDown = (e, index) => {
-      if (e.key === "Backspace" && !otp[index] && index > 0) {
-        inputsRef.current[index - 1]?.focus();
-      }
-    };
-
-
-    return (
-      <Box display="flex" gap={2} justifyContent="center">
-        {[...Array(6)].map((_, i) => (
-          <TextField
-            key={i}
-            value={otp.padEnd(6, "")[i]}
-            inputRef={(el) => (inputsRef.current[i] = el)}
-            onChange={(e) => handleChange(e.target.value, i)}
-            onKeyDown={(e) => handleKeyDown(e, i)}
-            inputProps={{
-              maxLength: 1,
-              inputMode: "numeric",
-              pattern: "[0-9]*",
-              style: {
-                textAlign: "center",
-                fontSize: 18,
-              },
-            }}
-            sx={{ width: 48 }}
-          />
-        ))}
-      </Box>
-    );
-  };
-
-
-
-
-
-  const StepWrapper = ({ children, step }) => (
-    <motion.div
-      key={step}
-      initial={{ x: 50, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: -50, opacity: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-    >
-      {children}
-    </motion.div>
-  );
-
-
-
-
+  // const StepWrapper = ({ children, step }) => (
+  //   <motion.div
+  //     key={step}
+  //     initial={{ x: 50, opacity: 0 }}
+  //     animate={{ x: 0, opacity: 1 }}
+  //     exit={{ x: -50, opacity: 0 }}
+  //     transition={{ duration: 0.35, ease: "easeOut" }}
+  //   >
+  //     {children}
+  //   </motion.div>
+  // );
 
   return (
     <Box className="min-h-screen w-full flex bg-black overflow-hidden">
@@ -338,12 +319,7 @@ export default function RegisterScreen() {
             Begin Your Smart Business Journey 🚀
           </Typography>
 
-
-          <Dialog
-            open={otpDialogOpen}
-            maxWidth="xs"
-            fullWidth
-          >
+          <Dialog open={otpDialogOpen} maxWidth="xs" fullWidth>
             <DialogContent>
               <Box
                 display="flex"
@@ -371,8 +347,6 @@ export default function RegisterScreen() {
             </DialogContent>
           </Dialog>
 
-
-
           {/* Stepper */}
           <RealStepper step={step} />
 
@@ -380,7 +354,6 @@ export default function RegisterScreen() {
             {/* ---------------- STEP 0 : BASIC INFO ---------------- */}
 
             {step === 0 && (
-
               <motion.div
                 key="step-0"
                 initial={{ x: 80, opacity: 0 }}
@@ -408,7 +381,6 @@ export default function RegisterScreen() {
                     disabled={otpVerified}
                   />
 
-
                   {/* Phone */}
                   <TextField
                     label="Phone Number"
@@ -419,7 +391,6 @@ export default function RegisterScreen() {
                     helperText={errors.phone}
                   />
 
-
                   <AppButton
                     label={otpLoading ? "Sending OTP..." : "Send OTP"}
                     onClick={sendOtp}
@@ -427,78 +398,73 @@ export default function RegisterScreen() {
                     className="!bg-blue-500"
                   />
                 </Box>
-
               </motion.div>
             )}
-
 
             {/* ---------------- STEP 1 : OTP VERIFICATION ---------------- */}
 
             {step === 1 && (
-              <>
-                <motion.div
-                  key="step-1"
-                  initial={{ x: 80, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -80, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
+              <motion.div
+                key="step-1"
+                initial={{ x: 80, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                exit={{ x: -80, opacity: 0 }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+              >
+                <Typography
+                  fontSize={16}
+                  textAlign="center"
+                  color="black"
+                  mb={2}
                 >
-                  <Typography fontSize={16} textAlign="center" color="black" mb={2}>
-                    Enter the 6-digit OTP sent to your email
-                  </Typography>
-                  <Box display={"flex"} flexDirection={"column"} gap={3}>
-                    <OtpBoxes
-                      otp={otp}
-                      setOtp={setOtp}
-                      onComplete={() => verifyOtp()}
+                  Enter the 6-digit OTP sent to your email
+                </Typography>
+
+                <Box display="flex" flexDirection="column" gap={3}>
+                  {/* ✅ OTP Boxes */}
+                  <OtpBoxes
+                    otp={otp}
+                    setOtp={setOtp}
+                    onComplete={() => verifyOtp()}
+                  />
+
+                  {/* ✅ Buttons */}
+                  <Box display="flex" gap={2}>
+                    <AppButton
+                      label="← Back"
+                      onClick={() => setStep(0)}
+                      variant="text"
+                      className="!text-gray-600 hover:!text-black"
                     />
 
-                    {/* <TextField
-                label="Enter OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-              /> */}
-
-
-
-                    <Box display="flex" gap={4}>
-                      <AppButton
-                        label="← Back"
-                        onClick={() => setStep(step - 1)}
-                        variant="text"
-                        className="!text-gray-600 hover:!text-black"
-                      />
-
-                      <AppButton
-                        label={otpLoading ? "Verifying..." : "Verify OTP"}
-                        onClick={verifyOtp}
-                        className="!bg-green-500"
-                      />
-                    </Box>
-
-                    {resendTimer > 0 ? (
-                      <Typography align="center" color="gray">
-                        Resend OTP in {resendTimer}s
-                      </Typography>
-                    ) : (
-                      <AppButton
-                        label="Resend OTP"
-                        variant="text"
-                        onClick={sendOtp}
-                        className="!text-blue-600"
-                      />
-                    )}
+                    <AppButton
+                      label={otpLoading ? "Verifying..." : "Verify OTP"}
+                      onClick={verifyOtp}
+                      className="!bg-green-500"
+                    />
                   </Box>
-                </motion.div>
-              </>
-            )}
 
+                  {/* ✅ Resend OTP Timer */}
+                  {resendTimer > 0 ? (
+                    <Typography align="center" color="gray">
+                      Resend OTP in {resendTimer}s
+                    </Typography>
+                  ) : (
+                    <AppButton
+                      label="Resend OTP"
+                      variant="text"
+                      onClick={sendOtp}
+                      className="!text-blue-600"
+                    />
+                  )}
+                </Box>
+              </motion.div>
+            )}
 
             {/* ---------------- STEP 2 : BUSINESS SETUP ---------------- */}
 
             {step === 2 && (
               <>
-
                 <motion.div
                   key="step-2"
                   initial={{ x: 80, opacity: 0 }}
@@ -510,7 +476,6 @@ export default function RegisterScreen() {
                     ✅ Email Verified
                   </Typography>
 
-
                   <Box display={"flex"} flexDirection={"column"} gap={3}>
                     {/* Shop Name */}
                     <TextField
@@ -520,7 +485,6 @@ export default function RegisterScreen() {
                       error={!!errors.shopName}
                       helperText={errors.shopName}
                     />
-
 
                     {/* GST Number */}
                     <TextField
@@ -552,9 +516,7 @@ export default function RegisterScreen() {
                       helperText={errors.password}
                     />
 
-
                     <Box display={"flex"} flexDirection={"row"}>
-
                       <Button
                         label="← Back"
                         onClick={() => setStep(step - 1)}
@@ -564,7 +526,9 @@ export default function RegisterScreen() {
 
                       {/* Register */}
                       <AppButton
-                        label={loading ? "Creating Account..." : "Create Account"}
+                        label={
+                          loading ? "Creating Account..." : "Create Account"
+                        }
                         onClick={handleRegister}
                         disabled={loading}
                         className="!bg-orange-500"
@@ -574,10 +538,7 @@ export default function RegisterScreen() {
                 </motion.div>
               </>
             )}
-
           </AnimatePresence>
-
-
 
           {/* OTP Buttons
           {!otpSent ? (
@@ -615,11 +576,6 @@ export default function RegisterScreen() {
               Email Verified ✅
             </Typography>
           )} */}
-
-
-
-
-
         </Box>
       </MotionDiv>
     </Box>
