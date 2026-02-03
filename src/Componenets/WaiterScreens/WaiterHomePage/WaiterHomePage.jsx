@@ -60,9 +60,6 @@ export default function WaiterHomePage() {
   useEffect(() => {
     handleGetTables();
   }, []);
-  const handleAddTable = async () => {
-    await handleGetTables();
-  };
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
@@ -72,19 +69,7 @@ export default function WaiterHomePage() {
     };
   }, [tables, keyBuffer, open]);
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    // clear auth
-    localStorage.removeItem("token"); // or cookies
-    router.push("/login");
-  };
+  //   // clear auth
 
   const handleTableClick = (tableId, tableNo) => {
     router.push(`/waiter/order?tableId=${tableId}&tableNo=${tableNo}`);
@@ -161,7 +146,19 @@ export default function WaiterHomePage() {
     { name: "Butter Naan", percent: 54 },
     { name: "Cold Coffee", percent: 41 },
   ];
-  
+
+  const getRunningTime = (occupiedAt) => {
+    if (!occupiedAt) return "";
+
+    const start = new Date(occupiedAt);
+    const now = new Date();
+
+    const diff = now - start;
+    const mins = Math.floor(diff / 60000);
+
+    if (mins < 60) return `${mins} min`;
+    return `${Math.floor(mins / 60)} hr ${mins % 60} min`;
+  };
 
   return (
     <Box className="min-h-screen bg-gray-50">
@@ -187,10 +184,7 @@ export default function WaiterHomePage() {
 
         {/* RIGHT PANEL */}
         <div className="col-span-12 md:col-span-8 lg:col-span-8 order-1 md:order-2 ">
-
           {!isDesktop && !isTablet && (
-
-
             <AppButton
               label="Takeaway"
               className="!bg-orange-500 !text-white"
@@ -224,47 +218,70 @@ export default function WaiterHomePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rounded"
-                    height={96}
-                    className="!rounded-2xl"
-                  />
-                ))
+                    <Skeleton
+                      key={index}
+                      variant="rounded"
+                      height={96}
+                      className="!rounded-2xl"
+                    />
+                  ))
                 : tables.map((table) => (
-                  <Tooltip
-                    key={table._id}
-                    title={
-                      table.status === "OCCUPIED"
-                        ? "Active table"
-                        : "Add order"
-                    }
-                    arrow
-                    placement="bottom"
-                  >
-                    <Card
-                      onClick={() =>
-                        handleTableClick(table._id, table.tableNo)
+                    <Tooltip
+                      key={table._id}
+                      title={
+                        table.status === "OCCUPIED"
+                          ? "Active table"
+                          : "Add order"
                       }
-                      className={`
-              h-25
-              flex items-center justify-center
-              cursor-pointer
-              transition
-              hover:shadow-md
-              ${tableStyles[table.status]}
-              ${highlightTableNo === table.tableNo
-                          ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-                          : ""
-                        }
-            `}
+                      arrow
+                      placement="bottom"
                     >
-                      <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
-                        {table.tableNo}
-                      </Typography>
-                    </Card>
-                  </Tooltip>
-                ))}
+                      <Card
+                        onClick={() =>
+                          handleTableClick(table._id, table.tableNo)
+                        }
+                        className={`
+    relative
+    h-[95px]
+    flex flex-col items-center justify-center
+    cursor-pointer
+    transition-all duration-200
+    hover:shadow-lg
+    ${tableStyles[table.status]}
+    ${
+      highlightTableNo === table.tableNo
+        ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+        : ""
+    }
+  `}
+                      >
+                        {/* ✅ Table Number */}
+                        <Typography fontSize={26} fontWeight={800}>
+                          {table.tableNo}
+                        </Typography>
+
+                        {/* ✅ Running Time (only for occupied) */}
+                        {table.status === "OCCUPIED" && table.occupiedAt && (
+                          <span className="mt-1 text-[13px] font-semibold text-green-700 bg-green-100 px-3 py-[2px] rounded-full">
+                            ⏱ {getRunningTime(table.occupiedAt)}
+                          </span>
+                        )}
+
+                        {/* ✅ Status Badge */}
+                        <span
+                          className={`absolute top-2 right-2 text-[10px] px-2 py-[2px] rounded-full font-bold
+      ${
+        table.status === "OCCUPIED"
+          ? "bg-green-600 text-white"
+          : "bg-gray-300 text-gray-700"
+      }
+    `}
+                        >
+                          {table.status}
+                        </span>
+                      </Card>
+                    </Tooltip>
+                  ))}
             </div>
           </Card>
         </div>
