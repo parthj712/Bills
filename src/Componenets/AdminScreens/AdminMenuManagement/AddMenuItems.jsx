@@ -26,8 +26,6 @@ import { addMenuItem, getCatgories } from "@/service/menuService";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-
-
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
 export default function AddMenuItems({ open, onClose, onSuccess }) {
@@ -123,8 +121,8 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
     const half = Number(form.priceHalf);
     const full = Number(form.priceFull);
-    if (form.priceHalf === "" || !Number.isFinite(half) || half < 0)
-      e.priceHalf = "Enter valid half price";
+    // if (form.priceHalf === "" || !Number.isFinite(half) || half < 0)
+    //   e.priceHalf = "Enter valid half price";
     if (form.priceFull === "" || !Number.isFinite(full) || full < 0)
       e.priceFull = "Enter valid full price";
     if (
@@ -165,6 +163,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
         subCategory:
           form.subCategory === "Other" ? customSubCategory : form.subCategory,
       };
+      console.log(payload);
 
       await addMenuItem(payload);
 
@@ -179,12 +178,13 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       }, 1200);
     } catch (error) {
       // ❌ API ERROR → SHAKE
+
       triggerShake();
 
       if (error?.response?.status === 403) {
         alert(
           error.response.data?.message ||
-          "Your subscription has expired. Please renew to add new menu items.",
+            "Your subscription has expired. Please renew to add new menu items.",
         );
         return;
       }
@@ -194,8 +194,6 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       setLoading(false);
     }
   };
-
-
 
   const MotionPaper = motion.div;
 
@@ -215,7 +213,6 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
     },
   };
 
-
   const controls = useAnimation();
   const [success, setSuccess] = useState(false);
 
@@ -225,7 +222,6 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       transition: { duration: 0.4 },
     });
   };
-
 
   return (
     <AnimatePresence>
@@ -278,7 +274,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                   >
                     Add Menu Item
                   </DialogTitle>
-                  <Typography sx={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
+                  <Typography
+                    sx={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}
+                  >
                     Fill details to create a new item.
                   </Typography>
                 </Box>
@@ -377,16 +375,20 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
             ) : (
               <motion.div animate={controls}>
                 <Box py={0.5}>
-                  <Typography fontSize={22} fontWeight={700} className="text-[#0b3c5d]">
+                  <Typography
+                    fontSize={22}
+                    fontWeight={700}
+                    className="text-[#0b3c5d]"
+                  >
                     Item Details
                   </Typography>
                   <Typography fontSize={14} className="text-gray-500" mb={2}>
-                    Keep the name clear, pricing accurate, and add a short description.
+                    Keep the name clear, pricing accurate, and add a short
+                    description.
                   </Typography>
                 </Box>
 
                 <Box>
-
                   <Box display={"flex"} flexDirection={"column"}>
                     <TextField
                       label="Item Name"
@@ -397,7 +399,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       onChange={handleChange}
                       onBlur={() => markTouched("name")}
                       error={!!(touched.name && errors.name)}
-                      helperText={touched.name && errors.name ? errors.name : " "}
+                      helperText={
+                        touched.name && errors.name ? errors.name : " "
+                      }
                       sx={{
                         backgroundColor: "white",
                         borderRadius: 3,
@@ -433,7 +437,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       onBlur={() => markTouched("itemCode")}
                       error={!!(touched.itemCode && errors.itemCode)}
                       helperText={
-                        touched.itemCode && errors.itemCode ? errors.itemCode : " "
+                        touched.itemCode && errors.itemCode
+                          ? errors.itemCode
+                          : " "
                       }
                       InputProps={{
                         startAdornment: (
@@ -457,7 +463,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       fullWidth
                       error={!!(touched.category && errors.category)}
                       helperText={
-                        touched.category && errors.category ? errors.category : " "
+                        touched.category && errors.category
+                          ? errors.category
+                          : " "
                       }
                     >
                       {categories.map((cat) => (
@@ -487,7 +495,10 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       label="Sub Category"
                       value={form.subCategory}
                       onChange={(e) =>
-                        setForm((prev) => ({ ...prev, subCategory: e.target.value }))
+                        setForm((prev) => ({
+                          ...prev,
+                          subCategory: e.target.value,
+                        }))
                       }
                       fullWidth
                       disabled={!form.category}
@@ -506,7 +517,8 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       <MenuItem value="Other">Other</MenuItem>
                     </TextField>
 
-                    {(form.subCategory === "Other" || form.category === "Other") && (
+                    {(form.subCategory === "Other" ||
+                      form.category === "Other") && (
                       <TextField
                         label="New Sub Category"
                         value={customSubCategory}
@@ -530,7 +542,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       onBlur={() => markTouched("foodType")}
                       error={!!(touched.foodType && errors.foodType)}
                       helperText={
-                        touched.foodType && errors.foodType ? errors.foodType : " "
+                        touched.foodType && errors.foodType
+                          ? errors.foodType
+                          : " "
                       }
                       sx={{
                         backgroundColor: "white",
@@ -553,14 +567,18 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       size="medium"
                       onChange={handleChange}
                       onBlur={() => markTouched("priceHalf")}
-                      error={!!(touched.priceHalf && errors.priceHalf)}
+                      // error={!!(touched.priceHalf && errors.priceHalf)}
                       helperText={
-                        touched.priceHalf && errors.priceHalf ? errors.priceHalf : " "
+                        touched.priceHalf && errors.priceHalf
+                          ? errors.priceHalf
+                          : " "
                       }
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <CurrencyRupeeRoundedIcon sx={{ color: "#8a8a8a" }} />
+                            <CurrencyRupeeRoundedIcon
+                              sx={{ color: "#8a8a8a" }}
+                            />
                           </InputAdornment>
                         ),
                       }}
@@ -581,12 +599,16 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       onBlur={() => markTouched("priceFull")}
                       error={!!(touched.priceFull && errors.priceFull)}
                       helperText={
-                        touched.priceFull && errors.priceFull ? errors.priceFull : " "
+                        touched.priceFull && errors.priceFull
+                          ? errors.priceFull
+                          : " "
                       }
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <CurrencyRupeeRoundedIcon sx={{ color: "#8a8a8a" }} />
+                            <CurrencyRupeeRoundedIcon
+                              sx={{ color: "#8a8a8a" }}
+                            />
                           </InputAdornment>
                         ),
                       }}
@@ -596,8 +618,6 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                         "& fieldset": { borderColor: "#e5e7eb" },
                       }}
                     />
-
-
                   </Box>
                 </Box>
 

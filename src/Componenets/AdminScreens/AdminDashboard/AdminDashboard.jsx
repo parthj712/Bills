@@ -54,6 +54,9 @@ export default function AdminDashboard() {
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
 
+  console.log("has", hasAccess);
+  console.log("sub", subscription);
+
   useEffect(() => {
     fetchBills();
     fetchSubscriptionExpiry();

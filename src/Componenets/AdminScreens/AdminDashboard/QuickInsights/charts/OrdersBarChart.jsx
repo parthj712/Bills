@@ -42,7 +42,6 @@ export default function OrdersBarChart({ bills }) {
           Weekly order activity with premium insights
         </Typography>
       </Box>
-
       {/* ✅ Common Filter */}
       <DateRangeFilter
         range={range}
@@ -52,7 +51,7 @@ export default function OrdersBarChart({ bills }) {
         customTo={customTo}
         setCustomTo={setCustomTo}
       />
-
+      4627
       {/* ✅ Premium Bar Chart */}
       <BarChart
         height={280}
