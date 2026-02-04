@@ -9,6 +9,7 @@ import {
   Divider,
   Tooltip,
   Box,
+  
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -275,7 +276,7 @@ export default function OrderForm() {
                   const price = getUnitPrice(x.item, x.portion);
                   return (
                     <Card key={x.tempId} className="p-5 rounded-xl">
-                      <div className="flex flex-col lg:flex-row md:flex-col items-start lg:items-center md:items-center justify-between gap-3">
+                      <div className="flex flex-col lg:flex-row md:flex-row items-start lg:items-center md:items-center justify-between gap-3">
                         <div className="flex gap-3">
                           <Typography fontWeight={600}>
                             {x.item.name}
@@ -381,7 +382,7 @@ export default function OrderForm() {
 
                 {/* Message for Kitchen */}
                 <TextField
-                  inputRef={kotRef}
+                  // inputRef={kotRef}
                   label="KOT Message"
                   placeholder="Ex: No onion, extra spicy..."
                   size="small"
