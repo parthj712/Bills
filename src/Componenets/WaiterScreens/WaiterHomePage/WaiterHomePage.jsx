@@ -25,10 +25,10 @@ import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopPr
 
 const tableStyles = {
   AVAILABLE:
-    "!bg-white !text-black border border-gray-300 shadow-xl !rounded-2xl",
+    "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
 
   OCCUPIED:
-    "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
+    "!bg-red-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-red-600/90 backdrop-blur-md",
 };
 
 export default function WaiterHomePage() {
@@ -275,8 +275,8 @@ export default function WaiterHomePage() {
                           className={`px-3 py-[2px] rounded-full
                 ${
                   table.status === "OCCUPIED"
-                    ? "bg-green-600 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-red-600 text-white"
+                    : "bg-green-600 text-white"
                 }
               `}
                         >
@@ -285,7 +285,7 @@ export default function WaiterHomePage() {
 
                         {/* ✅ Time (only if occupied) */}
                         {table.status === "OCCUPIED" && table.occupiedAt && (
-                          <div className="text-xs font-semibold text-green-700 bg-green-100 px-3 py-[2px] rounded-full">
+                          <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
                             {getRunningTime(table.occupiedAt)}
                           </div>
                         )}
