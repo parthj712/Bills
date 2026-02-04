@@ -295,9 +295,9 @@ export default function RegisterScreen() {
   // );
 
   return (
-    <Box className="min-h-screen w-full flex bg-black overflow-hidden">
+    <Box className="min-h-screen w-full flex bg-black">
       {/* LEFT IMAGE */}
-      <motion.div className="hidden md:block md:w-1/2 relative">
+      <motion.div className=" md:w-1/2 relative">
         <Image
           src="/LandingPage/Landing.avif"
           alt="Food"

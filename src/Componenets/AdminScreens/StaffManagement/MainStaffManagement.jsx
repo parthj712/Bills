@@ -34,6 +34,9 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import ViewBillStaffDialog from "../AdminBillsManagment/ViewBillStaffDialog/ViewBillStaffDialog";
 import { motion } from "framer-motion";
 import StaffCard from "./StaffCard";
+import { Download, UploadFile, Description } from "@mui/icons-material";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 const MainStaffManagement = () => {
 
@@ -57,6 +60,11 @@ const MainStaffManagement = () => {
 
   const [openViewDialog, setOpenViewDialog] = useState(false);
   // const [selectedStaff, setSelectedStaff] = useState(null);
+
+
+  const [openUpload, setOpenUpload] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+
 
 
   const [search, setSearch] = useState("");
@@ -121,6 +129,160 @@ const MainStaffManagement = () => {
     const inactive = total - active;
     return { total, active, inactive };
   }, [staffData]);
+
+
+  //download excel sheet filed from tabble
+  const handleDownloadExcel = () => {
+    if (!filteredStaff.length) return;
+
+    const headers = [
+      "Name",
+      "Email",
+      "Phone",
+      "Joining Date",
+      "Status",
+    ];
+
+    const data = filteredStaff.map((staff) => ({
+      Name: staff.name || "",
+      Email: staff.email || "",
+      Phone: staff.phone || "",
+      "Joining Date": staff.createdAt
+        ? new Date(staff.createdAt).toLocaleDateString("en-IN")
+        : "",
+      Status: staff.isActive ? "Active" : "Inactive",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data, { header: headers });
+
+    worksheet["!cols"] = [
+      { wch: 20 },
+      { wch: 30 },
+      { wch: 15 },
+      { wch: 18 },
+      { wch: 12 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Staff");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(file, `Staff-${Date.now()}.xlsx`);
+  };
+
+
+
+  //download empty excel sheet to fill it
+  const handleDownloadEmptyTemplate = () => {
+    const headers = [
+      "Name",
+      "Email",
+      "Phone",
+      "Joining Date",
+      "Status",
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet([], { header: headers });
+
+    worksheet["!cols"] = [
+      { wch: 20 },
+      { wch: 30 },
+      { wch: 15 },
+      { wch: 18 },
+      { wch: 12 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Staff Template");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(file, "Staff-Upload-Template.xlsx");
+  };
+
+
+
+
+  // Handle file select (Excel only)
+  const handleExcelSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isExcel =
+      file.type ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.type === "application/vnd.ms-excel";
+
+    if (!isExcel) {
+      alert("Please upload a valid Excel file (.xlsx or .xls)");
+      return;
+    }
+
+    setExcelFile(file);
+  };
+
+  // Read & parse Excel file
+  // const handleUploadExcel = async () => {
+  //   if (!excelFile) {
+  //     alert("Please select an Excel file");
+  //     return;
+  //   }
+
+  //   const reader = new FileReader();
+
+  //   reader.onload = (evt) => {
+  //     const data = new Uint8Array(evt.target.result);
+  //     const workbook = XLSX.read(data, { type: "array" });
+
+  //     const sheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[sheetName];
+
+  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+  //       defval: "",
+  //     });
+
+  //     console.log("Parsed Excel Data:", jsonData);
+
+  //     /**
+  //      * 👉 jsonData will look like:
+  //      * [
+  //      *  {
+  //      *    "Item Code": "ITM001",
+  //      *    "Item Name": "Paneer Butter Masala",
+  //      *    "Description": "Spicy",
+  //      *    "Category": "Main Course",
+  //      *    "Half Price": 150,
+  //      *    "Full Price": 250,
+  //      *    "Availability": "Available"
+  //      *  }
+  //      * ]
+  //      */
+
+  //     // TODO: map this to backend payload & call API
+  //     // bulkCreateMenuItems(jsonData)
+
+  //     setOpenUpload(false);
+  //     setExcelFile(null);
+  //   };
+
+  //   reader.readAsArrayBuffer(excelFile);
+  // };
+
 
   return (
     <Box className="flex flex-col gap-6 p-2">
@@ -192,6 +354,53 @@ const MainStaffManagement = () => {
         <KpiPill label="Total Staff" value={stats.total} color="primary" />
         <KpiPill label="Active Staff" value={stats.active} color="success" />
         <KpiPill label="Inactive Staff" value={stats.inactive} color="error" />
+      </Box>
+
+
+      {/* Actions: Download / Upload / File */}
+      <Box className="flex justify-end gap-3">
+        <Tooltip title="Download Menu">
+          <IconButton
+            onClick={handleDownloadExcel}
+            sx={{
+              backgroundColor: "#e3f2fd",
+              color: "#0b3c5d",
+              "&:hover": { backgroundColor: "#bbdefb" },
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            <Download />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Upload Menu">
+          <IconButton
+            onClick={() => setOpenUpload(true)}
+            sx={{
+              backgroundColor: "#e8f5e9",
+              color: "#2e7d32",
+              "&:hover": { backgroundColor: "#c8e6c9" },
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            <UploadFile />
+          </IconButton>
+        </Tooltip>
+
+
+        <Tooltip title="View File Template">
+          <IconButton
+            onClick={handleDownloadEmptyTemplate}
+            sx={{
+              backgroundColor: "#fff3e0",
+              color: "#ef6c00",
+              "&:hover": { backgroundColor: "#ffe0b2" },
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            <Description />
+          </IconButton>
+        </Tooltip>
       </Box>
 
       {/* Premium Table */}
