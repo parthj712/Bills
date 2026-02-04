@@ -14,8 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { finalizeBillAndOrder } from "@/service/orderService";
-import { Suspense, useState, useMemo } from "react";
-import { clearCart, decreaseQty, increaseQty } from "@/redux/slices/cartSlice";
+import { clearCart, decreaseQty, increaseQty, setCartFromOrder } from "@/redux/slices/cartSlice";
 import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
@@ -24,12 +23,6 @@ import {
   saveOrdersToDraft,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
-import {
-  clearCart,
-  decreaseQty,
-  increaseQty,
-  setCartFromOrder,
-} from "@/redux/slices/cartSlice";
 
 export default function OrderCart() {
   const dispatch = useDispatch();
@@ -318,29 +311,29 @@ export default function OrderCart() {
 
       {/* Buttons */}
       {cartItems.length > 0 && (
-      <div className="flex flex-col lg:flex-row md:flex-row  justify-end gap-4 mt-6">
-        {isDineIn ? (
-          <AppButton
-            label="Save & Continue"
-            className="!bg-green-500 hover:!bg-green-600 !text-white px-6"
-            onClick={handleSaveAndContinue}
-          />
-        ) : (
-          <AppButton
-            label="Cancel"
-            className="!bg-red-500 hover:!bg-red-600 !text-white px-6"
-            onClick={handleCancelOrder}
-          />
-        )}
+        <div className="flex flex-col lg:flex-row md:flex-row  justify-end gap-4 mt-6">
+          {isDineIn ? (
+            <AppButton
+              label="Save & Continue"
+              className="!bg-green-500 hover:!bg-green-600 !text-white px-6"
+              onClick={handleSaveAndContinue}
+            />
+          ) : (
+            <AppButton
+              label="Cancel"
+              className="!bg-red-500 hover:!bg-red-600 !text-white px-6"
+              onClick={handleCancelOrder}
+            />
+          )}
 
-        <AppButton
-          label={loading ? "Processing..." : "Proceed to Billing"}
-          disabled={loading}
-          className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
-          onClick={handleOpenConfirm}
+          <AppButton
+            label={loading ? "Processing..." : "Proceed to Billing"}
+            disabled={loading}
+            className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
+            onClick={handleOpenConfirm}
 
-        />
-      </div>
+          />
+        </div>
       )}
 
 
