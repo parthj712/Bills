@@ -13,6 +13,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Skeleton
 } from "@mui/material";
 
 import { useRouter } from "next/navigation";
@@ -91,12 +92,9 @@ export default function Settings() {
   };
 
   if (loading) {
-    return (
-      <Typography p={4} color="black">
-        Loading Settings...
-      </Typography>
-    );
+    return <SettingsSkeleton />;
   }
+
 
   return (
     <Box className="min-h-screen p-4 bg-[#f9fafb]">
@@ -300,5 +298,59 @@ function SettingsCard({ title, children }) {
 
       <Box className="flex flex-col gap-3">{children}</Box>
     </Paper>
+  );
+}
+
+
+
+function SettingsSkeleton() {
+  return (
+    <Box className="min-h-screen p-4 bg-[#f9fafb]">
+      {/* PAGE TITLE */}
+      <Skeleton variant="text" width={160} height={40} sx={{ mb: 3 }} />
+
+      <Box className="flex flex-col gap-6 max-w-4xl">
+        {/* BUSINESS INFORMATION CARD */}
+        <Paper
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+          }}
+        >
+          {/* Card title */}
+          <Skeleton variant="text" width={220} height={28} sx={{ mb: 3 }} />
+
+          <Box className="flex flex-col gap-3">
+            {[1, 2, 3, 4, 5].map((item) => (
+              <Box key={item}>
+                <Skeleton variant="text" width={120} height={18} />
+                <Skeleton variant="rectangular" height={32} sx={{ mt: 0.5 }} />
+              </Box>
+            ))}
+
+            {/* Website Row */}
+            <Box>
+              <Skeleton variant="text" width={120} height={18} />
+              <Skeleton variant="rectangular" height={32} sx={{ mt: 0.5 }} />
+            </Box>
+          </Box>
+        </Paper>
+
+        {/* SIGN OUT CARD */}
+        <Paper
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            backgroundColor: "#fff5f5",
+            border: "1px solid #fecaca",
+          }}
+        >
+          <Skeleton variant="text" width={100} height={22} />
+          <Skeleton variant="text" width={260} height={18} sx={{ mb: 2 }} />
+          <Skeleton variant="rectangular" width={120} height={36} />
+        </Paper>
+      </Box>
+    </Box>
   );
 }
