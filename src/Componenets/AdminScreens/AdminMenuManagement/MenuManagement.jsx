@@ -19,6 +19,11 @@ import {
   Skeleton,
   useTheme,
   useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Button,
+  DialogActions,
 } from "@mui/material";
 
 import { Edit, Delete, Add, Search, Close } from "@mui/icons-material";
@@ -26,6 +31,7 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useMemo, useState } from "react";
 import AddMenuItems from "./AddMenuItems";
 import {
+  addMenuItem,
   deleteMenuItem,
   getMenuItems,
   updateMenuAvailability,
@@ -35,6 +41,10 @@ import UpdateMenuItem from "./UpdateMenu";
 import KpiPill from "./KpiPill/KpiPill";
 import { motion } from "framer-motion";
 import MenuItemCard from "./MenuItemCard";
+import { Download, UploadFile, Description } from "@mui/icons-material";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 
 
@@ -58,6 +68,11 @@ export default function MenuManagement() {
 
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+
+
+  const [openUpload, setOpenUpload] = useState(false);
+  const [excelFile, setExcelFile] = useState(null);
+
 
 
   const handleFetchMenu = async () => {
@@ -122,6 +137,241 @@ export default function MenuManagement() {
     const unavailable = total - available;
     return { total, available, unavailable };
   }, [menuItems]);
+
+
+  //download excel sheet filed from tabble
+  const handleDownloadExcel = () => {
+    if (!filteredMenu.length) return;
+
+    // 1️⃣ Define headers exactly like table
+    const headers = [
+      "Item Code",
+      "Item Name",
+      "Description",
+      "Category",
+      "Half Price",
+      "Full Price",
+      "Availability",
+    ];
+
+    // 2️⃣ Map table data
+    const data = filteredMenu.map((item) => ({
+      "Item Code": item.itemCode || "",
+      "Item Name": item.name || "",
+      "Description": item.description || "",
+      "Category": item.categoryName || "",
+      "Half Price": item.price?.half ?? 0,
+      "Full Price": item.price?.full ?? 0,
+      "Availability": item.isAvailable ? "Available" : "Unavailable",
+    }));
+
+    // 3️⃣ Create worksheet
+    const worksheet = XLSX.utils.json_to_sheet(data, {
+      header: headers,
+    });
+
+    // 4️⃣ Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Menu");
+
+    // 5️⃣ Export file
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(file, `menu-items-${Date.now()}.xlsx`);
+  };
+
+
+  //download empty excel sheet to fill it
+  const handleDownloadEmptyTemplate = () => {
+    // Table headers only
+    const headers = [
+      "Item Code",
+      "Item Name",
+      "Description",
+      "Category",
+      "Half Price",
+      "Full Price",
+      "Availability",
+    ];
+
+    // Create an empty row structure (important for Excel headers)
+    const emptyData = [];
+
+    // Create worksheet with headers
+    const worksheet = XLSX.utils.json_to_sheet(emptyData, {
+      header: headers,
+    });
+
+    // Optional: set column widths for better UX
+    worksheet["!cols"] = [
+      { wch: 14 },
+      { wch: 20 },
+      { wch: 30 },
+      { wch: 18 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 15 },
+    ];
+
+    // Create workbook
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Menu Template");
+
+    // Export file
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(file, "menu-upload-template.xlsx");
+  };
+
+  // Handle file select (Excel only)
+  const handleExcelSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const isExcel =
+      file.type ===
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.type === "application/vnd.ms-excel";
+
+    if (!isExcel) {
+      alert("Please upload a valid Excel file (.xlsx or .xls)");
+      return;
+    }
+
+    setExcelFile(file);
+  };
+
+  // Read & parse Excel file
+  // const handleUploadExcel = async () => {
+  //   if (!excelFile) {
+  //     alert("Please select an Excel file");
+  //     return;
+  //   }
+
+  //   const reader = new FileReader();
+
+  //   reader.onload = (evt) => {
+  //     const data = new Uint8Array(evt.target.result);
+  //     const workbook = XLSX.read(data, { type: "array" });
+
+  //     const sheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[sheetName];
+
+  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+  //       defval: "",
+  //     });
+
+  //     console.log("Parsed Excel Data:", jsonData);
+
+  //     /**
+  //      * 👉 jsonData will look like:
+  //      * [
+  //      *  {
+  //      *    "Item Code": "ITM001",
+  //      *    "Item Name": "Paneer Butter Masala",
+  //      *    "Description": "Spicy",
+  //      *    "Category": "Main Course",
+  //      *    "Half Price": 150,
+  //      *    "Full Price": 250,
+  //      *    "Availability": "Available"
+  //      *  }
+  //      * ]
+  //      */
+
+  //     // TODO: map this to backend payload & call API
+  //     // bulkCreateMenuItems(jsonData)
+
+  //     setOpenUpload(false);
+  //     setExcelFile(null);
+  //   };
+
+  //   reader.readAsArrayBuffer(excelFile);
+  // };
+
+
+  //check api call for the upload file
+  const handleUploadExcel = async () => {
+    if (!excelFile) {
+      alert("Please select an Excel file");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = async (evt) => {
+      try {
+        setLoading(true);
+
+        const data = new Uint8Array(evt.target.result);
+        const workbook = XLSX.read(data, { type: "array" });
+
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+        if (!rows.length) {
+          alert("Excel file is empty");
+          return;
+        }
+
+        // 🔁 Convert Excel rows → API payloads
+        const payloads = rows.map((row, index) => {
+          if (!row["Item Name"] || !row["Item Code"] || !row["Category"]) {
+            throw new Error(`Row ${index + 2} is missing required fields`);
+          }
+
+          return {
+            name: row["Item Name"],
+            description: row["Description"],
+            category: row["Category"],
+            subCategory: "",
+            foodType: "Veg", // default
+            priceHalf: Number(row["Half Price"]) || 0,
+            priceFull: Number(row["Full Price"]) || 0,
+            itemCode: row["Item Code"],
+            isAvailable: row["Availability"] !== "Unavailable",
+          };
+        });
+
+        // 🚀 BULK API CALL (parallel)
+        await Promise.all(payloads.map((p) => addMenuItem(p)));
+
+        // ✅ Refresh table
+        await handleFetchMenu();
+
+        setOpenUpload(false);
+        setExcelFile(null);
+
+        alert(`Successfully uploaded ${payloads.length} menu items`);
+      } catch (err) {
+        console.error(err);
+        alert(err.message || "Failed to upload menu");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    reader.readAsArrayBuffer(excelFile);
+  };
+
+
+
+
 
   return (
     <Box className="flex flex-col gap-6 p-2">
@@ -204,6 +454,54 @@ export default function MenuManagement() {
 
 
       </Box>
+
+
+      {/* Actions: Download / Upload / File */}
+      <Box className="flex justify-end gap-3">
+        <Tooltip title="Download Menu">
+          <IconButton
+            onClick={handleDownloadExcel}
+            sx={{
+              backgroundColor: "#e3f2fd",
+              color: "#0b3c5d",
+              "&:hover": { backgroundColor: "#bbdefb" },
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            <Download />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Upload Menu">
+          <IconButton
+            onClick={() => setOpenUpload(true)}
+            sx={{
+              backgroundColor: "#e8f5e9",
+              color: "#2e7d32",
+              "&:hover": { backgroundColor: "#c8e6c9" },
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            <UploadFile />
+          </IconButton>
+        </Tooltip>
+
+
+        <Tooltip title="View File Template">
+          <IconButton
+            onClick={handleDownloadEmptyTemplate}
+            sx={{
+              backgroundColor: "#fff3e0",
+              color: "#ef6c00",
+              "&:hover": { backgroundColor: "#ffe0b2" },
+              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+            }}
+          >
+            <Description />
+          </IconButton>
+        </Tooltip>
+      </Box>
+
 
       {/* Premium Table */}
       {isDesktop && (
@@ -381,6 +679,10 @@ export default function MenuManagement() {
       )}
 
 
+
+
+
+
       {/* MOBILE + TABLET CARDS */}
       {!isDesktop && (
         <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -460,6 +762,52 @@ export default function MenuManagement() {
           </Box>
         </motion.div>
       )}
+
+
+      <Dialog open={openUpload} onClose={() => setOpenUpload(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          Upload Menu File To Upload
+        </DialogTitle>
+
+        <DialogContent className="flex flex-col gap-4">
+          <Typography fontSize={14} color="text.secondary">
+            Upload the filled Excel template to add menu items in bulk.
+          </Typography>
+
+          <Button
+            variant="outlined"
+            component="label"
+            sx={{
+              borderStyle: "dashed",
+              height: 120,
+              fontWeight: 600,
+            }}
+          >
+            {excelFile ? excelFile.name : "Click to select Excel file"}
+            <input
+              hidden
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleExcelSelect}
+            />
+          </Button>
+
+          <Typography fontSize={12} color="text.secondary">
+            Supported formats: .xlsx, .xls
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setOpenUpload(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleUploadExcel}
+            disabled={!excelFile}
+          >
+            Upload
+          </Button>
+        </DialogActions>
+      </Dialog>
 
 
     </Box>
