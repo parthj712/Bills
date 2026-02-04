@@ -7,9 +7,18 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
-import { finalizeBillAndOrder } from "@/service/orderService";
-import { Suspense, useState, useMemo } from "react";
-import { clearCart, decreaseQty, increaseQty } from "@/redux/slices/cartSlice";
+import {
+  fetchActiveOrder,
+  finalizeBillAndOrder,
+  saveOrdersToDraft,
+} from "@/service/orderService";
+import { Suspense, useState, useMemo, useEffect } from "react";
+import {
+  clearCart,
+  decreaseQty,
+  increaseQty,
+  setCartFromOrder,
+} from "@/redux/slices/cartSlice";
 
 export default function OrderCart() {
   const dispatch = useDispatch();
@@ -78,14 +87,52 @@ export default function OrderCart() {
 
   const handleSaveAndContinue = async () => {
     if (!isDineIn || !tableId) return;
+    if (!cartItems.length) return;
 
     try {
+      const payload = {
+        orderType,
+        tableId,
+        items: cartItems.map((item) => ({
+          menuItemId: item._id,
+          name: item.name,
+          price: item.unitPrice,
+          qty: item.qty,
+        })),
+      };
+      console.log("payload", payload);
+      await saveOrdersToDraft(payload);
       await updateTableStatus(tableId, "OCCUPIED");
       router.back();
     } catch (error) {
       console.error("Failed to update table status", error);
     }
   };
+
+  useEffect(() => {
+    if (!isDineIn || !tableId) return;
+
+    const loadDraftOrder = async () => {
+      try {
+        const res = await fetchActiveOrder(tableId);
+
+        if (res.data) {
+          dispatch(
+            setCartFromOrder({
+              cartKey: tableId,
+              items: res.data.items,
+            }),
+          );
+          await updateTableStatus(tableId, "OCCUPIED");
+          console.log("✅ Draft order loaded");
+        }
+      } catch (err) {
+        console.log("No active draft order found");
+      }
+    };
+
+    loadDraftOrder();
+  }, [tableId]);
 
   const handleCancelOrder = () => {
     dispatch(clearCart(cartKey));
