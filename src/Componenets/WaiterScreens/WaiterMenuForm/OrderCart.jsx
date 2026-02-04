@@ -204,25 +204,25 @@ export default function OrderCart() {
   // };
 
 
-  // const downloadBillPDF = async () => {
-  //   if (typeof window === "undefined") return;
+  const downloadBillPDF = async () => {
+    if (typeof window === "undefined") return;
 
-  //   const html2pdf = (await import("html2pdf.js")).default;
+    const html2pdf = (await import("html2pdf.js")).default;
 
-  //   const element = document.getElementById("bill-pdf");
-  //   if (!element) return;
+    const element = document.getElementById("bill-pdf");
+    if (!element) return;
 
-  //   html2pdf()
-  //     .set({
-  //       margin: 5,
-  //       filename: "bill-preview.pdf",
-  //       image: { type: "jpeg", quality: 0.98 },
-  //       html2canvas: { scale: 2 },
-  //       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  //     })
-  //     .from(element)
-  //     .save();
-  // };
+    html2pdf()
+      .set({
+        margin: 5,
+        filename: "bill-preview.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(element)
+      .save();
+  };
 
 
   return (

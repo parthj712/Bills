@@ -1,14 +1,12 @@
+export const dynamic = "force-dynamic";
+
 import WaiterMenuForm from "@/Componenets/WaiterScreens/WaiterMenuForm/WaiterMenuForm";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
-const page = () => {
+export default function Page() {
   return (
-    <div>
-      <Suspense fallback={<div>Loading order...</div>}>
-        <WaiterMenuForm />
-      </Suspense>
-    </div>
+    <Suspense fallback={<div>Loading order...</div>}>
+      <WaiterMenuForm />
+    </Suspense>
   );
-};
-
-export default page;
+}
