@@ -20,15 +20,15 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
-import WaiterTopProducts from "./WaiterTopProducts/WaiterTopProducts";
+
 import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
 
 const tableStyles = {
   AVAILABLE:
-    "!bg-white !text-black border border-gray-300 shadow-xl !rounded-2xl",
+    "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
 
   OCCUPIED:
-    "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
+    "!bg-red-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-red-600/90 backdrop-blur-md",
 };
 
 export default function WaiterHomePage() {
@@ -221,7 +221,7 @@ export default function WaiterHomePage() {
                     <Skeleton
                       key={index}
                       variant="rounded"
-                      height={96}
+                      height={110}
                       className="!rounded-2xl"
                     />
                   ))
@@ -241,62 +241,54 @@ export default function WaiterHomePage() {
                           handleTableClick(table._id, table.tableNo)
                         }
                         className={`
-                              relative
-                              h-28 w-full
-                              rounded-2xl
-                              border
-                              cursor-pointer
-                              flex flex-col
-                              items-center
-                              justify-between
-                              px-4 py-3
-                       
-                              text-black
-                              shadow-sm
-                              hover:shadow-lg
-                              ${tableStyles[table.status]}
-                              ${
-                                highlightTableNo === table.tableNo
-                                  ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-                                  : ""
-                              }
-                            `}
+              relative
+              h-28 w-full
+              rounded-2xl
+              border
+              cursor-pointer
+              flex flex-col
+              items-center
+              justify-center
+              gap-2
+              px-4 py-3
+              text-black
+              shadow-sm
+              transition-all duration-300
+              hover:shadow-lg hover:scale-[1.03]
+              ${tableStyles[table.status]}
+              ${
+                highlightTableNo === table.tableNo
+                  ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
+                  : ""
+              }
+            `}
                       >
-                        <Box
-                          display={"flex"}
-                          flexDirection={"column"}
-                          alignItems={"center"}
-                          justifyContent={"center"}
-                        >
-                          {/* ✅ BIG Table Number */}
-                          <Typography fontSize={24} fontWeight={600}>
-                            {table.tableNo}
-                          </Typography>
+                        {/* ✅ Table Number */}
+                        <Typography fontSize={26} fontWeight={600}>
+                          {table.tableNo}
+                        </Typography>
 
-                          {/* ✅ Status Badge */}
-                          <Typography
-                            fontSize={14}
-                            fontWeight={500}
-                            className={`
-                              ${
-                                table.status === "OCCUPIED"
-                                  ? "bg-green-600 text-white"
-                                  : "bg-gray-300 text-gray-700"
-                              }
-                    `}
-                          >
-                            {table.status}
-                          </Typography>
-                        </Box>
+                        {/* ✅ Status Badge */}
+                        <Typography
+                          fontSize={13}
+                          fontWeight={500}
+                          className={`px-3 py-[2px] rounded-full
+                ${
+                  table.status === "OCCUPIED"
+                    ? "bg-red-600 text-white"
+                    : "bg-green-600 text-white"
+                }
+              `}
+                        >
+                          {table.status}
+                        </Typography>
 
                         {/* ✅ Time (only if occupied) */}
-
-                        <div className="font-semibold text-green-700 bg-green-100 px-2 py-[2px] rounded-full">
-                          <div> ⏱ </div>
-                          {table.status === "OCCUPIED" && table.occupiedAt && (
-                            <div> {getRunningTime(table.occupiedAt)} </div>
-                          )}
-                        </div>
+                        {table.status === "OCCUPIED" && table.occupiedAt && (
+                          <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                            {getRunningTime(table.occupiedAt)}
+                          </div>
+                        )}
                       </div>
                     </Tooltip>
                   ))}
