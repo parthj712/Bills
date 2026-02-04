@@ -48,3 +48,14 @@ export const updateMenuAvailability = async (id, data) => {
 export const getCatgories = async () => {
   return await API.get("/menu/categories");
 };
+
+export const uploadExcelFile = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return await API.post("/menu/upload-excel", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
