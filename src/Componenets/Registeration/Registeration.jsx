@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  IconButton,
 } from "@mui/material";
 import Image from "next/image";
 import AppButton from "../CommonComponents/AppButton";
@@ -19,6 +20,7 @@ import { useRouter } from "next/navigation";
 import API from "@/service/api";
 import RealStepper from "./RealStepper";
 import OtpBoxes from "../CommonComponents/OTPBoxes";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 const MotionDiv = motion.div;
 
@@ -391,12 +393,30 @@ export default function RegisterScreen() {
                     helperText={errors.phone}
                   />
 
-                  <AppButton
-                    label={otpLoading ? "Sending OTP..." : "Send OTP"}
-                    onClick={sendOtp}
-                    disabled={otpLoading}
-                    className="!bg-blue-500"
-                  />
+                  <div className="flex items-center gap-6 mt-4">
+                    <IconButton
+                      onClick={() => router.push("/")}
+                      sx={{
+                        // position: "absolute",
+                        // top: 24,
+                        // left: isMobile ? 24 : 800,
+                        color: "#111827",
+                        background: "#F3F4F6",
+                        "&:hover": { background: "#E5E7EB" },
+                      }}
+                    > 
+                    
+                      <ArrowBackIosNewIcon fontSize="small" />
+                    </IconButton>
+
+
+                    <AppButton
+                      label={otpLoading ? "Sending OTP..." : "Send OTP"}
+                      onClick={sendOtp}
+                      disabled={otpLoading}
+                      className="!bg-blue-500"
+                    />
+                  </div>
                 </Box>
               </motion.div>
             )}

@@ -1,18 +1,25 @@
 import { getOrders } from "@/service/orderService";
-import { Card, Typography, Box } from "@mui/material";
+import { Card, Typography, Box, Skeleton } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useEffect, useMemo, useState } from "react";
 
+
 export const TopProductsCard = () => {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
 
   console.log();
   // ✅ Fetch Orders Dynamically
   useEffect(() => {
-    getOrders().then((res) => {
-      setOrders(res.data?.orders || []);
-    });
+    setLoading(true);
+    getOrders()
+      .then((res) => {
+        setOrders(res.data?.orders || []);
+      })
+      .finally(() => setLoading(false));
   }, []);
+
 
   const topProducts = useMemo(() => {
     let productMap = {};
@@ -57,8 +64,9 @@ export const TopProductsCard = () => {
         </Typography>
       </Box>
 
-      {/* Graph */}
-      {topProducts.length > 0 ? (
+      {loading ? (
+        <BarSkeleton />
+      ) : topProducts.length > 0 ? (
         <BarChart
           height={210}
           layout="horizontal"
@@ -90,3 +98,21 @@ export const TopProductsCard = () => {
     </Card>
   );
 };
+
+
+
+
+
+const BarSkeleton = () => (
+  <Box display="flex" flexDirection="column" gap={1.4}>
+    {[1, 2, 3, 4, 5].map((_, i) => (
+      <Skeleton
+        key={i}
+        variant="rounded"
+        height={16}
+        width={`${80 - i * 10}%`}
+        sx={{ borderRadius: "8px" }}
+      />
+    ))}
+  </Box>
+);

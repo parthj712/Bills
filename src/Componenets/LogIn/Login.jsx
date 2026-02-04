@@ -2,6 +2,7 @@
 
 import {
   Box,
+  IconButton,
   TextField,
   Typography,
   useMediaQuery,
@@ -14,6 +15,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import API from "@/service/api";
 import { useRef } from "react";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 const MotionDiv = motion.div;
 
@@ -208,13 +210,20 @@ export default function Login() {
           />
 
           {/* Actions */}
-          <div className="flex items-center justify-between mt-4">
-            <AppButton
-              label="← Back"
-              variant="text"
+          <div className="flex items-center gap-6  mt-4">
+            <IconButton
               onClick={() => router.push("/")}
-              className="!text-orange-500 hover:!underline !px-0 !min-w-0"
-            />
+              sx={{
+                // position: "absolute",
+                // top: 24,
+                // left: 24,
+                color: "#111827",
+                background: "#F3F4F6",
+                "&:hover": { background: "#E5E7EB" },
+              }}
+            >
+              <ArrowBackIosNewIcon fontSize="small" />
+            </IconButton>
 
             <AppButton
               type="submit"

@@ -1,12 +1,23 @@
 "use client";
 
-import { Card, Typography, Divider, IconButton } from "@mui/material";
+import {
+  Card, Typography, Divider, IconButton, Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
+import { finalizeBillAndOrder } from "@/service/orderService";
+import { Suspense, useState, useMemo } from "react";
+import { clearCart, decreaseQty, increaseQty } from "@/redux/slices/cartSlice";
+import html2pdf from "html2pdf.js";
+import BillPreview from "./BillPreview";
 import {
   fetchActiveOrder,
   finalizeBillAndOrder,
@@ -24,6 +35,9 @@ export default function OrderCart() {
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [openConfirm, setOpenConfirm] = useState(false);
+
 
   const tableId = searchParams.get("tableId");
   const orderType = searchParams.get("orderType") || "DINE-IN";
@@ -139,6 +153,66 @@ export default function OrderCart() {
     router.back();
   };
 
+  const handleOpenConfirm = () => {
+    if (!cartItems.length || loading) return;
+    if (isDineIn && !tableId) return;
+    setOpenConfirm(true);
+  };
+
+
+  const handleConfirmBilling = async () => {
+    setLoading(true);
+
+    try {
+      const payload = {
+        orderType,
+        tableId: isDineIn ? tableId : null,
+        items: cartItems.map((item) => ({
+          menuItemId: item._id,
+          name: item.name,
+          itemCode: item.itemCode,
+          portion: item.portion,
+          price: item.unitPrice,
+          qty: item.qty,
+        })),
+      };
+
+      await finalizeBillAndOrder(payload);
+
+      dispatch(clearCart(cartKey));
+
+      if (isDineIn) {
+        await updateTableStatus(tableId, "AVAILABLE");
+      }
+
+      setOpenConfirm(false);
+      router.back(); // billing machine
+    } catch (error) {
+      console.error("Billing failed", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+  const downloadBillPDF = () => {
+    const element = document.getElementById("bill-pdf");
+
+    html2pdf()
+      .set({
+        margin: 5,
+        filename: "bill-preview.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(element)
+      .save();
+  };
+
+
+
   return (
     <Suspense fallback={<div>Loading order...</div>}>
       <Card className="p-6 !rounded-2xl border-dashed border-3 border-gray-300">
@@ -243,6 +317,7 @@ export default function OrderCart() {
       </Card>
 
       {/* Buttons */}
+      {cartItems.length > 0 && (
       <div className="flex flex-col lg:flex-row md:flex-row  justify-end gap-4 mt-6">
         {isDineIn ? (
           <AppButton
@@ -262,9 +337,52 @@ export default function OrderCart() {
           label={loading ? "Processing..." : "Proceed to Billing"}
           disabled={loading}
           className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
-          onClick={handleProceedToBilling}
+          onClick={handleOpenConfirm}
+
         />
       </div>
+      )}
+
+
+
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)} maxWidth="sm" fullWidth>
+        <DialogTitle fontWeight={700}>Confirm Billing</DialogTitle>
+
+        <DialogContent>
+          <BillPreview
+            items={cartItems}
+            subtotal={subtotal}
+            tax={tax}
+            total={grandTotal}
+          />
+
+          <Button
+            fullWidth
+            variant="outlined"
+            sx={{ mt: 2 }}
+            onClick={downloadBillPDF}
+          >
+            Download Bill PDF
+          </Button>
+        </DialogContent>
+
+
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)} color="inherit">
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleConfirmBilling}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Confirm & Bill"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Suspense>
   );
 }
