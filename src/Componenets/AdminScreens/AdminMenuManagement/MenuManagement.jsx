@@ -36,6 +36,7 @@ import {
   getMenuItems,
   updateMenuAvailability,
   updateMenuItem,
+  uploadExcelFile,
 } from "@/service/menuService";
 import UpdateMenuItem from "./UpdateMenu";
 import KpiPill from "./KpiPill/KpiPill";
@@ -44,21 +45,16 @@ import MenuItemCard from "./MenuItemCard";
 import { Download, UploadFile, Description } from "@mui/icons-material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
-
-
+import { fetchMenuItems } from "@/redux/slices/menuSlice";
+import AppPagination from "@/Componenets/CommonComponents/PaginationControl";
 
 export default function MenuManagement() {
-
-
-
   const theme = useTheme();
 
   // BREAKPOINTS
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-
 
   const [openAdd, setOpenAdd] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
@@ -69,17 +65,17 @@ export default function MenuManagement() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
 
-
   const [openUpload, setOpenUpload] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
-
-
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(3);
 
   const handleFetchMenu = async () => {
     try {
       setLoading(true);
       const res = await getMenuItems();
-      setMenuItems(res.data || []);
+      console.log(res);
+      setMenuItems(res.data?.menu || []);
     } catch (error) {
       console.log(error?.message || error);
     } finally {
@@ -138,7 +134,6 @@ export default function MenuManagement() {
     return { total, available, unavailable };
   }, [menuItems]);
 
-
   //download excel sheet filed from tabble
   const handleDownloadExcel = () => {
     if (!filteredMenu.length) return;
@@ -158,11 +153,11 @@ export default function MenuManagement() {
     const data = filteredMenu.map((item) => ({
       "Item Code": item.itemCode || "",
       "Item Name": item.name || "",
-      "Description": item.description || "",
-      "Category": item.categoryName || "",
+      Description: item.description || "",
+      Category: item.categoryName || "",
       "Half Price": item.price?.half ?? 0,
       "Full Price": item.price?.full ?? 0,
-      "Availability": item.isAvailable ? "Available" : "Unavailable",
+      Availability: item.isAvailable ? "Available" : "Unavailable",
     }));
 
     // 3️⃣ Create worksheet
@@ -187,18 +182,18 @@ export default function MenuManagement() {
     saveAs(file, `menu-items-${Date.now()}.xlsx`);
   };
 
-
   //download empty excel sheet to fill it
   const handleDownloadEmptyTemplate = () => {
     // Table headers only
     const headers = [
-      "Item Code",
-      "Item Name",
-      "Description",
-      "Category",
-      "Half Price",
-      "Full Price",
-      "Availability",
+      "name",
+      "categoryName",
+      "subCategory",
+      "foodType",
+      "itemCode",
+      "priceFull",
+      "priceHalf",
+      "description",
     ];
 
     // Create an empty row structure (important for Excel headers)
@@ -244,7 +239,7 @@ export default function MenuManagement() {
 
     const isExcel =
       file.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -255,130 +250,42 @@ export default function MenuManagement() {
     setExcelFile(file);
   };
 
-  // Read & parse Excel file
-  // const handleUploadExcel = async () => {
-  //   if (!excelFile) {
-  //     alert("Please select an Excel file");
-  //     return;
-  //   }
-
-  //   const reader = new FileReader();
-
-  //   reader.onload = (evt) => {
-  //     const data = new Uint8Array(evt.target.result);
-  //     const workbook = XLSX.read(data, { type: "array" });
-
-  //     const sheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[sheetName];
-
-  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-  //       defval: "",
-  //     });
-
-  //     console.log("Parsed Excel Data:", jsonData);
-
-  //     /**
-  //      * 👉 jsonData will look like:
-  //      * [
-  //      *  {
-  //      *    "Item Code": "ITM001",
-  //      *    "Item Name": "Paneer Butter Masala",
-  //      *    "Description": "Spicy",
-  //      *    "Category": "Main Course",
-  //      *    "Half Price": 150,
-  //      *    "Full Price": 250,
-  //      *    "Availability": "Available"
-  //      *  }
-  //      * ]
-  //      */
-
-  //     // TODO: map this to backend payload & call API
-  //     // bulkCreateMenuItems(jsonData)
-
-  //     setOpenUpload(false);
-  //     setExcelFile(null);
-  //   };
-
-  //   reader.readAsArrayBuffer(excelFile);
-  // };
-
-
-  //check api call for the upload file
   const handleUploadExcel = async () => {
-    if (!excelFile) {
-      alert("Please select an Excel file");
-      return;
+    if (!excelFile) return;
+
+    try {
+      const res = await uploadExcelFile(excelFile);
+
+      alert(`Uploaded Successfully: ${res.data.inserted} items added`);
+
+      setOpenUpload(false);
+      setExcelFile(null);
+      handleFetchMenu();
+    } catch (error) {
+      console.error(error);
+      alert("Upload Failed");
     }
-
-    const reader = new FileReader();
-
-    reader.onload = async (evt) => {
-      try {
-        setLoading(true);
-
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-
-        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-
-        if (!rows.length) {
-          alert("Excel file is empty");
-          return;
-        }
-
-        // 🔁 Convert Excel rows → API payloads
-        const payloads = rows.map((row, index) => {
-          if (!row["Item Name"] || !row["Item Code"] || !row["Category"]) {
-            throw new Error(`Row ${index + 2} is missing required fields`);
-          }
-
-          return {
-            name: row["Item Name"],
-            description: row["Description"],
-            category: row["Category"],
-            subCategory: "",
-            foodType: "Veg", // default
-            priceHalf: Number(row["Half Price"]) || 0,
-            priceFull: Number(row["Full Price"]) || 0,
-            itemCode: row["Item Code"],
-            isAvailable: row["Availability"] !== "Unavailable",
-          };
-        });
-
-        // 🚀 BULK API CALL (parallel)
-        await Promise.all(payloads.map((p) => addMenuItem(p)));
-
-        // ✅ Refresh table
-        await handleFetchMenu();
-
-        setOpenUpload(false);
-        setExcelFile(null);
-
-        alert(`Successfully uploaded ${payloads.length} menu items`);
-      } catch (err) {
-        console.error(err);
-        alert(err.message || "Failed to upload menu");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    reader.readAsArrayBuffer(excelFile);
   };
 
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
 
-
-
+  const paginatedMenu = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return filteredMenu.slice(start, end);
+  }, [filteredMenu, page, rowsPerPage]);
 
   return (
     <Box className="flex flex-col gap-6 p-2">
       {/* Premium Header */}
       <Box className="flex flex-row gap-2">
-
-        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+        <Typography
+          fontSize={isMobile ? 24 : 30}
+          fontWeight={isMobile ? 600 : 700}
+          className="text-[#0b3c5d]"
+        >
           Menu Management
         </Typography>
 
@@ -400,7 +307,6 @@ export default function MenuManagement() {
             />
           )}
         </Box>
-
       </Box>
 
       {/* Search + KPI Cards */}
@@ -451,10 +357,7 @@ export default function MenuManagement() {
         <KpiPill label="Total" value={stats.total} color="primary" />
         <KpiPill label="Available" value={stats.available} color="success" />
         <KpiPill label="Unavailable" value={stats.unavailable} color="error" />
-
-
       </Box>
-
 
       {/* Actions: Download / Upload / File */}
       <Box className="flex justify-end gap-3">
@@ -486,7 +389,6 @@ export default function MenuManagement() {
           </IconButton>
         </Tooltip>
 
-
         <Tooltip title="View File Template">
           <IconButton
             onClick={handleDownloadEmptyTemplate}
@@ -501,7 +403,6 @@ export default function MenuManagement() {
           </IconButton>
         </Tooltip>
       </Box>
-
 
       {/* Premium Table */}
       {isDesktop && (
@@ -553,7 +454,7 @@ export default function MenuManagement() {
                 ))}
 
               {!loading &&
-                filteredMenu.map((item, index) => (
+                paginatedMenu.map((item, index) => (
                   <TableRow
                     key={item._id}
                     sx={{
@@ -678,11 +579,6 @@ export default function MenuManagement() {
         </TableContainer>
       )}
 
-
-
-
-
-
       {/* MOBILE + TABLET CARDS */}
       {!isDesktop && (
         <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -692,7 +588,7 @@ export default function MenuManagement() {
             ))}
 
           {!loading &&
-            filteredMenu.map((item) => (
+            paginatedMenu.map((item) => (
               <MenuItemCard
                 key={item._id}
                 item={item}
@@ -715,12 +611,11 @@ export default function MenuManagement() {
         </Box>
       )}
 
-
       {/* Modals */}
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => { }}
+        onSubmit={(data) => {}}
         onSuccess={handleFetchMenu}
       />
 
@@ -730,8 +625,6 @@ export default function MenuManagement() {
         menu={selectedMenu}
         onUpdate={handleUpdate}
       />
-
-
 
       {isMobile && (
         <motion.div
@@ -762,9 +655,19 @@ export default function MenuManagement() {
           </Box>
         </motion.div>
       )}
+      <AppPagination
+        totalItems={filteredMenu.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handlePageChange}
+      />
 
-
-      <Dialog open={openUpload} onClose={() => setOpenUpload(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openUpload}
+        onClose={() => setOpenUpload(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle sx={{ fontWeight: 700 }}>
           Upload Menu File To Upload
         </DialogTitle>
@@ -808,8 +711,6 @@ export default function MenuManagement() {
           </Button>
         </DialogActions>
       </Dialog>
-
-
     </Box>
   );
 }
