@@ -54,12 +54,12 @@ export default function OrderForm() {
     searchRef.current?.focus();
   }, []);
   const categories = useMemo(() => {
-    return [...new Set(items.map((i) => i.categoryName).filter(Boolean))];
+    return [...new Set(items.menu?.map((i) => i.categoryName).filter(Boolean))];
   }, [items]);
 
   const filteredItems = useMemo(() => {
     const byCategory = category
-      ? items.filter((i) => i.categoryName === category)
+      ? items.menu?.filter((i) => i.categoryName === category)
       : items;
 
     const q = search.trim().toLowerCase();
