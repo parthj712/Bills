@@ -89,7 +89,14 @@ export default function RegisterScreen() {
   // ✅ Send OTP
   // -------------------------------
   const sendOtp = useCallback(async () => {
-    if (!form.email) return alert("Enter email first");
+    if (!form.email) {
+      showToast({
+        type: "warning",
+        message: "Please enter your email address first",
+      });
+      return;
+    }
+
 
     setOtpLoading(true);
 
@@ -104,8 +111,20 @@ export default function RegisterScreen() {
       setStep(1);
 
       setOtpDialogOpen(true); // 👈 OPEN DIALOG
+
+
+      showToast({
+        type: "success",
+        message: resendTimer > 0
+          ? "OTP resent successfully"
+          : "OTP sent to your email",
+      });
     } catch (err) {
-      alert(err.response?.data?.message || "OTP send failed");
+      showToast({
+        type: "error",
+        message:
+          err.response?.data?.message || "Failed to send OTP. Try again",
+      });
     } finally {
       setOtpLoading(false);
     }
@@ -115,7 +134,14 @@ export default function RegisterScreen() {
   // ✅ Verify OTP
   // -------------------------------
   const verifyOtp = async () => {
-    if (!otp) return alert("Enter OTP");
+    if (!otp) {
+      showToast({
+        type: "warning",
+        message: "Please enter the OTP",
+      });
+      return;
+    }
+
 
     setOtpLoading(true);
 
@@ -127,7 +153,11 @@ export default function RegisterScreen() {
 
       setOtpVerified(true);
       setStep(2);
-      alert("Email Verified ✅");
+      showToast({
+        type: "success",
+        message: "Email verified successfully",
+      });
+
     } catch (err) {
       alert(err.response?.data?.message || "Invalid OTP");
     } finally {
@@ -139,18 +169,42 @@ export default function RegisterScreen() {
   // ✅ Register
   // -------------------------------
   const handleRegister = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      showToast({
+        type: "warning",
+        message: "Please fix the highlighted errors",
+      });
+      return;
+    }
 
-    if (!otpVerified) return alert("Please verify your email OTP first!");
+    if (!otpVerified) {
+      showToast({
+        type: "warning",
+        message: "Please verify your email before creating an account",
+      });
+      return;
+    }
 
     setLoading(true);
     console.log("form", form);
     try {
       await API.post("/auth/register", form);
-      alert("Registration Successful ✅");
+      showToast({
+        type: "success",
+        message: "Account created successfully! Please login",
+      });
+      setTimeout(() => {
+        router.push("/login");
+      }, 800);
+
       router.push("/login");
     } catch (err) {
-      alert(err.response?.data?.message || "Registration failed");
+      showToast({
+        type: "error",
+        message:
+          err.response?.data?.message ||
+          "Registration failed. Please try again",
+      });
     } finally {
       setLoading(false);
     }
@@ -404,8 +458,8 @@ export default function RegisterScreen() {
                         background: "#F3F4F6",
                         "&:hover": { background: "#E5E7EB" },
                       }}
-                    > 
-                    
+                    >
+
                       <ArrowBackIosNewIcon fontSize="small" />
                     </IconButton>
 
@@ -414,7 +468,7 @@ export default function RegisterScreen() {
                       label={otpLoading ? "Sending OTP..." : "Send OTP"}
                       onClick={sendOtp}
                       disabled={otpLoading}
-                      className="!bg-blue-500"
+                      className="!bg-orange-500 hover:!bg-orange-600 !text-white px-10"
                     />
                   </div>
                 </Box>
@@ -474,7 +528,7 @@ export default function RegisterScreen() {
                       label="Resend OTP"
                       variant="text"
                       onClick={sendOtp}
-                      className="!text-blue-600"
+                      className="!bg-orange-500 hover:!bg-orange-600 !text-white px-10"
                     />
                   )}
                 </Box>
@@ -547,12 +601,22 @@ export default function RegisterScreen() {
                       {/* Register */}
                       <AppButton
                         label={
-                          loading ? "Creating Account..." : "Create Account"
+                          !otpVerified
+                            ? "Verify Email to Continue"
+                            : loading
+                              ? "Creating Account..."
+                              : "Create Account"
                         }
                         onClick={handleRegister}
-                        disabled={loading}
-                        className="!bg-orange-500"
+                        disabled={loading || !otpVerified}
+                        className={`
+                                  ${otpVerified
+                            ? "!bg-orange-500 hover:!bg-orange-600"
+                            : "!bg-gray-300 cursor-not-allowed"}
+                               !text-white px-10
+                                  `}
                       />
+
                     </Box>
                   </Box>
                 </motion.div>
