@@ -19,6 +19,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { NOTIFICATIONS } from "@/Componenets/ToastConstant/notifications";
+import { showToast } from "@/Componenets/ToastConstant/toast";
 
 const WaiterNavbar = () => {
 
@@ -47,12 +49,28 @@ const WaiterNavbar = () => {
   const handleLogout = () => {
     // clear auth
     localStorage.removeItem("token"); // or cookies
+
+    showToast(NOTIFICATIONS.AUTH.LOGOUT_SUCCESS);
+
     router.push("/login");
   };
 
-  const handleKbOpen = () => setKbOpen(true);
+  const handleKbOpen = () => {
+    showToast({
+      type: "info",
+      message: "Keyboard shortcuts opened",
+    });
+    setKbOpen(true);
+  };
+
   const handleKbClose = () => setKbOpen(false);
+
   const handleOrderTypeClick = (orderType) => {
+    showToast({
+      type: "info",
+      message: `${orderType} order selected`,
+    });
+
     router.push(`/waiter/order?orderType=${orderType}`);
   };
 

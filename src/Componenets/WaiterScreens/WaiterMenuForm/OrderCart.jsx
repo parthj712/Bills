@@ -14,7 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
 import { clearCart, decreaseQty, increaseQty, setCartFromOrder } from "@/redux/slices/cartSlice";
-import html2pdf from "html2pdf.js";
+// import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
   fetchActiveOrder,

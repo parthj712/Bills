@@ -1,0 +1,56 @@
+/* Base Toast (slight refinement) */
+.app-toast {
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(8px);
+}
+
+/* Body */
+.app-toast__body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+/* Success (keep gradient – feels good) */
+.app-toast--success {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: #ffffff;
+}
+
+/* Error (keep strong) */
+.app-toast--error {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    color: #ffffff;
+}
+
+/* ⚠️ WARNING – toned down & premium */
+.app-toast--warning {
+    background: #fff7ed;
+    /* soft amber */
+    color: #92400e;
+    /* muted text */
+    border-left: 4px solid #f59e0b;
+    /* subtle accent */
+}
+
+/* Info (cool & calm) */
+.app-toast--info {
+    background: #eff6ff;
+    color: #1e40af;
+    border-left: 4px solid #3b82f6;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .Toastify__toast-container {
+        top: auto !important;
+        bottom: 1rem !important;
+        right: 1rem !important;
+        left: 1rem !important;
+    }
+}

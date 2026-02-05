@@ -17,6 +17,10 @@ import API from "@/service/api";
 import { useRef } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
+//toast notification
+import { showToast } from "../ToastConstant/toast";
+import { NOTIFICATIONS } from "../ToastConstant/notifications";
+
 const MotionDiv = motion.div;
 
 const slidePanel = {
@@ -82,7 +86,14 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-    if (!validate()) return;
+    if (!validate()) {
+      showToast({
+        type: "warning",
+        message: "Please fix the highlighted errors",
+      });
+      return;
+    }
+
 
     setLoading(true);
     setApiError("");
@@ -99,6 +110,9 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
+
+      showToast(NOTIFICATIONS.AUTH.LOGIN_SUCCESS);
+
       // ✅ REDIRECT BY ROLE
       if (user.role === "ADMIN") {
         router.push("/admin");
@@ -108,6 +122,12 @@ export default function Login() {
     } catch (err) {
       const message = err?.response?.data?.message || "Something went wrong";
       setErrors(message);
+
+      if (message === "Invalid credentials") {
+        showToast(NOTIFICATIONS.AUTH.LOGIN_FAILED);
+      } else {
+        showToast(NOTIFICATIONS.SYSTEM.SOMETHING_WENT_WRONG);
+      }
     } finally {
       setLoading(false);
     }
