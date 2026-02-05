@@ -24,12 +24,25 @@ import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
 import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
 
 const tableStyles = {
-  AVAILABLE:
-    "!bg-green-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-green-600/90 backdrop-blur-md",
+  AVAILABLE: `
+    bg-green-100
+    border-2 border-green-600
+    text-green-900
+    shadow-green-200
+    hover:bg-green-200
+    hover:border-green-700
+  `,
 
-  OCCUPIED:
-    "!bg-red-300/30 !text-black shadow-md !rounded-2xl border-[2px] border-red-600/90 backdrop-blur-md",
+  OCCUPIED: `
+    bg-red-100
+    border-2 border-red-600
+    text-red-900
+    shadow-red-200
+    hover:bg-red-200
+    hover:border-red-700
+  `,
 };
+;
 
 export default function WaiterHomePage() {
   const theme = useTheme();
@@ -218,80 +231,84 @@ export default function WaiterHomePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                    <Skeleton
-                      key={index}
-                      variant="rounded"
-                      height={110}
-                      className="!rounded-2xl"
-                    />
-                  ))
+                  <Skeleton
+                    key={index}
+                    variant="rounded"
+                    height={110}
+                    className="!rounded-2xl"
+                  />
+                ))
                 : tables.map((table) => (
-                    <Tooltip
-                      key={table._id}
-                      title={
-                        table.status === "OCCUPIED"
-                          ? "Active table"
-                          : "Add order"
-                      }
-                      arrow
-                      placement="bottom"
-                    >
-                      <div
-                        onClick={() =>
-                          handleTableClick(table._id, table.tableNo)
+                  <Tooltip
+                    key={table._id}
+                    title={
+                      table.status === "OCCUPIED"
+                        ? "Active table"
+                        : "Add order"
+                    }
+                    arrow
+                    placement="bottom"
+                  >
+                    <div
+                      onClick={() => handleTableClick(table._id, table.tableNo)}
+                      className={`
+                          relative
+                          h-28 w-full
+                          rounded-2xl
+                          cursor-pointer
+                          flex flex-col
+                          items-center
+                          justify-center
+                          gap-2
+                          px-4 py-3
+                          transition-all duration-300
+                          hover:shadow-lg hover:scale-[1.03]
+                          ${tableStyles[table.status]}
+                          ${highlightTableNo === table.tableNo
+                          ? table.status === "OCCUPIED"
+                            ? "ring-4 ring-red-500 ring-offset-2"
+                            : "ring-4 ring-green-500 ring-offset-2"
+                          : ""
                         }
-                        className={`
-              relative
-              h-28 w-full
-              rounded-2xl
-              border
-              cursor-pointer
-              flex flex-col
-              items-center
-              justify-center
-              gap-2
-              px-4 py-3
-              text-black
-              shadow-sm
-              transition-all duration-300
-              hover:shadow-lg hover:scale-[1.03]
-              ${tableStyles[table.status]}
-              ${
-                highlightTableNo === table.tableNo
-                  ? "ring-4 ring-blue-500 ring-offset-2 scale-105"
-                  : ""
-              }
-            `}
+                        `}
+                    >
+
+                      {/* ✅ Table Number */}
+                      <Typography
+                        fontSize={26}
+                        fontWeight={600}
+                        className={table.status === "OCCUPIED" ? "text-red-800" : "text-green-800"}
                       >
-                        {/* ✅ Table Number */}
-                        <Typography fontSize={26} fontWeight={600}>
-                          {table.tableNo}
-                        </Typography>
+                        {table.tableNo}
+                      </Typography>
 
-                        {/* ✅ Status Badge */}
-                        <Typography
-                          fontSize={13}
-                          fontWeight={500}
-                          className={`px-3 py-[2px] rounded-full
-                ${
-                  table.status === "OCCUPIED"
-                    ? "bg-red-600 text-white"
-                    : "bg-green-600 text-white"
-                }
-              `}
-                        >
-                          {table.status}
-                        </Typography>
 
-                        {/* ✅ Time (only if occupied) */}
-                        {table.status === "OCCUPIED" && table.occupiedAt && (
-                          <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
-                            {getRunningTime(table.occupiedAt)}
-                          </div>
-                        )}
-                      </div>
-                    </Tooltip>
-                  ))}
+                      {/* ✅ Status Badge */}
+                      <Typography
+                        fontSize={table.status === "OCCUPIED" ? 12 : 13}
+                        fontWeight={table.status === "OCCUPIED" ? 700 : 600}
+                        className={`px-2 py-[2px] rounded-full
+                          ${table.status === "OCCUPIED"
+                            ? "bg-red-100 text-red-700 border border-red-500"
+                            : "bg-green-100 text-green-700 border border-green-500"
+                          }
+                          `}
+                      >
+                        {table.status}
+                      </Typography>
+
+
+
+
+                      {/* ✅ Time (only if occupied) */}
+                      {table.status === "OCCUPIED" && table.occupiedAt && (
+                        <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                          {getRunningTime(table.occupiedAt)}
+                        </div>
+                      )}
+                    </div>
+                  </Tooltip>
+                ))}
             </div>
           </Card>
         </div>
