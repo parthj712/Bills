@@ -1,9 +1,11 @@
 import { Card, Typography, Box } from "@mui/material";
 
-export const StatCard = ({ stat }) => {
+export const StatCard = ({ stat, onClick }) => {
     return (
         <Card
+            onClick={onClick}
             sx={{
+                cursor: onClick ? "pointer" : "default",
                 borderRadius: "20px",
                 border: "1px solid rgba(0,0,0,0.06)",
                 background:

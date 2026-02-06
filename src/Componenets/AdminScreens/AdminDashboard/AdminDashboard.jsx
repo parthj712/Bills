@@ -7,6 +7,7 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Dialog,
 } from "@mui/material";
 import {
   ShoppingCart,
@@ -40,6 +41,8 @@ export default function AdminDashboard() {
   const [bills, setBills] = useState([]);
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
+
+  const [openTodayOrders, setOpenTodayOrders] = useState(false);
 
   const today = new Date();
   const todayDate = today.toDateString();
@@ -96,6 +99,7 @@ export default function AdminDashboard() {
     (b) => new Date(b.createdAt).toDateString() === todayDate,
   ).length;
 
+
   const todaysTotalSales = bills.reduce((sum, bill) => {
     const billDate = new Date(bill.createdAt).toDateString();
     return billDate === todayDate ? sum + bill.grandTotal : sum;
@@ -114,8 +118,9 @@ export default function AdminDashboard() {
         ? 100
         : 0
       : Math.round(
-          ((todaysOrders - yesterdaysOrders) / yesterdaysOrders) * 100,
-        );
+        ((todaysOrders - yesterdaysOrders) / yesterdaysOrders) * 100,
+      );
+
 
   const stats = [
     {
@@ -131,7 +136,9 @@ export default function AdminDashboard() {
       icon: <ShoppingCart fontSize="large" />,
       bg: "bg-green-100",
       iconColor: "text-green-600",
+      onClick: () => setOpenTodayOrders(true),
     },
+
     {
       title: "Today's Sales",
       value: `₹${todaysTotalSales}`,
@@ -155,8 +162,21 @@ export default function AdminDashboard() {
     },
   ];
 
+
+  //filter for the takeway and dinein
+
+  // const takeawayCount = todaysOrders.filter(
+  //   (bill) => bill.orderType === "TAKEAWAY"
+  // ).length;
+
+  // const dineInCount = todaysOrders.filter(
+  //   (bill) => bill.orderType === "DINE_IN"
+  // ).length;
+
+
+
   return (
-    <Box className="min-h-screen bg-[#f8fafc]">
+    <Box className="min-h-screen bg-[#f8fafc] overflow-hidden">
       {subscription && subscription.daysLeft <= 2 && (
         <Card
           className="mb-6 p-4 rounded-xl"
@@ -207,18 +227,6 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
         {/* ================= LOADING STATE ================= */}
         {loadingSub ? (
           <Box>
-            {/* Loading Spinner */}
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                mb: 4,
-              }}
-            >
-              <CircularProgress />
-            </Box>
-
             {/* Skeleton Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {[1, 2, 3, 4].map((i) => (
@@ -264,7 +272,7 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
               {/* STATS */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {stats.map((stat, index) => (
-                  <StatCard key={index} stat={stat} />
+                  <StatCard key={index} stat={stat} onClick={stat.onClick} />
                 ))}
               </div>
 
@@ -319,6 +327,55 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
           </Box>
         )}
       </Box>
+
+
+      <Dialog
+        open={openTodayOrders}
+        onClose={() => setOpenTodayOrders(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <Box p={3}>
+          <Typography fontSize={20} fontWeight={700} mb={2}>
+            Today's Orders Breakdown
+          </Typography>
+
+          <Divider sx={{ mb: 2 }} />
+
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography>Takeaway Orders</Typography>
+            {/* <Typography fontWeight={700}>{takeawayCount}</Typography> */}
+            <Typography fontWeight={700}>20</Typography>
+          </Box>
+
+          <Box display="flex" justifyContent="space-between">
+            <Typography>Dine-In Orders</Typography>
+            {/* <Typography fontWeight={700}>{dineInCount}</Typography> */}
+            <Typography fontWeight={700}>22</Typography>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box textAlign="right">
+            <Card
+              onClick={() => setOpenTodayOrders(false)}
+              sx={{
+                display: "inline-block",
+                px: 3,
+                py: 1,
+                cursor: "pointer",
+                borderRadius: "10px",
+                background: "linear-gradient(90deg,#2563eb,#3b82f6)",
+                color: "white",
+                fontWeight: 600,
+              }}
+            >
+              Close
+            </Card>
+          </Box>
+        </Box>
+      </Dialog>
+
     </Box>
   );
 }
