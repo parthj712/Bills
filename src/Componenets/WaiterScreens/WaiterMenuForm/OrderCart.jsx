@@ -31,6 +31,7 @@ import {
   saveOrdersToDraft,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
+import { adminInfo, getShopName } from "@/service/shopService";
 
 export default function OrderCart() {
   const dispatch = useDispatch();
@@ -42,6 +43,7 @@ export default function OrderCart() {
   const tableId = searchParams.get("tableId");
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const isDineIn = orderType === "DINE-IN";
+  const [shopInfo, setShopInfo] = useState([]);
 
   // ✅ cartKey: tableId for DINE-IN, else orderType
   const cartKey = isDineIn ? tableId : orderType;
@@ -58,46 +60,18 @@ export default function OrderCart() {
   const tax = subtotal * 0.05;
   const grandTotal = subtotal + tax;
 
-  const handleProceedToBilling = async () => {
-    if (!cartItems.length || loading) return;
-    if (isDineIn && !tableId) return;
-
-    setLoading(true);
-
+  const handleFecthShopInfo = async () => {
     try {
-      const payload = {
-        orderType, // ✅ MUST SEND
-        tableId: isDineIn ? tableId : null,
-        items: cartItems.map((item) => ({
-          menuItemId: item._id,
-          name: item.name,
-          itemCode: item.itemCode,
-          portion: item.portion,
-          price: item.unitPrice,
-          qty: item.qty,
-        })),
-      };
-
-      console.log("payload", payload);
-
-      const res = await finalizeBillAndOrder(payload);
-      console.log("Billing Success:", res.data);
-
-      // ✅ clear correct cart
-      dispatch(clearCart(cartKey));
-
-      // ✅ update table only for dine-in
-      if (isDineIn) {
-        await updateTableStatus(tableId, "AVAILABLE");
-      }
-
-      router.back();
+      const res = await getShopName();
+      console.log("res", res.data?.data);
+      setShopInfo(res.data?.data);
     } catch (error) {
-      console.error("Billing failed", error.response?.data || error.message);
-    } finally {
-      setLoading(false);
+      console.log(error);
     }
   };
+  useEffect(() => {
+    handleFecthShopInfo();
+  }, []);
 
   const handleSaveAndContinue = async () => {
     if (!isDineIn || !tableId) return;
@@ -371,6 +345,7 @@ export default function OrderCart() {
             subtotal={subtotal}
             tax={tax}
             total={grandTotal}
+            shopInfo={shopInfo}
           />
 
           <Button
