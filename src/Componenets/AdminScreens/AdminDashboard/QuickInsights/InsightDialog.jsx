@@ -18,7 +18,7 @@ import RevenueDonutChart from "./charts/RevenueDonutGraph";
 
 export default function InsightDialog({ open, onClose, insight, bills }) {
   if (!insight) return null;
-
+  console.log("data", bills);
   /* Render Chart Based on Type */
   const renderChart = () => {
     switch (insight.chartType) {

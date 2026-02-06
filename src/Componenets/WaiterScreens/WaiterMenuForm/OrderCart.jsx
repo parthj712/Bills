@@ -58,46 +58,46 @@ export default function OrderCart() {
   const tax = subtotal * 0.05;
   const grandTotal = subtotal + tax;
 
-  const handleProceedToBilling = async () => {
-    if (!cartItems.length || loading) return;
-    if (isDineIn && !tableId) return;
+  // const handleProceedToBilling = async () => {
+  //   if (!cartItems.length || loading) return;
+  //   if (isDineIn && !tableId) return;
 
-    setLoading(true);
+  //   setLoading(true);
 
-    try {
-      const payload = {
-        orderType, // ✅ MUST SEND
-        tableId: isDineIn ? tableId : null,
-        items: cartItems.map((item) => ({
-          menuItemId: item._id,
-          name: item.name,
-          itemCode: item.itemCode,
-          portion: item.portion,
-          price: item.unitPrice,
-          qty: item.qty,
-        })),
-      };
+  //   try {
+  //     const payload = {
+  //       orderType, // ✅ MUST SEND
+  //       tableId: isDineIn ? tableId : null,
+  //       items: cartItems.map((item) => ({
+  //         menuItemId: item._id,
+  //         name: item.name,
+  //         itemCode: item.itemCode,
+  //         portion: item.portion,
+  //         price: item.unitPrice,
+  //         qty: item.qty,
+  //       })),
+  //     };
 
-      console.log("payload", payload);
+  //     console.log("payload", payload);
 
-      const res = await finalizeBillAndOrder(payload);
-      console.log("Billing Success:", res.data);
+  //     const res = await finalizeBillAndOrder(payload);
+  //     console.log("Billing Success:", res.data);
 
-      // ✅ clear correct cart
-      dispatch(clearCart(cartKey));
+  //     // ✅ clear correct cart
+  //     dispatch(clearCart(cartKey));
 
-      // ✅ update table only for dine-in
-      if (isDineIn) {
-        await updateTableStatus(tableId, "AVAILABLE");
-      }
+  //     // ✅ update table only for dine-in
+  //     if (isDineIn) {
+  //       await updateTableStatus(tableId, "AVAILABLE");
+  //     }
 
-      router.back();
-    } catch (error) {
-      console.error("Billing failed", error.response?.data || error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     router.back();
+  //   } catch (error) {
+  //     console.error("Billing failed", error.response?.data || error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleSaveAndContinue = async () => {
     if (!isDineIn || !tableId) return;
@@ -175,6 +175,7 @@ export default function OrderCart() {
           qty: item.qty,
         })),
       };
+      console.log("payload", payload);
 
       await finalizeBillAndOrder(payload);
 
