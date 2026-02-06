@@ -301,8 +301,8 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
               justifyContent="space-between"
               mb={1}
             >
-              <Typography>{item.orderType} Orders</Typography>
-              <Typography fontWeight={700}>{item.todayOrders}</Typography>
+              <Typography fontSize={16}>{item.orderType} Orders</Typography>
+              <Typography fontSize={16} fontWeight={700}>{item.todayOrders}</Typography>
             </Box>
           ))}
 
