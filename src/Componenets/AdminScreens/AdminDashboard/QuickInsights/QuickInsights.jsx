@@ -35,7 +35,7 @@ export const QuickInsights = () => {
   const getData = async () => {
     try {
       const res = await getBills();
-      console.log(res.data?.data);
+
       setBills(res.data?.data);
     } catch (error) {
       console.log(error);

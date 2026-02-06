@@ -18,7 +18,7 @@ import {
 } from "@mui/icons-material";
 import { StatCard } from "./StatCard";
 import { useEffect, useState } from "react";
-import { getBills } from "@/service/billsService";
+import { getBills, getDashboardSummary } from "@/service/billsService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
 import { QuickInsights } from "./QuickInsights/QuickInsights";
@@ -38,14 +38,14 @@ export default function AdminDashboard() {
   // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   // const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-  const [bills, setBills] = useState([]);
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
+  const [summary, setSummary] = useState([]);
 
   const [openTodayOrders, setOpenTodayOrders] = useState(false);
 
   const today = new Date();
-  const todayDate = today.toDateString();
+
   const yesterday = new Date();
 
   const currentMonth = today.getMonth();
@@ -57,22 +57,21 @@ export default function AdminDashboard() {
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
 
-  console.log("has", hasAccess);
-  console.log("sub", subscription);
-
   useEffect(() => {
-    fetchBills();
+    fetchSummary();
     fetchSubscriptionExpiry();
   }, []);
 
-  const fetchBills = async () => {
+  const fetchSummary = async () => {
     try {
-      const res = await getBills();
-      setBills(Array.isArray(res.data) ? res.data : res.data?.data || []);
+      const res = await getDashboardSummary();
+      console.log(res.data);
+      setSummary(res.data);
     } catch (error) {
-      console.log(error?.message || error);
+      console.log(error);
     }
   };
+
   const fetchSubscriptionExpiry = async () => {
     try {
       const res = await getSubscriptionExpiry();
@@ -84,55 +83,30 @@ export default function AdminDashboard() {
     }
   };
 
-  const monthlyTotalSales = bills.reduce((sum, bill) => {
-    const billDate = new Date(bill.createdAt);
-    if (
-      billDate.getMonth() === currentMonth &&
-      billDate.getFullYear() === currentYear
-    ) {
-      return sum + bill.grandTotal;
-    }
-    return sum;
-  }, 0);
+  const avgOrderValue = summary.totalOrders
+    ? Math.round(summary.totalRevenue / summary.totalOrders)
+    : 0;
 
-  const todaysOrders = bills.filter(
-    (b) => new Date(b.createdAt).toDateString() === todayDate,
-  ).length;
+  const todayAOV = summary.todayOrders
+    ? Math.round(summary.todayRevenue / summary.todayOrders)
+    : 0;
 
-
-  const todaysTotalSales = bills.reduce((sum, bill) => {
-    const billDate = new Date(bill.createdAt).toDateString();
-    return billDate === todayDate ? sum + bill.grandTotal : sum;
-  }, 0);
-
-  // Yesterday's Orders
-  const yesterdaysOrders = bills.filter((bill) => {
-    const d = new Date(bill.createdAt);
-    return d.toDateString() === yesterday.toDateString();
-  }).length;
-
-  // Growth %
-  const OrdersGrowthToday =
-    yesterdaysOrders === 0
-      ? todaysOrders > 0
-        ? 100
-        : 0
-      : Math.round(
-        ((todaysOrders - yesterdaysOrders) / yesterdaysOrders) * 100,
-      );
-
+  const aovChange =
+    avgOrderValue === 0
+      ? 0
+      : Math.round(((todayAOV - avgOrderValue) / avgOrderValue) * 100);
 
   const stats = [
     {
       title: "Monthly Sales",
-      value: `₹${monthlyTotalSales}`,
+      value: `₹${summary.monthlyRevenue}`,
       icon: <HomeWork fontSize="large" />,
       bg: "bg-orange-100",
       iconColor: "text-orange-600",
     },
     {
       title: "Today's Orders",
-      value: todaysOrders,
+      value: summary.todayOrders,
       icon: <ShoppingCart fontSize="large" />,
       bg: "bg-green-100",
       iconColor: "text-green-600",
@@ -141,40 +115,19 @@ export default function AdminDashboard() {
 
     {
       title: "Today's Sales",
-      value: `₹${todaysTotalSales}`,
+      value: `₹${summary.todayRevenue}`,
       icon: <CurrencyRupee fontSize="large" />,
       bg: "bg-purple-100",
       iconColor: "text-purple-600",
     },
-    // {
-    //   title: "Order Growth Today",
-    //   value: `${OrdersGrowthToday}%`,
-    //   icon: <EmojiEmotions fontSize="large" />,
-    //   bg: "bg-yellow-100",
-    //   iconColor: "text-yellow-600",
-    // },
     {
-      title: "Order Growth Today",
-      value: `${OrdersGrowthToday}%`,
+      title: "Order Value Trend",
+      value: `${aovChange > 0 ? "+" : ""}${aovChange}%`,
       icon: <TrendingUpIcon fontSize="large" />,
-      bg: "bg-green-100",
-      iconColor: "text-green-600",
+      bg: aovChange >= 0 ? "bg-green-100" : "bg-red-100",
+      iconColor: aovChange >= 0 ? "text-green-600" : "text-red-600",
     },
   ];
-
-
-  //filter for the takeway and dinein
-
-  // const takeawayCount = todaysOrders.filter(
-  //   (bill) => bill.orderType === "TAKEAWAY"
-  // ).length;
-
-  // const dineInCount = todaysOrders.filter(
-  //   (bill) => bill.orderType === "DINE_IN"
-  // ).length;
-
-
-
   return (
     <Box className="min-h-screen bg-[#f8fafc] overflow-hidden">
       {subscription && subscription.daysLeft <= 2 && (
@@ -328,7 +281,6 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
         )}
       </Box>
 
-
       <Dialog
         open={openTodayOrders}
         onClose={() => setOpenTodayOrders(false)}
@@ -342,17 +294,17 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
 
           <Divider sx={{ mb: 2 }} />
 
-          <Box display="flex" justifyContent="space-between" mb={1}>
-            <Typography>Takeaway Orders</Typography>
-            {/* <Typography fontWeight={700}>{takeawayCount}</Typography> */}
-            <Typography fontWeight={700}>20</Typography>
-          </Box>
-
-          <Box display="flex" justifyContent="space-between">
-            <Typography>Dine-In Orders</Typography>
-            {/* <Typography fontWeight={700}>{dineInCount}</Typography> */}
-            <Typography fontWeight={700}>22</Typography>
-          </Box>
+          {summary.orderTypeStats?.map((item, index) => (
+            <Box
+              key={index}
+              display="flex"
+              justifyContent="space-between"
+              mb={1}
+            >
+              <Typography>{item.orderType} Orders</Typography>
+              <Typography fontWeight={700}>{item.todayOrders}</Typography>
+            </Box>
+          ))}
 
           <Divider sx={{ my: 2 }} />
 
@@ -375,7 +327,6 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
           </Box>
         </Box>
       </Dialog>
-
     </Box>
   );
 }
