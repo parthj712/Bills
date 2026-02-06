@@ -1,7 +1,11 @@
 "use client";
 
 import {
-  Card, Typography, Divider, IconButton, Dialog,
+  Card,
+  Typography,
+  Divider,
+  IconButton,
+  Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
@@ -13,7 +17,12 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
-import { clearCart, decreaseQty, increaseQty, setCartFromOrder } from "@/redux/slices/cartSlice";
+import {
+  clearCart,
+  decreaseQty,
+  increaseQty,
+  setCartFromOrder,
+} from "@/redux/slices/cartSlice";
 // import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
@@ -29,7 +38,6 @@ export default function OrderCart() {
   const searchParams = useSearchParams();
 
   const [openConfirm, setOpenConfirm] = useState(false);
-
 
   const tableId = searchParams.get("tableId");
   const orderType = searchParams.get("orderType") || "DINE-IN";
@@ -151,7 +159,6 @@ export default function OrderCart() {
     setOpenConfirm(true);
   };
 
-
   const handleConfirmBilling = async () => {
     setLoading(true);
 
@@ -186,8 +193,6 @@ export default function OrderCart() {
     }
   };
 
-
-
   // const downloadBillPDF = () => {
   //   const element = document.getElementById("bill-pdf");
 
@@ -202,7 +207,6 @@ export default function OrderCart() {
   //     .from(element)
   //     .save();
   // };
-
 
   const downloadBillPDF = async () => {
     if (typeof window === "undefined") return;
@@ -223,7 +227,6 @@ export default function OrderCart() {
       .from(element)
       .save();
   };
-
 
   return (
     <Suspense fallback={<div>Loading order...</div>}>
@@ -350,14 +353,16 @@ export default function OrderCart() {
             disabled={loading}
             className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
             onClick={handleOpenConfirm}
-
           />
         </div>
       )}
 
-
-
-      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle fontWeight={700}>Confirm Billing</DialogTitle>
 
         <DialogContent>
@@ -378,7 +383,6 @@ export default function OrderCart() {
           </Button>
         </DialogContent>
 
-
         <DialogActions>
           <Button onClick={() => setOpenConfirm(false)} color="inherit">
             Cancel
@@ -394,7 +398,6 @@ export default function OrderCart() {
           </Button>
         </DialogActions>
       </Dialog>
-
     </Suspense>
   );
 }
