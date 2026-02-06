@@ -1,7 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Box, Skeleton, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { useEffect, useRef, useState } from "react";
+import {
+  Box,
+  Skeleton,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import AddTable from "./AddTable";
 import { getTables } from "@/service/tableService";
@@ -12,7 +18,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Edit, Delete, Add, Search } from "@mui/icons-material";
-
+import { connect, useDispatch } from "react-redux";
+import { connectSocket, socket } from "@/app/socket";
 
 export const STATUS_CONFIG = {
   AVAILABLE: {
@@ -45,11 +52,7 @@ export const STATUS_CONFIG = {
   },
 };
 
-
-
 export default function TableManagement() {
-
-
   const theme = useTheme();
 
   // BREAKPOINTS
@@ -57,9 +60,8 @@ export default function TableManagement() {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-
-  // ✅ tables must be state
   const [tables, setTables] = useState([]);
+  const shopJoinedRef = useRef(false); // ensures we join the shop only once
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [selectedTable, setSelectedTable] = useState(null);
   const handleTableClick = (table) => {
@@ -67,16 +69,25 @@ export default function TableManagement() {
     setOpenEditDialog(true);
   };
   const [loading, setLoading] = useState(true);
-
+  console.log(tables);
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const dispatch = useDispatch();
 
+  // Fetch tables
   const handleGetTables = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const res = await getTables();
+      console.log("Fetched tables:", res); // debug API
       setTables(res);
-    } catch (error) {
-      console.log("failed to get tables", error);
+
+      if (res.length && !shopJoinedRef.current) {
+        const shopId = res[0].shopId;
+        connectSocket(shopId);
+        shopJoinedRef.current = true;
+      }
+    } catch (err) {
+      console.log("Failed to fetch tables", err);
     } finally {
       setLoading(false);
     }
@@ -86,23 +97,55 @@ export default function TableManagement() {
     handleGetTables();
   }, []);
 
+  useEffect(() => {
+    const handleTableUpdate = (data) => {
+      console.log("Table updated via socket:", data);
+      setTables((prev) =>
+        prev.map((t) =>
+          t._id === data.tableId ? { ...t, status: data.status } : t,
+        ),
+      );
+      dispatch(updateTableFromSocket(data));
+    };
+
+    socket.on("tableUpdated", handleTableUpdate);
+
+    return () => {
+      socket.off("tableUpdated", handleTableUpdate);
+    };
+  }, [dispatch]);
+
   const handleAddTable = async () => {
     await handleGetTables();
   };
-
-
 
   return (
     <Box className="flex flex-col min-h-full p-2">
       {/* Header */}
 
-      <Box display={"flex"} flexDirection={"row"} justifyContent={"space-between"} alignItems={isMobile ? "flex-start" : "center"} mb={4} gap={isMobile ? 2 : 0}>
-        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+      <Box
+        display={"flex"}
+        flexDirection={"row"}
+        justifyContent={"space-between"}
+        alignItems={isMobile ? "flex-start" : "center"}
+        mb={4}
+        gap={isMobile ? 2 : 0}
+      >
+        <Typography
+          fontSize={isMobile ? 24 : 30}
+          fontWeight={isMobile ? 600 : 700}
+          className="text-[#0b3c5d]"
+        >
           Table Management
         </Typography>
 
         {/* Bottom Section */}
-        <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"space-between"}>
+        <Box
+          display={"flex"}
+          flexDirection={"row"}
+          alignItems={"center"}
+          justifyContent={"space-between"}
+        >
           {/* Legend */}
           <Box className="flex gap-8 text-[20px]">
             {/* <span className="flex items-center gap-3">
@@ -126,7 +169,6 @@ export default function TableManagement() {
             className="!bg-yellow-400 !text-black px-8"
           /> */}
 
-
             {!isMobile && (
               <AppButton
                 label="Add Tables"
@@ -143,34 +185,29 @@ export default function TableManagement() {
                 }}
               />
             )}
-
-
-
           </Box>
         </Box>
-
       </Box>
 
       {/* Tables Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-
         {loading
           ? Array.from({ length: 10 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              variant="rounded"
-              height={112}
-              sx={{ borderRadius: "12px" }}
-            />
-          ))
+              <Skeleton
+                key={index}
+                variant="rounded"
+                height={112}
+                sx={{ borderRadius: "12px" }}
+              />
+            ))
           : tables.map((table) => (
-            <motion.div
-              key={table._id}
-              whileHover={{ y: -4, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              onClick={() => handleTableClick(table)}
-              className={`
+              <motion.div
+                key={table._id}
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                onClick={() => handleTableClick(table)}
+                className={`
                   relative
                   h-28 w-full
                   rounded-2xl
@@ -187,28 +224,23 @@ export default function TableManagement() {
                  ${STATUS_CONFIG[table.status?.toUpperCase()]?.bg} ${STATUS_CONFIG[table.status?.toUpperCase()]?.border}
 
                 `}
-            >
-              {/* Table number */}
-              <span className="text-2xl font-bold">
-                {table.tableNo}
-              </span>
+              >
+                {/* Table number */}
+                <span className="text-2xl font-bold">{table.tableNo}</span>
 
-              {/* Status label */}
-              <span className="text-xs font-medium tracking-wide uppercase text-black/60">
-                {table.status || "Available"}
-              </span>
-            </motion.div>
-
-          ))}
+                {/* Status label */}
+                <span className="text-xs font-medium tracking-wide uppercase text-black/60">
+                  {table.status || "Available"}
+                </span>
+              </motion.div>
+            ))}
       </div>
-
 
       <AddTable
         open={openAddDialog}
         onClose={() => setOpenAddDialog(false)}
         onSuccess={handleAddTable}
       />
-
 
       {/*  Edit and delete Table Dialog */}
       <EditTable
@@ -217,8 +249,6 @@ export default function TableManagement() {
         onClose={() => setOpenEditDialog(false)}
         onSuccess={handleGetTables}
       />
-
-
 
       {isMobile && (
         <motion.div
@@ -249,7 +279,6 @@ export default function TableManagement() {
           </Box>
         </motion.div>
       )}
-
     </Box>
   );
 }
