@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://billing-web-app-sdr9.onrender.com",
+  baseURL: "https://billing-web-app-sdr9.onrender.com/api",
   // withCredentials: true,
 });
 
