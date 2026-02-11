@@ -35,13 +35,10 @@ import SalesBillCard from "./SalesBillCard";
 import MonthlySummaryCard from "./MonthlySummaryCard";
 
 export default function SalesReport() {
-
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-
 
   const [billsData, setBillsData] = useState([]);
   const [fromDate, setFromDate] = useState(null);
@@ -52,17 +49,14 @@ export default function SalesReport() {
 
   const [showReport, setShowReport] = useState(false);
 
-
   const quickRanges = [
-    { label: "1 Day", days: 0 },
+    { label: "1 Day", days: 1 },
     { label: "1 Week", days: 7 },
     { label: "1 Month", months: 1 },
     { label: "6 Months", months: 6 },
   ];
 
   const [activeRange, setActiveRange] = useState(null);
-
-
 
   useEffect(() => {
     getBills().then((res) => {
@@ -128,7 +122,11 @@ export default function SalesReport() {
       {/* Header */}
       <Box className="flex items-center justify-between mb-6">
         <Box>
-          <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+          <Typography
+            fontSize={isMobile ? 24 : 30}
+            fontWeight={isMobile ? 600 : 700}
+            className="text-[#0b3c5d]"
+          >
             Sales Report
           </Typography>
           <Typography fontSize={14} color="text.secondary">
@@ -170,7 +168,12 @@ export default function SalesReport() {
           flexWrap="wrap"
         >
           {/* LEFT SIDE */}
-          <Box display="flex" flexDirection="column" alignItems={"flex-start"} gap={4}>
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems={"flex-start"}
+            gap={4}
+          >
             {/* Quick Date Shortcuts */}
             <Box display="flex" gap={1} flexWrap="wrap">
               {quickRanges.map((range) => (
@@ -227,7 +230,6 @@ export default function SalesReport() {
                 />
               </LocalizationProvider>
             </Box>
-
           </Box>
 
           {/* RIGHT SIDE CTA */}
@@ -253,8 +255,6 @@ export default function SalesReport() {
         </Box>
       </Paper>
 
-
-
       {/* Sales Table */}
       {showReport && isDesktop && (
         <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
@@ -262,21 +262,26 @@ export default function SalesReport() {
             <Table stickyHeader>
               <TableHead>
                 <TableRow sx={{ backgroundColor: "#0b3c5d" }}>
-                  {["Date", "Bill No", "Subtotal", "GST", "Total", "Action"].map(
-                    (h) => (
-                      <TableCell
-                        key={h}
-                        align="center"
-                        sx={{
-                          color: "white",
-                          fontWeight: 600,
-                          backgroundColor: "#0b3c5d",
-                        }}
-                      >
-                        {h}
-                      </TableCell>
-                    ),
-                  )}
+                  {[
+                    "Date",
+                    "Bill No",
+                    "Subtotal",
+                    "GST",
+                    "Total",
+                    "Action",
+                  ].map((h) => (
+                    <TableCell
+                      key={h}
+                      align="center"
+                      sx={{
+                        color: "white",
+                        fontWeight: 600,
+                        backgroundColor: "#0b3c5d",
+                      }}
+                    >
+                      {h}
+                    </TableCell>
+                  ))}
                 </TableRow>
               </TableHead>
 
@@ -338,7 +343,6 @@ export default function SalesReport() {
         </Paper>
       )}
 
-
       {/* MOBILE + TABLET CARDS */}
       {showReport && !isDesktop && (
         <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -362,7 +366,6 @@ export default function SalesReport() {
           )}
         </Box>
       )}
-
 
       {/* Monthly Summary */}
       {isDesktop && (
@@ -400,7 +403,6 @@ export default function SalesReport() {
         </Box>
       )}
 
-
       {/* MOBILE + TABLET MONTHLY SUMMARY */}
       {/* {!isDesktop && (
         <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -423,14 +425,12 @@ export default function SalesReport() {
         </Box>
       )} */}
 
-
       {/* Bill Modal */}
       <BillDetails
         open={openBill}
         onClose={() => setOpenBill(false)}
         bill={selectedBill}
       />
-
 
       {isMobile && (
         <motion.div

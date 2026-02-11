@@ -52,7 +52,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
     const loadCategories = async () => {
       try {
         const res = await getCatgories();
-        console.log("categories", res);
+
         setCategories(res.data);
       } catch (err) {
         console.error("Failed to load categories", err);

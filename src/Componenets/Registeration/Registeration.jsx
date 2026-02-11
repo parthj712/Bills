@@ -22,6 +22,9 @@ import RealStepper from "./RealStepper";
 import OtpBoxes from "../CommonComponents/OTPBoxes";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
+//toast notification
+import { showToast } from "../ToastConstant/toast";
+import { NOTIFICATIONS } from "../ToastConstant/notifications";
 const MotionDiv = motion.div;
 
 export default function RegisterScreen() {
@@ -97,7 +100,6 @@ export default function RegisterScreen() {
       return;
     }
 
-
     setOtpLoading(true);
 
     setOtpSent(true);
@@ -112,18 +114,17 @@ export default function RegisterScreen() {
 
       setOtpDialogOpen(true); // 👈 OPEN DIALOG
 
-
       showToast({
         type: "success",
-        message: resendTimer > 0
-          ? "OTP resent successfully"
-          : "OTP sent to your email",
+        message:
+          resendTimer > 0
+            ? "OTP resent successfully"
+            : "OTP sent to your email",
       });
     } catch (err) {
       showToast({
         type: "error",
-        message:
-          err.response?.data?.message || "Failed to send OTP. Try again",
+        message: err.response?.data?.message || "Failed to send OTP. Try again",
       });
     } finally {
       setOtpLoading(false);
@@ -142,7 +143,6 @@ export default function RegisterScreen() {
       return;
     }
 
-
     setOtpLoading(true);
 
     try {
@@ -157,7 +157,6 @@ export default function RegisterScreen() {
         type: "success",
         message: "Email verified successfully",
       });
-
     } catch (err) {
       alert(err.response?.data?.message || "Invalid OTP");
     } finally {
@@ -459,10 +458,8 @@ export default function RegisterScreen() {
                         "&:hover": { background: "#E5E7EB" },
                       }}
                     >
-
                       <ArrowBackIosNewIcon fontSize="small" />
                     </IconButton>
-
 
                     <AppButton
                       label={otpLoading ? "Sending OTP..." : "Send OTP"}
@@ -610,13 +607,14 @@ export default function RegisterScreen() {
                         onClick={handleRegister}
                         disabled={loading || !otpVerified}
                         className={`
-                                  ${otpVerified
-                            ? "!bg-orange-500 hover:!bg-orange-600"
-                            : "!bg-gray-300 cursor-not-allowed"}
+                                  ${
+                                    otpVerified
+                                      ? "!bg-orange-500 hover:!bg-orange-600"
+                                      : "!bg-gray-300 cursor-not-allowed"
+                                  }
                                !text-white px-10
                                   `}
                       />
-
                     </Box>
                   </Box>
                 </motion.div>

@@ -18,8 +18,8 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Edit, Delete, Add, Search } from "@mui/icons-material";
-import { connect, useDispatch } from "react-redux";
-import { connectSocket, socket } from "@/app/socket";
+
+import { socket } from "@/app/lib/socket";
 
 export const STATUS_CONFIG = {
   AVAILABLE: {
@@ -71,7 +71,6 @@ export default function TableManagement() {
   const [loading, setLoading] = useState(true);
   console.log(tables);
   const [openAddDialog, setOpenAddDialog] = useState(false);
-  const dispatch = useDispatch();
 
   // Fetch tables
   const handleGetTables = async () => {
@@ -80,12 +79,6 @@ export default function TableManagement() {
       const res = await getTables();
       console.log("Fetched tables:", res); // debug API
       setTables(res);
-
-      if (res.length && !shopJoinedRef.current) {
-        const shopId = res[0].shopId;
-        connectSocket(shopId);
-        shopJoinedRef.current = true;
-      }
     } catch (err) {
       console.log("Failed to fetch tables", err);
     } finally {
@@ -105,15 +98,14 @@ export default function TableManagement() {
           t._id === data.tableId ? { ...t, status: data.status } : t,
         ),
       );
-      dispatch(updateTableFromSocket(data));
     };
 
-    socket.on("tableUpdated", handleTableUpdate);
+    socket.on("tableStatusChanged", handleTableUpdate);
 
     return () => {
-      socket.off("tableUpdated", handleTableUpdate);
+      socket.off("tableStatusChanged", handleTableUpdate);
     };
-  }, [dispatch]);
+  }, []);
 
   const handleAddTable = async () => {
     await handleGetTables();

@@ -9,13 +9,12 @@ import {
   Divider,
   Tooltip,
   Box,
-  
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { fetchMenuItems } from "@/redux/slices/menuSlice";
 import { addToCart } from "@/redux/slices/cartSlice";
 import { useSearchParams } from "next/navigation";
@@ -23,12 +22,12 @@ import { nanoid } from "@reduxjs/toolkit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useRef } from "react";
+import { saveOrdersToDraft } from "@/service/orderService";
 
 export default function OrderForm() {
   const searchRef = useRef(null);
   const kotRef = useRef(null);
 
-  const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const tableId = searchParams.get("tableId");
   const { items = [] } = useSelector((state) => state.menu);
@@ -40,14 +39,7 @@ export default function OrderForm() {
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const cartKey = orderType === "DINE-IN" ? tableId : orderType;
 
-  // keyboard shortcuts
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // selectedItems: [{ tempId, item, portion, qty }]
-
-  useEffect(() => {
-    dispatch(fetchMenuItems());
-  }, [dispatch]);
 
   // keyboatd shortcuts
   useEffect(() => {
@@ -133,32 +125,33 @@ export default function OrderForm() {
   }, [selectedItems]);
 
   // From here we add the items to the cart
-  const handleAddAllToOrder = () => {
-    if (orderType === "DINE-IN" && !tableId) return;
-    if (selectedItems.length === 0) return;
+  const handleAddAllToOrder = async () => {
+    if (!selectedItems.length) return;
 
-    selectedItems.forEach((x) => {
-      const unitPrice = getUnitPrice(x.item, x.portion);
-
-      dispatch(
-        addToCart({
-          cartKey, // ✅ REQUIRED
-          cartId: nanoid(),
-          _id: x.item._id,
+    try {
+      const payload = {
+        orderType,
+        tableId,
+        items: selectedItems.map((x) => ({
+          menuItemId: x.item._id,
           name: x.item.name,
+          price: getUnitPrice(x.item, x.portion),
+          qty: x.qty,
           itemCode: x.item.itemCode,
           portion: x.portion,
-          unitPrice,
-          qty: x.qty,
-          orderType,
-          kotMessage,
-        }),
-      );
-    });
+        })),
+      };
+      console.log(payload);
 
-    setSearch("");
-    setSelectedItems([]);
-    setKotMessage("");
+      await saveOrdersToDraft(payload);
+
+      // clear UI selections
+      setSelectedItems([]);
+      setSearch("");
+      setKotMessage("");
+    } catch (err) {
+      console.error("Add item failed", err);
+    }
   };
 
   const isItemSelected = (itemId) => {
@@ -243,7 +236,7 @@ export default function OrderForm() {
                               : "border-gray-200 hover:bg-gray-50"
                         }
                       `}
-                                        >
+                      >
                         <Typography fontWeight={600}>{item.name}</Typography>
                         <Typography
                           fontSize={14}

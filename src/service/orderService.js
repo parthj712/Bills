@@ -15,3 +15,10 @@ export const saveOrdersToDraft = async (payload) => {
 export const fetchActiveOrder = async (tableId) => {
   return await API.get(`/orders/active?tableId=${tableId}`);
 };
+
+export const itemIncrement = async (data) => {
+  await API.post("/orders/increase", data);
+};
+export const itemDecrement = async (data) => {
+  await API.post("/orders/decrease", data);
+};

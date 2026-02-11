@@ -42,8 +42,6 @@ const tableStyles = {
     hover:border-red-700
   `,
 };
-;
-
 export default function WaiterHomePage() {
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -231,27 +229,29 @@ export default function WaiterHomePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rounded"
-                    height={110}
-                    className="!rounded-2xl"
-                  />
-                ))
+                    <Skeleton
+                      key={index}
+                      variant="rounded"
+                      height={110}
+                      className="!rounded-2xl"
+                    />
+                  ))
                 : tables.map((table) => (
-                  <Tooltip
-                    key={table._id}
-                    title={
-                      table.status === "OCCUPIED"
-                        ? "Active table"
-                        : "Add order"
-                    }
-                    arrow
-                    placement="bottom"
-                  >
-                    <div
-                      onClick={() => handleTableClick(table._id, table.tableNo)}
-                      className={`
+                    <Tooltip
+                      key={table._id}
+                      title={
+                        table.status === "OCCUPIED"
+                          ? "Active table"
+                          : "Add order"
+                      }
+                      arrow
+                      placement="bottom"
+                    >
+                      <div
+                        onClick={() =>
+                          handleTableClick(table._id, table.tableNo)
+                        }
+                        className={`
                           relative
                           h-28 w-full
                           rounded-2xl
@@ -264,51 +264,52 @@ export default function WaiterHomePage() {
                           transition-all duration-300
                           hover:shadow-lg hover:scale-[1.03]
                           ${tableStyles[table.status]}
-                          ${highlightTableNo === table.tableNo
-                          ? table.status === "OCCUPIED"
-                            ? "ring-4 ring-red-500 ring-offset-2"
-                            : "ring-4 ring-green-500 ring-offset-2"
-                          : ""
-                        }
+                          ${
+                            highlightTableNo === table.tableNo
+                              ? table.status === "OCCUPIED"
+                                ? "ring-4 ring-red-500 ring-offset-2"
+                                : "ring-4 ring-green-500 ring-offset-2"
+                              : ""
+                          }
                         `}
-                    >
-
-                      {/* ✅ Table Number */}
-                      <Typography
-                        fontSize={26}
-                        fontWeight={600}
-                        className={table.status === "OCCUPIED" ? "text-red-800" : "text-green-800"}
                       >
-                        {table.tableNo}
-                      </Typography>
+                        {/* ✅ Table Number */}
+                        <Typography
+                          fontSize={26}
+                          fontWeight={600}
+                          className={
+                            table.status === "OCCUPIED"
+                              ? "text-red-800"
+                              : "text-green-800"
+                          }
+                        >
+                          {table.tableNo}
+                        </Typography>
 
-
-                      {/* ✅ Status Badge */}
-                      <Typography
-                        fontSize={table.status === "OCCUPIED" ? 12 : 13}
-                        fontWeight={table.status === "OCCUPIED" ? 700 : 600}
-                        className={`px-2 py-[2px] rounded-full
-                          ${table.status === "OCCUPIED"
-                            ? "bg-red-100 text-red-700 border border-red-500"
-                            : "bg-green-100 text-green-700 border border-green-500"
+                        {/* ✅ Status Badge */}
+                        <Typography
+                          fontSize={table.status === "OCCUPIED" ? 12 : 13}
+                          fontWeight={table.status === "OCCUPIED" ? 700 : 600}
+                          className={`px-2 py-[2px] rounded-full
+                          ${
+                            table.status === "OCCUPIED"
+                              ? "bg-red-100 text-red-700 border border-red-500"
+                              : "bg-green-100 text-green-700 border border-green-500"
                           }
                           `}
-                      >
-                        {table.status}
-                      </Typography>
+                        >
+                          {table.status}
+                        </Typography>
 
-
-
-
-                      {/* ✅ Time (only if occupied) */}
-                      {table.status === "OCCUPIED" && table.occupiedAt && (
-                        <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
-                          {getRunningTime(table.occupiedAt)}
-                        </div>
-                      )}
-                    </div>
-                  </Tooltip>
-                ))}
+                        {/* ✅ Time (only if occupied) */}
+                        {table.status === "OCCUPIED" && table.occupiedAt && (
+                          <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                            {getRunningTime(table.occupiedAt)}
+                          </div>
+                        )}
+                      </div>
+                    </Tooltip>
+                  ))}
             </div>
           </Card>
         </div>
