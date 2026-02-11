@@ -15,6 +15,7 @@ import {
   EmojiEmotions,
   HomeWork,
   TrendingUp,
+  AccessTime,
 } from "@mui/icons-material";
 import { StatCard } from "./StatCard";
 import { useEffect, useState } from "react";
@@ -24,6 +25,8 @@ import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
 import { QuickInsights } from "./QuickInsights/QuickInsights";
 import { Skeleton, CircularProgress } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
 
 const topProducts = [
   { name: "Paneer Butter Masala", percent: 72 },
@@ -82,19 +85,41 @@ export default function AdminDashboard() {
       setLoadingSub(false); // ✅ stop loading
     }
   };
+  const calcGrowth = (today, yesterday) => {
+    if (!yesterday) return 0; // avoid divide by 0
 
-  const avgOrderValue = summary.totalOrders
-    ? Math.round(summary.totalRevenue / summary.totalOrders)
-    : 0;
+    return Math.round(((today - yesterday) / yesterday) * 100);
+  };
 
-  const todayAOV = summary.todayOrders
-    ? Math.round(summary.todayRevenue / summary.todayOrders)
-    : 0;
+  const revenueGrowth = calcGrowth(
+    summary.todayRevenue,
+    summary.yesterdayRevenue,
+  );
+  const performanceText =
+    summary.yesterdayRevenue === 0
+      ? "No data yesterday"
+      : `${revenueGrowth >= 0 ? "▲" : "▼"} ${Math.abs(revenueGrowth)}%`;
 
-  const aovChange =
-    avgOrderValue === 0
-      ? 0
-      : Math.round(((todayAOV - avgOrderValue) / avgOrderValue) * 100);
+  let performanceBg = "bg-gray-100";
+  let performanceColor = "text-gray-600";
+
+  if (revenueGrowth > 0) {
+    performanceBg = "bg-green-100";
+    performanceColor = "text-green-600";
+  } else if (revenueGrowth < 0) {
+    performanceBg = "bg-red-100";
+    performanceColor = "text-red-600";
+  }
+
+  let performanceIcon;
+
+  if (revenueGrowth > 0) {
+    performanceIcon = <TrendingUpIcon fontSize="large" />;
+  } else if (revenueGrowth < 0) {
+    performanceIcon = <TrendingDownIcon fontSize="large" />;
+  } else {
+    performanceIcon = <TrendingFlatIcon fontSize="large" />;
+  }
 
   const stats = [
     {
@@ -106,7 +131,7 @@ export default function AdminDashboard() {
     },
     {
       title: "Today's Orders",
-      value: summary.todayOrders,
+      value: summary.todayOrders || 0,
       icon: <ShoppingCart fontSize="large" />,
       bg: "bg-green-100",
       iconColor: "text-green-600",
@@ -121,11 +146,11 @@ export default function AdminDashboard() {
       iconColor: "text-purple-600",
     },
     {
-      title: "Order Value Trend",
-      value: `${aovChange > 0 ? "+" : ""}${aovChange}%`,
-      icon: <TrendingUpIcon fontSize="large" />,
-      bg: aovChange >= 0 ? "bg-green-100" : "bg-red-100",
-      iconColor: aovChange >= 0 ? "text-green-600" : "text-red-600",
+      title: "Performance",
+      value: performanceText,
+      icon: performanceIcon,
+      bg: performanceBg,
+      iconColor: performanceColor,
     },
   ];
   return (

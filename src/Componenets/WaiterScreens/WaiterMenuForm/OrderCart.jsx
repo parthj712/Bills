@@ -17,29 +17,24 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  clearCart,
-  decreaseQty,
-  increaseQty,
-  setCartFromOrder,
-} from "@/redux/slices/cartSlice";
+import { clearCart, decreaseQty, increaseQty } from "@/redux/slices/cartSlice";
 // import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
   fetchActiveOrder,
   finalizeBillAndOrder,
-  saveOrdersToDraft,
+  itemDecrement,
+  itemIncrement,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { adminInfo, getShopName } from "@/service/shopService";
+import { socket } from "@/app/lib/socket";
 
 export default function OrderCart() {
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const [openConfirm, setOpenConfirm] = useState(false);
-
   const tableId = searchParams.get("tableId");
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const isDineIn = orderType === "DINE-IN";
@@ -48,12 +43,16 @@ export default function OrderCart() {
   // ✅ cartKey: tableId for DINE-IN, else orderType
   const cartKey = isDineIn ? tableId : orderType;
 
-  const cartItems = useSelector((state) => state.cart.byTable[cartKey] || []);
+  const [cartItems, setCartItems] = useState([]);
 
   const [loading, setLoading] = useState(false);
-
   const subtotal = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.unitPrice * item.qty, 0),
+    () =>
+      cartItems.reduce((sum, item) => {
+        const price = Number(item.price) || 0;
+        const qty = Number(item.qty) || 0;
+        return sum + price * qty;
+      }, 0),
     [cartItems],
   );
 
@@ -63,7 +62,7 @@ export default function OrderCart() {
   const handleFecthShopInfo = async () => {
     try {
       const res = await getShopName();
-      console.log("res", res.data?.data);
+
       setShopInfo(res.data?.data);
     } catch (error) {
       console.log(error);
@@ -73,58 +72,48 @@ export default function OrderCart() {
     handleFecthShopInfo();
   }, []);
 
-  const handleSaveAndContinue = async () => {
-    if (!isDineIn || !tableId) return;
-    if (!cartItems.length) return;
-
+  const loadOrder = async () => {
     try {
-      const payload = {
-        orderType,
-        tableId,
-        items: cartItems.map((item) => ({
-          menuItemId: item._id,
-          name: item.name,
-          price: item.unitPrice,
-          qty: item.qty,
-        })),
-      };
-      console.log("payload", payload);
-      await saveOrdersToDraft(payload);
-      await updateTableStatus(tableId, "OCCUPIED");
-      router.back();
-    } catch (error) {
-      console.error("Failed to update table status", error);
+      const res = await fetchActiveOrder(tableId);
+      console.log("items", res);
+
+      setCartItems(res.data.items);
+    } catch {
+      setCartItems([]);
     }
   };
 
   useEffect(() => {
-    if (!isDineIn || !tableId) return;
+    if (tableId) loadOrder();
+  }, [tableId]);
 
-    const loadDraftOrder = async () => {
-      try {
-        const res = await fetchActiveOrder(tableId);
-
-        if (res.data) {
-          dispatch(
-            setCartFromOrder({
-              cartKey: tableId,
-              items: res.data.items,
-            }),
-          );
-          await updateTableStatus(tableId, "OCCUPIED");
-          console.log("✅ Draft order loaded");
-        }
-      } catch (err) {
-        console.log("No active draft order found");
+  useEffect(() => {
+    const handleUpdate = ({ tableId: updated }) => {
+      if (updated === tableId) {
+        loadOrder();
       }
     };
 
-    loadDraftOrder();
-  }, [tableId]);
+    socket.on("orderItemsUpdated", handleUpdate);
 
+    return () => socket.off("orderItemsUpdated", handleUpdate);
+  }, [tableId]);
   const handleCancelOrder = () => {
-    dispatch(clearCart(cartKey));
     router.back();
+  };
+  const handleIncrease = async (item) => {
+    await itemIncrement({
+      tableId,
+      menuItemId: item.menuItemId,
+      price: item.price,
+    });
+  };
+  const handleDecrease = async (item) => {
+    await itemDecrement({
+      tableId,
+      menuItemId: item.menuItemId,
+      price: item.price,
+    });
   };
 
   const handleOpenConfirm = () => {
@@ -137,23 +126,7 @@ export default function OrderCart() {
     setLoading(true);
 
     try {
-      const payload = {
-        orderType,
-        tableId: isDineIn ? tableId : null,
-        items: cartItems.map((item) => ({
-          menuItemId: item._id,
-          name: item.name,
-          itemCode: item.itemCode,
-          portion: item.portion,
-          price: item.unitPrice,
-          qty: item.qty,
-        })),
-      };
-
-      await finalizeBillAndOrder(payload);
-
-      dispatch(clearCart(cartKey));
-
+      await finalizeBillAndOrder({ tableId, orderType });
       if (isDineIn) {
         await updateTableStatus(tableId, "AVAILABLE");
       }
@@ -166,21 +139,6 @@ export default function OrderCart() {
       setLoading(false);
     }
   };
-
-  // const downloadBillPDF = () => {
-  //   const element = document.getElementById("bill-pdf");
-
-  //   html2pdf()
-  //     .set({
-  //       margin: 5,
-  //       filename: "bill-preview.pdf",
-  //       image: { type: "jpeg", quality: 0.98 },
-  //       html2canvas: { scale: 2 },
-  //       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-  //     })
-  //     .from(element)
-  //     .save();
-  // };
 
   const downloadBillPDF = async () => {
     if (typeof window === "undefined") return;
@@ -218,23 +176,21 @@ export default function OrderCart() {
         ) : (
           cartItems.map((item) => (
             <div
-              key={item.cartId}
+              key={item.menuItemId}
               className="flex justify-between items-center my-3"
             >
               <div>
                 <Typography fontSize={16} fontWeight={600}>
                   {item.name} ({item.portion})
                 </Typography>
-                <Typography fontSize={14}>₹ {item.unitPrice}/-</Typography>
+                <Typography fontSize={14}>₹ {item.price}/-</Typography>
               </div>
 
               <div className="flex items-center gap-3">
                 {/* Decrease */}
                 <IconButton
                   size="small"
-                  onClick={() =>
-                    dispatch(decreaseQty({ cartKey, cartId: item.cartId }))
-                  }
+                  onClick={() => handleDecrease(item)}
                   sx={{
                     backgroundColor: "#f3f4f6",
                     color: "#374151",
@@ -262,9 +218,7 @@ export default function OrderCart() {
                 {/* Increase */}
                 <IconButton
                   size="small"
-                  onClick={() =>
-                    dispatch(increaseQty({ cartKey, cartId: item.cartId }))
-                  }
+                  onClick={() => handleIncrease(item)}
                   sx={{
                     backgroundColor: "#dcfce7",
                     color: "#16a34a",
@@ -312,13 +266,11 @@ export default function OrderCart() {
             <AppButton
               label="Save & Continue"
               className="!bg-green-500 hover:!bg-green-600 !text-white px-6"
-              onClick={handleSaveAndContinue}
             />
           ) : (
             <AppButton
               label="Cancel"
               className="!bg-red-500 hover:!bg-red-600 !text-white px-6"
-              onClick={handleCancelOrder}
             />
           )}
 

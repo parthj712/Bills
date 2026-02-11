@@ -31,12 +31,10 @@ import { motion } from "framer-motion";
 import ItemReportCard from "./ItemReportCard";
 
 const ItemsReport = () => {
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-
 
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
@@ -56,7 +54,6 @@ const ItemsReport = () => {
 
   useEffect(() => {
     getOrders().then((res) => {
-      console.log(res.data?.orders);
       setOrders(res.data?.orders || []);
     });
   }, []);
@@ -86,6 +83,7 @@ const ItemsReport = () => {
             qtySold: 0,
             unitPrice: item.price,
             totalRevenue: 0,
+            itemCode: item.itemCode,
           };
         }
 
@@ -104,6 +102,7 @@ const ItemsReport = () => {
   const exportExcel = () => {
     const data = itemsReport.map((row) => ({
       "Item Name": row.itemName,
+      "Item Code": row.itemCode,
       "Total Orders": row.totalOrders,
       "Qty Sold": row.qtySold,
       "Unit Price": row.unitPrice,
@@ -141,7 +140,11 @@ const ItemsReport = () => {
         {/* Header */}
         <Box className="flex items-center justify-between mb-6">
           <Box>
-            <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+            <Typography
+              fontSize={isMobile ? 24 : 30}
+              fontWeight={isMobile ? 600 : 700}
+              className="text-[#0b3c5d]"
+            >
               Items Report
             </Typography>
             <Typography fontSize={14} color="text.secondary">
@@ -377,9 +380,6 @@ const ItemsReport = () => {
           </Paper>
         )}
 
-
-
-
         {/* MOBILE + TABLET CARDS */}
         {showReport && !isDesktop && (
           <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -389,16 +389,12 @@ const ItemsReport = () => {
               ))
             ) : (
               <Box className="col-span-full text-center py-6">
-                <Typography color="text.secondary">
-                  No data found
-                </Typography>
+                <Typography color="text.secondary">No data found</Typography>
               </Box>
             )}
           </Box>
         )}
-
       </Box>
-
 
       {isMobile && (
         <motion.div
