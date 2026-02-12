@@ -1,20 +1,26 @@
 "use client";
 
-import { addWebsite, adminInfo } from "@/service/shopService";
+import {
+  addWebsite,
+  getShofInfo,
+  removeShopLogo,
+  removeShopQR,
+  uploadShopLogo,
+  uploadShopQR,
+} from "@/service/shopService";
 import {
   Box,
   Paper,
   Typography,
   TextField,
   Button,
-  Divider,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
   Skeleton,
-    CircularProgress 
+  CircularProgress,
 } from "@mui/material";
 
 import { useRouter } from "next/navigation";
@@ -32,38 +38,21 @@ export default function Settings() {
   const [logoPreview, setLogoPreview] = useState("");
   const [qrPreview, setQrPreview] = useState("");
 
-
   const [logoLoading, setLogoLoading] = useState(false);
   const [qrLoading, setQrLoading] = useState(false);
 
-
-
   // ✅ Store admin + shop info
-  const [shopData, setShopData] = useState({
-    businessName: "",
-    phone: "",
-    email: "",
-    address: "",
-    gst: "",
-    website: "",
-  });
+  const [shopData, setShopData] = useState(null);
 
   // ✅ Fetch Admin Info
   useEffect(() => {
     const fetchInfo = async () => {
       try {
-        const res = await adminInfo();
+        const res = await getShofInfo();
 
-        const shop = res.data.data[0].shopId;
+        console.log("res", res.data?.data);
 
-        setShopData({
-          businessName: shop?.shopName ?? "",
-          phone: shop?.phone ?? "",
-          email: shop?.email ?? "",
-          address: shop?.address ?? "",
-          gst: shop?.gstNumber ?? "",
-          website: shop?.website ?? "",
-        });
+        setShopData(res.data?.data);
 
         setLoading(false);
       } catch (err) {
@@ -74,6 +63,17 @@ export default function Settings() {
 
     fetchInfo();
   }, []);
+  useEffect(() => {
+    if (!shopData) return;
+
+    if (shopData.logo?.url) {
+      setLogoPreview(shopData.logo.url);
+    }
+
+    if (shopData.upiQr?.url) {
+      setQrPreview(shopData.upiQr.url);
+    }
+  }, [shopData]);
 
   // ✅ Website Edit Change
   const handleWebsiteChange = (e) => {
@@ -105,50 +105,80 @@ export default function Settings() {
     return <SettingsSkeleton />;
   }
 
-
-
-  const handleLogoChange = (e) => {
+  const handleLogoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setLogoLoading(true);
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setLogoPreview(reader.result);
-      setLogoLoading(false);
-    };
+    try {
+      // instant preview
+      const previewURL = URL.createObjectURL(file);
+      setLogoPreview(previewURL);
 
-    reader.readAsDataURL(file);
+      // upload to cloudinary
+      const res = await uploadShopLogo(file);
+
+      // save real cloudinary url
+      setLogoPreview(res.data.logo);
+    } catch (err) {
+      alert("Logo upload failed");
+      console.log(err);
+    } finally {
+      setLogoLoading(false);
+    }
   };
 
-
-  const handleQrChange = (e) => {
+  const handleQrChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setQrLoading(true);
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setQrPreview(reader.result);
+    try {
+      const previewURL = URL.createObjectURL(file);
+      setQrPreview(previewURL);
+
+      const res = await uploadShopQR(file);
+
+      setQrPreview(res.data.qr);
+    } catch (err) {
+      alert("QR upload failed");
+      console.log(err);
+    } finally {
       setQrLoading(false);
-    };
-
-    reader.readAsDataURL(file);
+    }
   };
 
+  const handleRemoveLogo = async () => {
+    try {
+      await removeShopLogo();
 
-  const handleRemoveLogo = () => {
-    setLogoPreview("");
+      setLogoPreview("");
+
+      setShopData((prev) => ({
+        ...prev,
+        logo: { url: "", public_id: "" },
+      }));
+    } catch (err) {
+      alert("Failed to remove logo");
+    }
   };
 
-  const handleRemoveQr = () => {
-    setQrPreview("");
+  const handleRemoveQr = async () => {
+    try {
+      await removeShopQR();
+
+      setQrPreview("");
+
+      setShopData((prev) => ({
+        ...prev,
+        upiQr: { url: "", public_id: "" },
+      }));
+    } catch (err) {
+      alert("Failed to remove QR");
+    }
   };
-
-
-
 
   return (
     <Box className="min-h-screen p-4 bg-[#f9fafb]">
@@ -161,7 +191,7 @@ export default function Settings() {
         {/* BUSINESS SETTINGS */}
         <SettingsCard title="Business Information">
           {/* BUSINESS NAME */}
-          <InfoRow label="Business Name" value={shopData.businessName} />
+          <InfoRow label="Business Name" value={shopData.shopName} />
 
           {/* PHONE */}
           <InfoRow label="Phone Number" value={shopData.phone} />
@@ -173,14 +203,11 @@ export default function Settings() {
           <InfoRow label="Address" value={shopData.address} multiline />
 
           {/* GST */}
-          <InfoRow label="GST Number" value={shopData.gst} />
-
+          <InfoRow label="GST Number" value={shopData.gstNumber} />
         </SettingsCard>
-
 
         {/* WEBSITE & BRANDING SECTION */}
         <SettingsCard title="Website & Branding">
-
           {/* WEBSITE */}
           {/* WEBSITE */}
           <Box>
@@ -285,7 +312,6 @@ export default function Settings() {
             )}
           </Box>
 
-
           {/* COMPANY LOGO */}
           <Box mt={3}>
             <Typography fontWeight={600} fontSize={14} mb={1}>
@@ -343,7 +369,6 @@ export default function Settings() {
               />
             </Button>
           </Box>
-
 
           {/* QR UPI IMAGE */}
           <Box mt={3}>
@@ -403,7 +428,6 @@ export default function Settings() {
             </Button>
           </Box>
 
-
           {/* SAVE BUTTON */}
           <Box mt={3} textAlign="right">
             <Button
@@ -418,9 +442,7 @@ export default function Settings() {
               Save Changes
             </Button>
           </Box>
-
         </SettingsCard>
-
 
         {/* SIGN OUT */}
         <Paper
@@ -496,8 +518,6 @@ function SettingsCard({ title, children }) {
     </Paper>
   );
 }
-
-
 
 function SettingsSkeleton() {
   return (
