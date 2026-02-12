@@ -28,7 +28,7 @@ const BillPreview = ({ items, subtotal, tax, total, shopInfo }) => {
             <span>
               {item.name} × {item.qty}
             </span>
-            <span>₹ {item.unitPrice * item.qty}</span>
+            <span>₹ {item.price * item.qty}</span>
           </div>
         ))}
 

@@ -11,7 +11,7 @@ export default function PeakHoursLineChart({ bills }) {
   const [range, setRange] = useState("week");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
-
+  console.log("bills", bills);
   // ✅ Filter Bills Using Helper
   const filteredBills = useMemo(() => {
     return filterBillsByRange(bills, range, customFrom, customTo);

@@ -14,14 +14,14 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
-import { clearCart, decreaseQty, increaseQty } from "@/redux/slices/cartSlice";
 // import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
   fetchActiveOrder,
+  fetchActiveTakaway,
   finalizeBillAndOrder,
   itemDecrement,
   itemIncrement,
@@ -74,8 +74,15 @@ export default function OrderCart() {
 
   const loadOrder = async () => {
     try {
-      const res = await fetchActiveOrder(tableId);
-      console.log("items", res);
+      let res;
+
+      if (orderType === "TAKEAWAY") {
+        res = await fetchActiveTakaway();
+      } else {
+        res = await fetchActiveOrder(tableId);
+      }
+
+      setCartItems(res?.data?.items || []);
 
       setCartItems(res.data.items);
     } catch {
@@ -84,20 +91,35 @@ export default function OrderCart() {
   };
 
   useEffect(() => {
-    if (tableId) loadOrder();
-  }, [tableId]);
+    if (orderType === "TAKEAWAY") {
+      loadOrder();
+    } else if (tableId) {
+      loadOrder();
+    }
+  }, [tableId, orderType]);
 
   useEffect(() => {
-    const handleUpdate = ({ tableId: updated }) => {
+    const handleDineInUpdate = ({ tableId: updated }) => {
       if (updated === tableId) {
         loadOrder();
       }
     };
 
-    socket.on("orderItemsUpdated", handleUpdate);
+    const handleTakeawayUpdate = () => {
+      if (orderType === "TAKEAWAY") {
+        loadOrder();
+      }
+    };
 
-    return () => socket.off("orderItemsUpdated", handleUpdate);
-  }, [tableId]);
+    socket.on("orderItemsUpdated", handleDineInUpdate);
+    socket.on("takeawayUpdated", handleTakeawayUpdate);
+
+    return () => {
+      socket.off("orderItemsUpdated", handleDineInUpdate);
+      socket.off("takeawayUpdated", handleTakeawayUpdate);
+    };
+  }, [tableId, orderType]);
+
   const handleCancelOrder = () => {
     router.back();
   };
