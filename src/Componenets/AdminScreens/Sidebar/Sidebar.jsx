@@ -20,6 +20,9 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import { useEffect, useState } from "react";
 import { getShopName } from "@/service/shopService";
 import { Box, Typography } from "@mui/material";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
+import LockIcon from "@mui/icons-material/Lock";
+
 
 const mainItems = [
   { label: "Dashboard", href: "/admin", icon: <Dashboard fontSize="small" /> },
@@ -90,6 +93,28 @@ const settingsItem = {
 };
 
 export default function Sidebar() {
+
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(true);
+
+  const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
+
+  const hasAccess =
+    subscription?.status === "ACTIVE" &&
+    allowedPlans.includes(subscription.planType);
+
+  const fetchSubscriptionExpiry = async () => {
+    try {
+      const res = await getSubscriptionExpiry();
+      setSubscription(res.data);
+    } catch (error) {
+      console.log(error?.message || error);
+    } finally {
+      setLoadingSub(false); // ✅ stop loading
+    }
+  };
+
+
   const [shopName, setShopName] = useState("");
   const pathname = usePathname();
   const fetchShopName = async () => {
@@ -104,6 +129,7 @@ export default function Sidebar() {
 
   useEffect(() => {
     fetchShopName();
+    fetchSubscriptionExpiry();
   }, []);
   const [openReports, setOpenReports] = useState(
     pathname.startsWith("/admin/reports"),
@@ -200,7 +226,10 @@ export default function Sidebar() {
       </nav>
       <div>
         <motion.div
-          onClick={() => setOpenReports(!openReports)}
+          onClick={() => {
+            if (!hasAccess) return;
+            setOpenReports(!openReports);
+          }}
           className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer
                    text-[17px] font-medium text-black hover:bg-gray-50"
         >
@@ -210,11 +239,16 @@ export default function Sidebar() {
           </div>
 
           <motion.span
-            animate={{ rotate: openReports ? 180 : 0 }}
+            animate={hasAccess ? { rotate: openReports ? 180 : 0 } : {}}
             transition={{ duration: 0.25 }}
           >
-            <ExpandMore fontSize="small" />
+            {hasAccess ? (
+              <ExpandMore fontSize="small" />
+            ) : (
+              <LockIcon fontSize="small" className="text-gray-400" />
+            )}
           </motion.span>
+
         </motion.div>
 
         <motion.div

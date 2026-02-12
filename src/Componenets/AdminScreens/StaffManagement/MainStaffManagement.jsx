@@ -37,9 +37,31 @@ import StaffCard from "./StaffCard";
 import { Download, UploadFile, Description } from "@mui/icons-material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
+import { showToast } from "@/Componenets/ToastConstant/toast";
 
 const MainStaffManagement = () => {
 
+
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(true);
+
+  const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
+
+  const hasAccess =
+    subscription?.status === "ACTIVE" &&
+    allowedPlans.includes(subscription.planType);
+
+  const fetchSubscriptionExpiry = async () => {
+    try {
+      const res = await getSubscriptionExpiry();
+      setSubscription(res.data);
+    } catch (error) {
+      console.log(error?.message || error);
+    } finally {
+      setLoadingSub(false); // ✅ stop loading
+    }
+  };
 
   const theme = useTheme();
 
@@ -83,6 +105,7 @@ const MainStaffManagement = () => {
 
   useEffect(() => {
     fetchStaff();
+    fetchSubscriptionExpiry();
   }, []);
 
   const handleEdit = (staff) => {
@@ -300,7 +323,18 @@ const MainStaffManagement = () => {
               <AppButton
                 label="Add Staff"
                 startIcon={<Add />}
-                onClick={() => setOpenAdd(true)}
+                onClick={() => {
+                  if (!hasAccess) {
+                    showToast({
+                      type: "warning",
+                      message: "Upgrade to Premium to add more tables 🚀",
+                    });
+                    return;
+                  }
+
+                  setOpenAdd(true);
+                }}
+                // onClick={() => setOpenAdd(true)}
                 sx={{
                   backgroundColor: "#0b3c5d",
                   color: "#fff",
