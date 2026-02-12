@@ -2,7 +2,7 @@ import { io } from "socket.io-client";
 
 let currentShopId = null;
 
-export const socket = io("https://billing-web-app-sdr9.onrender.com", {
+export const socket = io("http://localhost:5000", {
   autoConnect: false,
   transports: ["websocket"],
   withCredentials: true,
