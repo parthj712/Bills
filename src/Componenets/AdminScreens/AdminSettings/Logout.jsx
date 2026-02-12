@@ -13,7 +13,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  Skeleton
+  Skeleton,
+    CircularProgress 
 } from "@mui/material";
 
 import { useRouter } from "next/navigation";
@@ -27,6 +28,15 @@ export default function Settings() {
 
   const [loading, setLoading] = useState(true);
   const [editWebsite, setEditWebsite] = useState(false);
+
+  const [logoPreview, setLogoPreview] = useState("");
+  const [qrPreview, setQrPreview] = useState("");
+
+
+  const [logoLoading, setLogoLoading] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
+
+
 
   // ✅ Store admin + shop info
   const [shopData, setShopData] = useState({
@@ -96,6 +106,50 @@ export default function Settings() {
   }
 
 
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setLogoLoading(true);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result);
+      setLogoLoading(false);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+
+  const handleQrChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setQrLoading(true);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setQrPreview(reader.result);
+      setQrLoading(false);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
+
+  const handleRemoveLogo = () => {
+    setLogoPreview("");
+  };
+
+  const handleRemoveQr = () => {
+    setQrPreview("");
+  };
+
+
+
+
   return (
     <Box className="min-h-screen p-4 bg-[#f9fafb]">
       {/* PAGE TITLE */}
@@ -121,7 +175,14 @@ export default function Settings() {
           {/* GST */}
           <InfoRow label="GST Number" value={shopData.gst} />
 
-          {/* WEBSITE Editable */}
+        </SettingsCard>
+
+
+        {/* WEBSITE & BRANDING SECTION */}
+        <SettingsCard title="Website & Branding">
+
+          {/* WEBSITE */}
+          {/* WEBSITE */}
           <Box>
             <Typography fontWeight={600} fontSize={14} mb={0.5}>
               Website Link
@@ -135,7 +196,6 @@ export default function Settings() {
                 fullWidth
                 size="small"
                 placeholder="Enter website link"
-                onBlur={handleSaveWebsite} // auto save when user leaves field
               />
             ) : (
               <>
@@ -224,7 +284,143 @@ export default function Settings() {
               </>
             )}
           </Box>
+
+
+          {/* COMPANY LOGO */}
+          <Box mt={3}>
+            <Typography fontWeight={600} fontSize={14} mb={1}>
+              Company Logo
+            </Typography>
+
+            {logoLoading ? (
+              <CircularProgress size={30} />
+            ) : logoPreview ? (
+              <Box position="relative" display="inline-block">
+                <img
+                  src={logoPreview}
+                  alt="Logo Preview"
+                  style={{
+                    height: 80,
+                    borderRadius: 8,
+                    border: "1px solid #ddd",
+                  }}
+                />
+
+                {/* Remove Button */}
+                <Button
+                  size="small"
+                  onClick={handleRemoveLogo}
+                  sx={{
+                    position: "absolute",
+                    top: -10,
+                    right: -10,
+                    minWidth: 0,
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    backgroundColor: "red",
+                    color: "white",
+                    fontSize: 12,
+                    "&:hover": { backgroundColor: "#b91c1c" },
+                  }}
+                >
+                  ✕
+                </Button>
+              </Box>
+            ) : null}
+
+            <Button
+              variant="outlined"
+              component="label"
+              sx={{ textTransform: "none", m: qrPreview ? 1 : 2 }}
+            >
+              Upload Logo
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleLogoChange}
+              />
+            </Button>
+          </Box>
+
+
+          {/* QR UPI IMAGE */}
+          <Box mt={3}>
+            <Typography fontWeight={600} fontSize={14} mb={1}>
+              UPI QR Code
+            </Typography>
+
+            {qrLoading ? (
+              <CircularProgress size={30} />
+            ) : qrPreview ? (
+              <Box position="relative" display="inline-block">
+                <img
+                  src={qrPreview}
+                  alt="QR Preview"
+                  style={{
+                    height: 120,
+                    borderRadius: 8,
+                    border: "1px solid #ddd",
+                  }}
+                />
+
+                {/* Remove Button */}
+                <Button
+                  size="small"
+                  onClick={handleRemoveQr}
+                  sx={{
+                    position: "absolute",
+                    top: -10,
+                    right: -10,
+                    minWidth: 0,
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    backgroundColor: "red",
+                    color: "white",
+                    fontSize: 12,
+                    "&:hover": { backgroundColor: "#b91c1c" },
+                  }}
+                >
+                  ✕
+                </Button>
+              </Box>
+            ) : null}
+
+            <Button
+              variant="outlined"
+              component="label"
+              sx={{ textTransform: "none", m: qrPreview ? 1 : 2 }}
+            >
+              Upload QR Image
+              <input
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleQrChange}
+              />
+            </Button>
+          </Box>
+
+
+          {/* SAVE BUTTON */}
+          <Box mt={3} textAlign="right">
+            <Button
+              variant="contained"
+              onClick={handleSaveWebsite}
+              sx={{
+                backgroundColor: "#0b3c5d",
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              Save Changes
+            </Button>
+          </Box>
+
         </SettingsCard>
+
 
         {/* SIGN OUT */}
         <Paper

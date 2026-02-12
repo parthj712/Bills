@@ -18,8 +18,11 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import { Edit, Delete, Add, Search } from "@mui/icons-material";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 import { socket } from "@/app/lib/socket";
+import { showToast } from "@/Componenets/ToastConstant/toast";
+import { NOTIFICATIONS } from "@/Componenets/ToastConstant/notifications";
 
 export const STATUS_CONFIG = {
   AVAILABLE: {
@@ -53,6 +56,29 @@ export const STATUS_CONFIG = {
 };
 
 export default function TableManagement() {
+
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(true);
+
+  const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
+
+  const hasAccess =
+    subscription?.status === "ACTIVE" &&
+    allowedPlans.includes(subscription.planType);
+
+
+  const fetchSubscriptionExpiry = async () => {
+    try {
+      const res = await getSubscriptionExpiry();
+      setSubscription(res.data);
+    } catch (error) {
+      console.log(error?.message || error);
+    } finally {
+      setLoadingSub(false); // ✅ stop loading
+    }
+  };
+
+
   const theme = useTheme();
 
   // BREAKPOINTS
@@ -88,6 +114,7 @@ export default function TableManagement() {
 
   useEffect(() => {
     handleGetTables();
+    fetchSubscriptionExpiry();
   }, []);
 
   useEffect(() => {
@@ -165,7 +192,18 @@ export default function TableManagement() {
               <AppButton
                 label="Add Tables"
                 startIcon={<Add />}
-                onClick={() => setOpenAddDialog(true)}
+                onClick={() => {
+                  if (!hasAccess) {
+                    showToast({
+                      type: "warning",
+                      message: "Upgrade to Premium to add more tables 🚀",
+                    });
+                    return;
+                  }
+
+                  setOpenAddDialog(true);
+                }}
+
                 sx={{
                   backgroundColor: "#0b3c5d",
                   color: "#fff",
@@ -176,6 +214,7 @@ export default function TableManagement() {
                   fontWeight: 800,
                 }}
               />
+
             )}
           </Box>
         </Box>
@@ -185,21 +224,21 @@ export default function TableManagement() {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {loading
           ? Array.from({ length: 10 }).map((_, index) => (
-              <Skeleton
-                key={index}
-                variant="rounded"
-                height={112}
-                sx={{ borderRadius: "12px" }}
-              />
-            ))
+            <Skeleton
+              key={index}
+              variant="rounded"
+              height={112}
+              sx={{ borderRadius: "12px" }}
+            />
+          ))
           : tables.map((table) => (
-              <motion.div
-                key={table._id}
-                whileHover={{ y: -4, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                onClick={() => handleTableClick(table)}
-                className={`
+            <motion.div
+              key={table._id}
+              whileHover={{ y: -4, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              onClick={() => handleTableClick(table)}
+              className={`
                   relative
                   h-28 w-full
                   rounded-2xl
@@ -216,16 +255,16 @@ export default function TableManagement() {
                  ${STATUS_CONFIG[table.status?.toUpperCase()]?.bg} ${STATUS_CONFIG[table.status?.toUpperCase()]?.border}
 
                 `}
-              >
-                {/* Table number */}
-                <span className="text-2xl font-bold">{table.tableNo}</span>
+            >
+              {/* Table number */}
+              <span className="text-2xl font-bold">{table.tableNo}</span>
 
-                {/* Status label */}
-                <span className="text-xs font-medium tracking-wide uppercase text-black/60">
-                  {table.status || "Available"}
-                </span>
-              </motion.div>
-            ))}
+              {/* Status label */}
+              <span className="text-xs font-medium tracking-wide uppercase text-black/60">
+                {table.status || "Available"}
+              </span>
+            </motion.div>
+          ))}
       </div>
 
       <AddTable

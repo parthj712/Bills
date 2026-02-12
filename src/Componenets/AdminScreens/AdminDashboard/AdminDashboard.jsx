@@ -85,6 +85,7 @@ export default function AdminDashboard() {
       setLoadingSub(false); // ✅ stop loading
     }
   };
+
   const calcGrowth = (today, yesterday) => {
     if (!yesterday) return 0; // avoid divide by 0
 
@@ -157,8 +158,9 @@ export default function AdminDashboard() {
     <Box className="min-h-screen bg-[#f8fafc] overflow-hidden">
       {subscription && subscription.daysLeft <= 2 && (
         <Card
-          className="mb-6 p-4 rounded-xl"
+          className="mb-6 !rounded-2xl"
           sx={{
+            p: 3,
             background:
               subscription.daysLeft <= 0
                 ? "linear-gradient(90deg,#991b1b,#ef4444)"
@@ -168,30 +170,82 @@ export default function AdminDashboard() {
             color: "white",
           }}
         >
-          <Typography fontWeight={700}>
+          {/* Title */}
+          <Typography fontWeight={700} fontSize={18}>
             {subscription.daysLeft > 1 && "⚠️ Subscription Expiring Soon"}
             {subscription.daysLeft === 1 && "⏰ Subscription Expires Tomorrow"}
             {subscription.daysLeft <= 0 && "❌ Subscription Expired"}
           </Typography>
 
-          <Typography fontSize={13} sx={{ opacity: 0.9 }}>
+          {/* Message */}
+          <Typography fontSize={14} sx={{ mt: 1, opacity: 0.95 }}>
             {subscription.daysLeft > 1 &&
-              `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.
-To continue uninterrupted service, please contact our support team for renewal assistance at +91 9XXXXXXXXX.`}
+              `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.`}
 
             {subscription.daysLeft === 1 &&
-              `Your subscription expires tomorrow.
-Please contact our support team at +91 9XXXXXXXXX to renew and avoid service interruption.`}
+              `Your subscription expires tomorrow.`}
 
             {subscription.daysLeft <= 0 &&
-              `Your subscription has expired.
-To reactivate your account, please contact our support team at +91 9XXXXXXXXX for renewal assistance.`}
+              `Your subscription has expired.`}
+
+            {" "}Please contact our support team for renewal assistance.
           </Typography>
+
+          {/* ACTION BUTTONS */}
+          <Box
+            mt={3}
+            display="flex"
+            gap={2}
+            flexWrap="wrap"
+          >
+            {/* CALL BUTTON */}
+            <a
+              href="tel:+919545934174"
+              style={{ textDecoration: "none" }}
+            >
+              <Card
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  background: "white",
+                  color: "#991b1b",
+                  fontWeight: 600,
+                  display: "inline-block",
+                }}
+              >
+                📞 Call Support
+              </Card>
+            </a>
+
+            {/* MAIL BUTTON */}
+            <a
+              href="mailto:support@yourdomain.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
+              style={{ textDecoration: "none" }}
+            >
+              <Card
+                sx={{
+                  px: 3,
+                  py: 1,
+                  borderRadius: "10px",
+                  cursor: "pointer",
+                  background: "white",
+                  color: "#991b1b",
+                  fontWeight: 600,
+                  display: "inline-block",
+                }}
+              >
+                📧 Send Query via Email
+              </Card>
+            </a>
+          </Box>
         </Card>
       )}
+
       {/* HEADER */}
 
-      <Box className="min-h-screen bg-[#f8fafc] p-4">
+      <Box className="bg-[#f8fafc] p-4">
         {/* HEADER */}
         <Typography
           fontSize={isMobile ? 24 : 30}
@@ -277,29 +331,38 @@ To reactivate your account, please contact our support team at +91 9XXXXXXXXX fo
                   backdropFilter: "blur(3px)",
                 }}
               >
-                <Typography fontSize={28} fontWeight={800}>
+                <Typography fontSize={28} fontWeight={700} color="black">
                   🔒 Locked Features
                 </Typography>
 
-                <Typography fontSize={14} sx={{ mt: 1, opacity: 0.8 }}>
+                <Typography fontSize={14} sx={{ mt: 1, opacity: 0.8 }} color="black">
                   Upgrade your subscription to view analytics, reports &
                   insights.
                 </Typography>
 
-                <Card
-                  sx={{
-                    mt: 3,
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: "14px",
-                    fontWeight: 700,
-                    cursor: "pointer",
-                    background: "linear-gradient(90deg,#2563eb,#3b82f6)",
-                    color: "white",
-                  }}
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSdwDSRksKCckmgx7rBBpkOtS421kYT4otRyo59dALSDCCEfQA/viewform"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ textDecoration: "none" }}
                 >
-                  Upgrade to Premium 🚀
-                </Card>
+                  <Card
+                    sx={{
+                      mt: 3,
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: "14px",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      background: "linear-gradient(90deg,#2563eb,#3b82f6)",
+                      color: "white",
+                      textAlign: "center",
+                    }}
+                  >
+                    Upgrade to Premium 🚀
+                  </Card>
+                </a>
+
               </Box>
             )}
           </Box>
