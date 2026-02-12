@@ -17,18 +17,22 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMenuItems } from "@/redux/slices/menuSlice";
 import { addToCart } from "@/redux/slices/cartSlice";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { nanoid } from "@reduxjs/toolkit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useRef } from "react";
 import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
+import { showToast } from "@/Componenets/ToastConstant/toast";
 
 export default function OrderForm() {
+
   const searchRef = useRef(null);
   const kotRef = useRef(null);
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const tableId = searchParams.get("tableId");
   const { items = [] } = useSelector((state) => state.menu);
 
@@ -38,6 +42,11 @@ export default function OrderForm() {
   const [kotMessage, setKotMessage] = useState("");
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const cartKey = orderType === "DINE-IN" ? tableId : orderType;
+
+  const [customerName, setCustomerName] = useState("");
+  const [nameError, setNameError] = useState("");
+
+
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -132,6 +141,32 @@ export default function OrderForm() {
   const handleAddAllToOrder = async () => {
     if (!selectedItems.length) return;
 
+
+    // 🚨 Takeaway name validation
+    if (orderType === "TAKEAWAY") {
+      if (!customerName.trim()) {
+        setNameError("Customer name is required");
+
+        showToast({
+          type: "error",
+          message: "Please add customer name first",
+        });
+
+        document.querySelector("input[label='Customer Name']")?.focus();
+        return;
+      }
+
+      if (nameError) {
+        showToast({
+          type: "error",
+          message: "Customer name is invalid",
+        });
+
+        return;
+      }
+    }
+
+
     try {
       const payload = {
         orderType,
@@ -153,12 +188,33 @@ export default function OrderForm() {
         await saveOrdersToDraft(payload);
       }
 
+
+      // ✅ SUCCESS TOAST HERE
+      showToast({
+        type: "success",
+        message: "Order added successfully",
+      });
+
       // clear UI selections
       setSelectedItems([]);
       setSearch("");
       setKotMessage("");
+
+      // ✅ Redirect after short delay
+      if (orderType === "DINE-IN") {
+        setTimeout(() => {
+          router.replace("/waiter");
+        }, 1100);
+      }
+
+
     } catch (err) {
       console.error("Add item failed", err);
+
+      showToast({
+        type: "error",
+        message: "Failed to add order. Please try again.",
+      });
     }
   };
 
@@ -180,6 +236,36 @@ export default function OrderForm() {
         <Typography fontSize={20} fontWeight={600}>
           Add Order
         </Typography>
+
+        {/* Customer Name – Only for TAKEAWAY */}
+        {orderType === "TAKEAWAY" && (
+          <TextField
+            size="small"
+            fullWidth
+            label="Customer Name"
+            placeholder="Enter customer name"
+            value={customerName}
+            error={!!nameError}
+            helperText={nameError}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              // Allow only letters & spaces
+              if (value && !/^[A-Za-z\s]+$/.test(value)) {
+                setNameError("Only letters allowed");
+              } else {
+                setNameError("");
+              }
+
+              // Capitalize first letters
+              setCustomerName(
+                value.replace(/\b\w/g, (char) => char.toUpperCase())
+              );
+            }}
+          />
+        )}
+
+
 
         {/* Search */}
         <TextField
@@ -236,13 +322,12 @@ export default function OrderForm() {
                         onClick={() => handleSelectItem(item)}
                         className={`
                         p-3 cursor-pointer border !rounded-xl transition-all duration-150
-                        ${
-                          index === activeIndex
+                        ${index === activeIndex
                             ? "border-blue-500 bg-blue-50"
                             : isItemSelected(item._id)
                               ? "border-green-500 bg-green-50"
                               : "border-gray-200 hover:bg-gray-50"
-                        }
+                          }
                       `}
                       >
                         <Typography fontWeight={600}>{item.name}</Typography>

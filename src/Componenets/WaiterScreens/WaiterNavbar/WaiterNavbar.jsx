@@ -5,6 +5,7 @@ import {
   Avatar,
   Box,
   Card,
+  Divider,
   IconButton,
   Menu,
   MenuItem,
@@ -16,11 +17,14 @@ import KeyboardIcon from "@mui/icons-material/Keyboard";
 import CloseIcon from "@mui/icons-material/Close";
 import { Dialog, DialogTitle, DialogContent } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { NOTIFICATIONS } from "@/Componenets/ToastConstant/notifications";
 import { showToast } from "@/Componenets/ToastConstant/toast";
+import MenuIcon from "@mui/icons-material/Menu";
+import Drawer from "@mui/material/Drawer";
+
 
 const WaiterNavbar = () => {
 
@@ -36,6 +40,22 @@ const WaiterNavbar = () => {
   const open = Boolean(anchorEl);
   const [kbAnchorEl, setKbAnchorEl] = useState(null);
   const [kbOpen, setKbOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+
+
+  //avatr mail
+
+  const [userInitial, setUserInitial] = useState("A");
+
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    if (email) {
+      setUserInitial(email.charAt(0).toUpperCase());
+    }
+  }, []);
+
+
   const router = useRouter();
 
   const handleMenuOpen = (event) => {
@@ -102,7 +122,7 @@ const WaiterNavbar = () => {
           </div>
 
           <Typography fontSize={24} fontWeight={600}>
-            Billing | Waiter Panel
+            Service Console
           </Typography>
         </Box>
 
@@ -110,52 +130,144 @@ const WaiterNavbar = () => {
           <>
             {/* Right: Menu + Sign Out */}
             <div className="flex items-center gap-3">
-              <IconButton onClick={handleKbOpen}>
-                <KeyboardIcon />
+              {isDesktop && (<>
+                <IconButton onClick={handleKbOpen}>
+                  <KeyboardIcon />
+                </IconButton>
+
+                {/* Swiggy */}
+                <Box position="relative" display="inline-block">
+                  <AppButton
+                    label="Swiggy"
+                    className="
+      !bg-[#FC8019]/80
+      !text-white
+      !px-5
+      opacity-80
+      cursor-not-allowed
+    "
+                    disabled
+                  />
+
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -6,
+                      right: -8,
+                      backgroundColor: "#f97316",
+                      color: "white",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      px: 1,
+                      py: "2px",
+                      borderRadius: 1.5,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    Incoming
+                  </Box>
+                </Box>
+
+                {/* Zomato */}
+                <Box position="relative" display="inline-block">
+                  <AppButton
+                    label="Zomato"
+                    className="
+                    !bg-[#E23744]/80
+                    !text-white
+                    !px-5
+                    opacity-80
+                    cursor-not-allowed
+                  "
+                    disabled
+                  />
+
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      top: -6,
+                      right: -8,
+                      backgroundColor: "#dc2626",
+                      color: "white",
+                      fontSize: 10,
+                      fontWeight: 600,
+                      px: 1,
+                      py: "2px",
+                      borderRadius: 1.5,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    Incoming
+                  </Box>
+                </Box>
+
+              </>)}
+
+
+              <IconButton onClick={handleMenuOpen} sx={{ position: "relative" }}>
+                <Box position="relative">
+                  <Avatar
+                    sx={{
+                      bgcolor: "#2563EB",
+                      fontWeight: 600,
+
+                    }}
+                  >
+                    {userInitial}
+                  </Avatar>
+
+                  {/* 🟢 Online Status Dot */}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 2,
+                      right: 2,
+                      width: 10,
+                      height: 10,
+                      borderRadius: "50%",
+                      backgroundColor: "#22c55e",
+                      border: "2px solid white",
+                    }}
+                  />
+                </Box>
               </IconButton>
 
-              <AppButton
-                label="Swiggy"
-                className="
-              !bg-[#FC8019]
-              !text-white
-              !px-5
-              hover:!bg-[#e56f15]
-            "
-                onClick={() => handleOrderTypeClick("SWIGGY")}
-              />
-
-              <AppButton
-                label="Zomato"
-                className="
-              !bg-[#E23744]
-              !text-white
-              !px-5
-              hover:!bg-[#c92f3a]
-            "
-                onClick={() => handleOrderTypeClick("ZOMATO")}
-              />
-
-              <IconButton onClick={handleMenuOpen}>
-                <Avatar
-                  sx={{
-                    bgcolor: "#2563EB", // Indigo / Blue
-                    fontWeight: 600,
-                  }}
-                >
-                  A
-                </Avatar>
-              </IconButton>
 
               <Menu
                 anchorEl={anchorEl}
-                open={open}
+                open={Boolean(anchorEl)}
                 onClose={handleClose}
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
+                PaperProps={{
+                  sx: {
+                    borderRadius: 2,
+                    minWidth: 180,
+                    p: 1,
+                  },
+                }}
               >
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon fontSize="small" className="mr-2" />
+                {/* User Info */}
+                <Box px={2} py={1}>
+                  <Typography fontSize={14} fontWeight={600}>
+                    {localStorage.getItem("userEmail")} mail
+                  </Typography>
+                  <Typography fontSize={12} color="text.secondary">
+                    Logged In
+                  </Typography>
+                </Box>
+
+                <Divider sx={{ my: 1 }} />
+
+                {/* Sign Out */}
+                <MenuItem
+                  onClick={() => {
+                    handleClose();
+                    handleLogout();
+                  }}
+                  sx={{ borderRadius: 1 }}
+                >
+                  <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
                   Sign Out
                 </MenuItem>
               </Menu>

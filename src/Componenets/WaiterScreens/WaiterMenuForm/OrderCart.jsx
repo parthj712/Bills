@@ -10,6 +10,8 @@ import {
   DialogContent,
   DialogActions,
   Button,
+  Box,
+  TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
@@ -45,7 +47,20 @@ export default function OrderCart() {
 
   const [cartItems, setCartItems] = useState([]);
 
+  const [customerName, setCustomerName] = useState("");
+
+  const currentDate = new Date().toLocaleString("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+
   const [loading, setLoading] = useState(false);
+
+  const nameRegex = /^[A-Za-z\s]+$/;
+  const [nameError, setNameError] = useState("");
+
+
   const subtotal = useMemo(
     () =>
       cartItems.reduce((sum, item) => {
@@ -145,6 +160,7 @@ export default function OrderCart() {
   };
 
   const handleConfirmBilling = async () => {
+
     setLoading(true);
 
     try {
@@ -181,6 +197,10 @@ export default function OrderCart() {
       .from(element)
       .save();
   };
+
+
+
+
 
   return (
     <Suspense fallback={<div>Loading order...</div>}>
@@ -310,36 +330,117 @@ export default function OrderCart() {
         onClose={() => setOpenConfirm(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 1,
+          },
+        }}
       >
-        <DialogTitle fontWeight={700}>Confirm Billing</DialogTitle>
+        {/* HEADER */}
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            fontSize: 20,
+            pb: 1,
+          }}
+        >
+          Confirm Billing
+        </DialogTitle>
 
-        <DialogContent>
-          <BillPreview
-            items={cartItems}
-            subtotal={subtotal}
-            tax={tax}
-            total={grandTotal}
-            shopInfo={shopInfo}
-          />
+        <Divider />
 
+        {/* CONTENT */}
+        <DialogContent sx={{ pt: 3 }}>
+
+          {/* Order Meta Info */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+              flexWrap: "wrap",
+              gap: 1,
+            }}
+          >
+            <Typography fontWeight={600}>
+              Order Type:{" "}
+              <span style={{ color: orderType === "TAKEAWAY" ? "#f97316" : "#2563eb" }}>
+                {orderType}
+              </span>
+            </Typography>
+
+            <Typography fontSize={14} color="text.secondary">
+              {currentDate}
+            </Typography>
+          </Box>
+
+          {/* Bill Preview */}
+          <Box
+            sx={{
+              backgroundColor: "#f9fafb",
+              borderRadius: 2,
+              p: 2,
+            }}
+          >
+            <BillPreview
+              items={cartItems}
+              subtotal={subtotal}
+              tax={tax}
+              total={grandTotal}
+              shopInfo={shopInfo}
+              orderType={orderType}
+              date={currentDate}
+              customerName={customerName}
+            />
+          </Box>
+
+          {/* Download Button */}
           <Button
             fullWidth
             variant="outlined"
-            sx={{ mt: 2 }}
+            sx={{
+              mt: 3,
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+            }}
             onClick={downloadBillPDF}
           >
             Download Bill PDF
           </Button>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)} color="inherit">
+
+        <Divider />
+
+        {/* FOOTER ACTIONS */}
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            justifyContent: "space-between",
+          }}
+        >
+          <Button
+            onClick={() => setOpenConfirm(false)}
+            sx={{
+              textTransform: "none",
+              fontWeight: 500,
+            }}
+          >
             Cancel
           </Button>
 
           <Button
             variant="contained"
-            color="primary"
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              fontWeight: 600,
+              textTransform: "none",
+            }}
             onClick={handleConfirmBilling}
             disabled={loading}
           >
@@ -347,6 +448,7 @@ export default function OrderCart() {
           </Button>
         </DialogActions>
       </Dialog>
+
     </Suspense>
   );
 }
