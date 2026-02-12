@@ -16,9 +16,24 @@ export const fetchActiveOrder = async (tableId) => {
   return await API.get(`/orders/active?tableId=${tableId}`);
 };
 
+export const addTakeawayOrder = async (payload) => {
+  return await API.post("/orders/takeaway", payload);
+};
+
+export const fetchActiveTakaway = async () => {
+  return await API.get("/orders/takeaway-active");
+};
+export const fetchActiveTakawayById = async (orderId) => {
+  return await API.get(`/orders/takeaway-active/${orderId}`);
+};
+
 export const itemIncrement = async (data) => {
   await API.post("/orders/increase", data);
 };
 export const itemDecrement = async (data) => {
   await API.post("/orders/decrease", data);
+};
+
+export const getCustomerInfo = async (data) => {
+  await API.post("/orders/takeaway-customers", data);
 };

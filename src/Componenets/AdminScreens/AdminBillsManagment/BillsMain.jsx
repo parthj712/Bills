@@ -13,7 +13,7 @@ import {
   TextField,
   Tooltip,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -23,10 +23,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BillCard from "./BillCard";
 
-
 const BillsMain = () => {
-
-
   const theme = useTheme();
 
   // BREAKPOINTS
@@ -34,12 +31,10 @@ const BillsMain = () => {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-
-
   const [billsData, setBillsData] = useState([]);
   const [search, setSearch] = useState("");
 
-
+  console.log("bills", billsData);
   const fetchBills = async () => {
     try {
       const res = await getBills();
@@ -172,7 +167,11 @@ const BillsMain = () => {
   return (
     <Box className="flex flex-col gap-6 p-2">
       <Box className="flex flex-col gap-2 w-full">
-        <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+        <Typography
+          fontSize={isMobile ? 24 : 30}
+          fontWeight={isMobile ? 600 : 700}
+          className="text-[#0b3c5d]"
+        >
           Bills Management
         </Typography>
 
@@ -314,7 +313,13 @@ const BillsMain = () => {
                     ₹ {bills.grandTotal}
                   </TableCell>
                   <TableCell align="center">
-                    <Box sx={{ display: "flex", justifyContent: "center", gap: 1.5 }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        gap: 1.5,
+                      }}
+                    >
                       <Tooltip title="View">
                         <IconButton
                           size="small"
@@ -352,14 +357,15 @@ const BillsMain = () => {
                       </Tooltip>
                     </Box>
                   </TableCell>
-
                 </TableRow>
               ))}
 
               {filteredBills.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                    <Typography color="text.secondary">No bills found</Typography>
+                    <Typography color="text.secondary">
+                      No bills found
+                    </Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -377,14 +383,11 @@ const BillsMain = () => {
 
           {filteredBills.length === 0 && (
             <Box className="col-span-full text-center py-8">
-              <Typography color="text.secondary">
-                No bills found
-              </Typography>
+              <Typography color="text.secondary">No bills found</Typography>
             </Box>
           )}
         </Box>
       )}
-
     </Box>
   );
 };

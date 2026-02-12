@@ -14,7 +14,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchMenuItems } from "@/redux/slices/menuSlice";
 import { addToCart } from "@/redux/slices/cartSlice";
 import { useSearchParams } from "next/navigation";
@@ -22,12 +22,12 @@ import { nanoid } from "@reduxjs/toolkit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useRef } from "react";
-import { saveOrdersToDraft } from "@/service/orderService";
+import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 
 export default function OrderForm() {
   const searchRef = useRef(null);
   const kotRef = useRef(null);
-
+  const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const tableId = searchParams.get("tableId");
   const { items = [] } = useSelector((state) => state.menu);
@@ -42,6 +42,10 @@ export default function OrderForm() {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // keyboatd shortcuts
+
+  useEffect(() => {
+    dispatch(fetchMenuItems());
+  }, [dispatch]);
   useEffect(() => {
     searchRef.current?.focus();
   }, []);
@@ -143,7 +147,11 @@ export default function OrderForm() {
       };
       console.log(payload);
 
-      await saveOrdersToDraft(payload);
+      if (orderType === "TAKEAWAY") {
+        await addTakeawayOrder(payload);
+      } else {
+        await saveOrdersToDraft(payload);
+      }
 
       // clear UI selections
       setSelectedItems([]);
