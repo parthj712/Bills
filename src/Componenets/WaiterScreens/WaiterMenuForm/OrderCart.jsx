@@ -29,7 +29,7 @@ import {
   itemIncrement,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
-import { adminInfo, getShopName } from "@/service/shopService";
+import { adminInfo, getShofInfo, getShopName } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
 
 export default function OrderCart() {
@@ -76,7 +76,7 @@ export default function OrderCart() {
 
   const handleFecthShopInfo = async () => {
     try {
-      const res = await getShopName();
+      const res = await getShofInfo();
 
       setShopInfo(res.data?.data);
     } catch (error) {
@@ -204,17 +204,32 @@ export default function OrderCart() {
 
   return (
     <Suspense fallback={<div>Loading order...</div>}>
-      <Card className="p-6 !rounded-2xl border-dashed border-3 border-gray-300">
+      <Card
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          border: "1px solid #E5E7EB",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+        }}
+      >
+
         {/* Items */}
         {cartItems.length === 0 ? (
-          <div className="my-6 text-center">
-            <Typography fontSize={16} fontWeight={600} color="text.secondary">
-              No items added yet
+          <Box
+            sx={{
+              py: 6,
+              textAlign: "center",
+              color: "#64748B",
+            }}
+          >
+            <Typography fontSize={16} fontWeight={600}>
+              No items added
             </Typography>
-            <Typography fontSize={14} color="text.secondary" className="mt-1">
-              Tap on menu items to add them here
+            <Typography fontSize={14}>
+              Add items from menu to build this order
             </Typography>
-          </div>
+          </Box>
+
         ) : (
           cartItems.map((item) => (
             <div
@@ -234,10 +249,11 @@ export default function OrderCart() {
                   size="small"
                   onClick={() => handleDecrease(item)}
                   sx={{
-                    backgroundColor: "#f3f4f6",
-                    color: "#374151",
-                    "&:hover": { backgroundColor: "#e5e7eb" },
+                    backgroundColor: "#F1F5F9",
+                    color: "#334155",
+                    "&:hover": { backgroundColor: "#E2E8F0" },
                   }}
+
                 >
                   <RemoveIcon fontSize="small" />
                 </IconButton>
@@ -262,10 +278,11 @@ export default function OrderCart() {
                   size="small"
                   onClick={() => handleIncrease(item)}
                   sx={{
-                    backgroundColor: "#dcfce7",
-                    color: "#16a34a",
-                    "&:hover": { backgroundColor: "#bbf7d0" },
+                    backgroundColor: "#F1F5F9",
+                    color: "#334155",
+                    "&:hover": { backgroundColor: "#E2E8F0" },
                   }}
+
                 >
                   <AddIcon fontSize="small" />
                 </IconButton>
@@ -290,14 +307,41 @@ export default function OrderCart() {
 
           <Divider />
 
-          <div className="flex justify-between items-center my-4 p-3 rounded-xl bg-green-50">
-            <span className="text-[22px] font-semibold text-gray-800">
-              Grand Total
-            </span>
-            <span className="text-[22px] font-bold text-green-700">
-              ₹ {grandTotal.toFixed(2)}
-            </span>
-          </div>
+          <Box
+            sx={{
+              mt: 3,
+              p: 3,
+              borderRadius: 2,
+              border: "1px solid #E5E7EB",
+              backgroundColor: "#F8FAFC",
+            }}
+          >
+            <Box display="flex" justifyContent="space-between" mb={1}>
+              <Typography color="text.secondary">Subtotal</Typography>
+              <Typography>₹ {subtotal.toFixed(2)}</Typography>
+            </Box>
+
+            <Box display="flex" justifyContent="space-between" mb={2}>
+              <Typography color="text.secondary">Tax (approx)</Typography>
+              <Typography>₹ {tax.toFixed(2)}</Typography>
+            </Box>
+
+            <Divider sx={{ mb: 2 }} />
+
+            <Box display="flex" justifyContent="space-between">
+              <Typography fontWeight={700} fontSize={18}>
+                Grand Total
+              </Typography>
+              <Typography
+                fontWeight={700}
+                fontSize={20}
+                sx={{ color: "#1E293B" }}
+              >
+                ₹ {grandTotal.toFixed(2)}
+              </Typography>
+            </Box>
+          </Box>
+
         </div>
       </Card>
 
@@ -306,20 +350,44 @@ export default function OrderCart() {
         <div className="flex flex-col lg:flex-row md:flex-row  justify-end gap-4 mt-6">
           {isDineIn ? (
             <AppButton
-              label="Save & Continue"
-              className="!bg-green-500 hover:!bg-green-600 !text-white px-6"
+              label="Print KOT"
+              sx={{
+                backgroundColor: "#F1F5F9",
+                color: "#334155",
+                borderRadius: 2,
+                fontWeight: 600,
+                "&:hover": { backgroundColor: "#E2E8F0" },
+              }}
+
             />
           ) : (
             <AppButton
               label="Cancel"
-              className="!bg-red-500 hover:!bg-red-600 !text-white px-6"
+              sx={{
+                backgroundColor: "#F1F5F9",
+                color: "#334155",
+                borderRadius: 2,
+                fontWeight: 600,
+                "&:hover": { backgroundColor: "#E2E8F0" },
+              }}
             />
           )}
 
           <AppButton
             label={loading ? "Processing..." : "Proceed to Billing"}
             disabled={loading}
-            className="!bg-blue-500 hover:!bg-blue-600 !text-white px-6"
+            sx={{
+              backgroundColor: "#1E293B",
+              color: "#fff",
+              borderRadius: 2,
+              fontWeight: 600,
+              px: 4,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              "&:hover": {
+                backgroundColor: "#0F172A",
+              },
+            }}
+
             onClick={handleOpenConfirm}
           />
         </div>

@@ -205,7 +205,7 @@ export default function OrderForm() {
       //   }, 1100);
       // }
 
-      
+
     } catch (err) {
       console.error("Add item failed", err);
 
@@ -295,201 +295,253 @@ export default function OrderForm() {
         </div>
 
         <Box className="grid lg:grid-cols-1 gap-4">
-          {/* Menu Items */}
-          {(category || search.trim()) && (
-            <Box display={"flex"} flexDirection={"column"} gap={2}>
-              {/* <Divider /> */}
+          <Box>
+            {/* Menu Items */}
+            {(category || search.trim()) && (
+              <Box display={"flex"} flexDirection={"column"} gap={2}>
+                {/* <Divider /> */}
 
-              <Typography fontSize={20} fontWeight={600}>
-                Menu Items
-              </Typography>
+                <Typography fontSize={20} fontWeight={600}>
+                  Menu Items
+                </Typography>
 
-              <>
-                {filteredItems.length === 0 ? (
-                  <Typography fontSize={14} color="text.secondary">
-                    No items found.
-                  </Typography>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    {filteredItems.map((item, index) => (
-                      <Card
-                        key={item._id}
-                        elevation={0}
-                        onClick={() => handleSelectItem(item)}
-                        className={`
-                        p-3 cursor-pointer border !rounded-xl transition-all duration-150
-                        ${
-                          index === activeIndex
-                            ? "border-blue-500 bg-blue-50"
-                            : isItemSelected(item._id)
-                              ? "border-green-500 bg-green-50"
-                              : "border-gray-200 hover:bg-gray-50"
-                        }
-                      `}
-                      >
-                        <Typography fontWeight={600}>{item.name}</Typography>
-                        <Typography
-                          fontSize={14}
-                          fontWeight={600}
-                          color="text.secondary"
+                <>
+                  {filteredItems.length === 0 ? (
+                    <Typography fontSize={14} color="text.secondary">
+                      No items found.
+                    </Typography>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredItems.map((item, index) => (
+                        <Card
+                          key={item._id}
+                          elevation={0}
+                          onClick={() => handleSelectItem(item)}
+                          className={`
+                            p-3 cursor-pointer border  transition-all duration-150
+                            ${isItemSelected(item._id)
+                              ? "border-slate-800 bg-slate-50 shadow-sm"
+                              : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
+                            }
+
+`}
+
                         >
-                          ₹ {item?.price?.full ?? 0}
-                          {item?.price?.half
-                            ? ` (Half ₹${item.price.half})`
-                            : ""}
-                        </Typography>
-                      </Card>
-                    ))}
-                  </div>
-                )}
-              </>
-            </Box>
-          )}
-
-          {/* Selected Items */}
-          {selectedItems.length > 0 && (
-            <Box display={"flex"} flexDirection={"column"} gap={2}>
-              {/* <Divider /> */}
-              <Typography fontSize={20} fontWeight={600}>
-                Selected Items
-              </Typography>
-
-              <div className="flex flex-col gap-3">
-                {selectedItems.map((x) => {
-                  const price = getUnitPrice(x.item, x.portion);
-                  return (
-                    <Card key={x.tempId} className="p-5 rounded-xl">
-                      <div className="flex flex-col lg:flex-row md:flex-row items-start lg:items-center md:items-center justify-between gap-3">
-                        <div className="flex gap-3">
-                          <Typography fontWeight={600}>
-                            {x.item.name}
-                          </Typography>
-                          <Typography fontSize={16} color="text.secondary">
-                            ₹ {price} / {x.portion}
-                          </Typography>
-                        </div>
-
-                        {/* Portion */}
-                        <div className="flex gap-2 mt-3 flex-wrap">
-                          <Chip
-                            sx={{ fontWeight: 600 }}
-                            label={`Full ₹${x.item?.price?.full ?? 0}`}
-                            color={x.portion === "full" ? "primary" : "default"}
-                            onClick={() => updatePortion(x.tempId, "full")}
-                          />
-                          {x.item?.price?.half && (
-                            <Chip
-                              sx={{ fontWeight: 600 }}
-                              label={`Half ₹${x.item.price.half}`}
-                              color={
-                                x.portion === "half" ? "primary" : "default"
-                              }
-                              onClick={() => updatePortion(x.tempId, "half")}
-                            />
-                          )}
-                        </div>
-
-                        {/* Qty */}
-                        <div className="flex items-center gap-3 mt-3">
-                          {/* Decrease */}
-                          <IconButton
-                            size="small"
-                            onClick={() => updateQty(x.tempId, x.qty - 1)}
-                            sx={{
-                              backgroundColor: "#f3f4f6",
-                              color: "#374151",
-                              "&:hover": { backgroundColor: "#e5e7eb" },
-                            }}
-                          >
-                            <RemoveIcon fontSize="small" />
-                          </IconButton>
-
-                          {/* Quantity */}
+                          <Typography fontWeight={600}>{item.name}</Typography>
                           <Typography
-                            fontSize={16}
-                            fontWeight={700}
-                            sx={{
-                              minWidth: 32,
-                              textAlign: "center",
-                              backgroundColor: "#f9fafb",
-                              borderRadius: "8px",
-                              padding: "4px 10px",
-                              border: "1px solid #e5e7eb",
-                            }}
+                            fontSize={14}
+                            fontWeight={600}
+                            color="text.secondary"
                           >
-                            {x.qty}
+                            ₹ {item?.price?.full ?? 0}
+                            {item?.price?.half
+                              ? ` (Half ₹${item.price.half})`
+                              : ""}
                           </Typography>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </>
+              </Box>
+            )}
+          </Box>
 
-                          {/* Increase */}
-                          <IconButton
-                            size="small"
-                            onClick={() => updateQty(x.tempId, x.qty + 1)}
-                            sx={{
-                              backgroundColor: "#dcfce7", // light green
-                              color: "#16a34a", // green icon
-                              "&:hover": { backgroundColor: "#bbf7d0" },
-                            }}
-                          >
-                            <AddIcon fontSize="small" />
-                          </IconButton>
+          <Box>
+            {/* Selected Items */}
+            {selectedItems.length > 0 && (
+              <Box display={"flex"} flexDirection={"column"} gap={2}>
+                {/* <Divider /> */}
+                <Typography fontSize={20} fontWeight={600}>
+                  Selected Items
+                </Typography>
 
-                          {/* Price */}
-                          {/* <Typography
+                <div className="flex flex-col gap-3">
+                  {selectedItems.map((x) => {
+                    const price = getUnitPrice(x.item, x.portion);
+                    return (
+                      <Card
+                        key={x.tempId}
+                        sx={{
+                          p: 3,
+                          borderRadius: 3,
+                          border: "1px solid #E5E7EB",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                        }}
+                      >
+
+                        <div className="flex flex-col lg:flex-row md:flex-row items-start lg:items-center md:items-center justify-between gap-3">
+                          <div className="flex gap-3">
+                            <Typography fontWeight={600}>
+                              {x.item.name}
+                            </Typography>
+                            <Typography fontSize={16} color="text.secondary">
+                              ₹ {price} / {x.portion}
+                            </Typography>
+                          </div>
+
+                          {/* Portion */}
+                          <div className="flex gap-2 flex-wrap">
+                            {x.item?.price?.full && (
+                              <Chip
+
+                                label={`Full ₹${x.item.price.full}`}
+                                sx={{
+                                  fontWeight: 600,
+                                  borderRadius: 2,
+                                  backgroundColor: x.portion === "full" ? "#334155" : "#F1F5F9",
+                                  color: x.portion === "full" ? "#fff" : "#475569",
+                                  "&:hover": {
+                                    backgroundColor: x.portion === "full" ? "#1E293B" : "#E2E8F0",
+                                  },
+                                }}
+
+                                onClick={() => updatePortion(x.tempId, "full")}
+                              />
+                            )}
+
+                            {x.item?.price?.half && (
+                              <Chip
+                                sx={{ fontWeight: 600 }}
+                                label={`Half ₹${x.item.price.half}`}
+                                color={x.portion === "half" ? "primary" : "default"}
+                                onClick={() => updatePortion(x.tempId, "half")}
+                              />
+                            )}
+                          </div>
+
+
+                          {/* Qty */}
+                          <div className="flex items-center gap-3">
+                            {/* Decrease */}
+                            <IconButton
+                              size="small"
+                              onClick={() => updateQty(x.tempId, x.qty - 1)}
+                              sx={{
+                                backgroundColor: "#f3f4f6",
+                                color: "#374151",
+                                "&:hover": { backgroundColor: "#e5e7eb" },
+                              }}
+                            >
+                              <RemoveIcon fontSize="small" />
+                            </IconButton>
+
+                            {/* Quantity */}
+                            <Typography
+                              fontSize={16}
+                              fontWeight={700}
+                              sx={{
+                                minWidth: 32,
+                                textAlign: "center",
+                                backgroundColor: "#f9fafb",
+                                borderRadius: "8px",
+                                padding: "4px 10px",
+                                border: "1px solid #e5e7eb",
+                              }}
+                            >
+                              {x.qty}
+                            </Typography>
+
+                            {/* Increase */}
+                            <IconButton
+                              size="small"
+                              onClick={() => updateQty(x.tempId, x.qty + 1)}
+                              sx={{
+                                backgroundColor: "#F1F5F9",
+                                color: "#334155",
+                                "&:hover": { backgroundColor: "#E2E8F0" },
+                              }}
+
+                            >
+                              <AddIcon fontSize="small" />
+                            </IconButton>
+
+                            {/* Price */}
+                            {/* <Typography
                         className="ml-auto"
                         fontWeight={700}
                         sx={{ color: "#111827" }}
                       >
                         ₹ {price * x.qty}
                       </Typography> */}
+                          </div>
+
+                          <Tooltip title="Remove item" sx={{ fontWeight: 600 }}>
+                            <IconButton
+                              onClick={() => removeSelected(x.tempId)}
+                              size="small"
+                              sx={{
+                                backgroundColor: "#fee2e2", // light red
+                                color: "#dc2626", // red icon
+                                "&:hover": {
+                                  backgroundColor: "#fecaca",
+                                },
+                              }}
+                            >
+                              <DeleteOutlineIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         </div>
+                      </Card>
+                    );
+                  })}
 
-                        <Tooltip title="Remove item" sx={{ fontWeight: 600 }}>
-                          <IconButton
-                            onClick={() => removeSelected(x.tempId)}
-                            size="small"
-                            sx={{
-                              backgroundColor: "#fee2e2", // light red
-                              color: "#dc2626", // red icon
-                              "&:hover": {
-                                backgroundColor: "#fecaca",
-                              },
-                            }}
-                          >
-                            <DeleteOutlineIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </div>
-                    </Card>
-                  );
-                })}
+                  {/* Message for Kitchen */}
+                  <TextField
+                    // inputRef={kotRef}
+                    label="KOT Message"
+                    placeholder="Ex: No onion, extra spicy..."
+                    size="small"
+                    fullWidth
+                    value={kotMessage}
+                    onChange={(e) => setKotMessage(e.target.value)}
+                    multiline
+                    minRows={2}
+                  />
 
-                {/* Message for Kitchen */}
-                <TextField
-                  // inputRef={kotRef}
-                  label="KOT Message"
-                  placeholder="Ex: No onion, extra spicy..."
-                  size="small"
-                  fullWidth
-                  value={kotMessage}
-                  onChange={(e) => setKotMessage(e.target.value)}
-                  multiline
-                  minRows={2}
-                />
+                  <Box
+                    sx={{
+                      backgroundColor: "#F8FAFC",
+                      p: 2,
+                      borderRadius: 2,
+                      border: "1px solid #E5E7EB",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: 18,
+                        color: "#1E293B",
+                        textAlign: "center",
+                      }}
+                    >
+                      Total ₹ {totalAmount}
+                    </Typography>
+                  </Box>
 
-                <div className="flex items-center justify-center">
-                  <Typography fontSize={20} fontWeight={700}>
-                    Total: ₹ {totalAmount}
-                  </Typography>
+
+                  <AppButton
+                    label="Add All to Order"
+                    sx={{
+                      backgroundColor: "#1E293B",
+                      color: "#fff",
+                      py: 1.6,
+                      borderRadius: 3,
+                      fontWeight: 600,
+                      letterSpacing: "0.4px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                      "&:hover": {
+                        backgroundColor: "#0F172A",
+                        boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
+                      },
+                    }}
+
+                    onClick={handleAddAllToOrder}
+                  />
                 </div>
-
-                <AppButton
-                  label="Add All to Order"
-                  className="!bg-orange-500 hover:!bg-orange-600 !text-white"
-                  onClick={handleAddAllToOrder}
-                />
-              </div>
-            </Box>
-          )}
+              </Box>
+            )}
+          </Box>
         </Box>
       </Card>
     </Suspense>
