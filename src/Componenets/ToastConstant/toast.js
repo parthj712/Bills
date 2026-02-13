@@ -1,13 +1,21 @@
-import { toast, Slide } from "react-toastify";
+import { toast, cssTransition } from "react-toastify";
+
+const SmoothSlide = cssTransition({
+  enter: "toast-enter",
+  exit: "toast-exit",
+  duration: [280, 200],
+});
+
 
 const baseOptions = {
-    position: "top-right",
-    hideProgressBar: true,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: false,
-    transition: Slide,
+  position: "top-right",
+  hideProgressBar: true,
+  closeOnClick: true,
+  pauseOnHover: true,
+  draggable: false,
+  transition: SmoothSlide,
 };
+
 
 export const showToast = ({ type = "info", message }) => {
     if (!message) return;
