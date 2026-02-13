@@ -199,11 +199,13 @@ export default function OrderForm() {
       setKotMessage("");
 
       // ✅ Redirect after short delay
-      if (orderType === "DINE-IN") {
-        setTimeout(() => {
-          router.replace("/waiter");
-        }, 1100);
-      }
+      // if (orderType === "DINE-IN") {
+      //   setTimeout(() => {
+      //     router.replace("/waiter");
+      //   }, 1100);
+      // }
+
+      
     } catch (err) {
       console.error("Add item failed", err);
 

@@ -193,23 +193,82 @@ export default function WaiterHomePage() {
       {/* Navbar */}
       <WaiterNavbar />
 
-      <div className="grid grid-cols-12 gap-6 p-6">
-        {/* RIGHT PANEL */}
-        <div className="col-span-12">
-          <AppButton
-            label="Takeaway"
-            className="!bg-orange-500 !text-white mb-4 block lg:hidden shadow-lg hover:shadow-xl transition !py-3"
-            onClick={() => handleOrderTypeClick("TAKEAWAY")}
-          />
+      <div>
+        <Box
+          display="flex"
+          p={4}
+          flexDirection={isDesktop ? "row" : "column-reverse"}
+          gap={4}
+        >
 
-          <Card className="p-7 my-6 !rounded-4xl shadow-md !bg-[#F1F1F1]">
-            <div className="flex items-center justify-between  mb-4">
-              <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
-                Dine-In Orders
-              </Typography>
+          {/* LEFT PANEL */}
+          <div className="flex-1 flex flex-col gap-4 ">
 
-              <span
-                className="
+            {/* Recent Bills */}
+            <Card className="p-5 !rounded-3xl shadow-md">
+              <div className="flex justify-between items-center mb-4">
+                <Typography fontSize={18} fontWeight={600}>
+                  Recent Bills
+                </Typography>
+
+                {/* <Typography className="text-orange-600 cursor-pointer font-semibold text-sm hover:underline">
+                View All →
+              </Typography> */}
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {recentBills.map((bill) => (
+                  <div
+                    key={bill._id}
+                    className="flex justify-between items-center bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition"
+                  >
+                    <div>
+                      <Typography fontSize={14} fontWeight={600}>
+                        {bill.billNo}
+                      </Typography>
+                      <Typography fontSize={12} color="text.secondary">
+                        Table {bill.tableNo} • {bill.time}
+                      </Typography>
+                    </div>
+
+                    <Typography fontSize={14} fontWeight={600} color="green">
+                      ₹{bill.grandTotal}
+                    </Typography>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className="flex-1">
+            {/* <div className="flex justify-end mb-4">
+            <AppButton
+              label="Takeaway"
+              className="
+                    !bg-orange-500 
+                    !text-white 
+                    shadow-lg 
+                    hover:shadow-xl 
+                    transition 
+                    !py-3
+                    w-full 
+                    sm:w-[220px] 
+                    md:w-[240px]
+                  "
+              onClick={() => handleOrderTypeClick("TAKEAWAY")}
+            />
+          </div> */}
+
+
+            <Card className="p-7 shadow-md ">
+              <div className="flex items-center justify-between  mb-4">
+                <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
+                  Dine-In Orders
+                </Typography>
+
+                <span
+                  className="
                       border-[1px]
                       border-green-600/90 text-[14px]
                       md:test-[16px] lg:text-[16px]
@@ -220,14 +279,14 @@ export default function WaiterHomePage() {
                       py-1
                       rounded-full
                     "
-              >
-                {totalActiveTables} Active
-              </span>
-            </div>
+                >
+                  {totalActiveTables} Active
+                </span>
+              </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {loading
-                ? Array.from({ length: 9 }).map((_, index) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {loading
+                  ? Array.from({ length: 9 }).map((_, index) => (
                     <Skeleton
                       key={index}
                       variant="rounded"
@@ -235,7 +294,7 @@ export default function WaiterHomePage() {
                       className="!rounded-2xl"
                     />
                   ))
-                : tables.map((table) => (
+                  : tables.map((table) => (
                     <Tooltip
                       key={table._id}
                       title={
@@ -263,12 +322,11 @@ export default function WaiterHomePage() {
                           transition-all duration-300
                           hover:shadow-lg hover:scale-[1.03]
                           ${tableStyles[table.status]}
-                          ${
-                            highlightTableNo === table.tableNo
-                              ? table.status === "OCCUPIED"
-                                ? "ring-4 ring-red-500 ring-offset-2"
-                                : "ring-4 ring-green-500 ring-offset-2"
-                              : ""
+                          ${highlightTableNo === table.tableNo
+                            ? table.status === "OCCUPIED"
+                              ? "ring-4 ring-red-500 ring-offset-2"
+                              : "ring-4 ring-green-500 ring-offset-2"
+                            : ""
                           }
                         `}
                       >
@@ -290,11 +348,10 @@ export default function WaiterHomePage() {
                           fontSize={table.status === "OCCUPIED" ? 12 : 13}
                           fontWeight={table.status === "OCCUPIED" ? 700 : 600}
                           className={`px-2 py-[2px] rounded-full
-                          ${
-                            table.status === "OCCUPIED"
+                          ${table.status === "OCCUPIED"
                               ? "bg-red-100 text-red-700 border border-red-500"
                               : "bg-green-100 text-green-700 border border-green-500"
-                          }
+                            }
                           `}
                         >
                           {table.status}
@@ -309,47 +366,33 @@ export default function WaiterHomePage() {
                       </div>
                     </Tooltip>
                   ))}
-            </div>
-          </Card>
+              </div>
+            </Card>
+          </div>
+
+
+        </Box>
+
+
+        {/* Floating Takeaway Button */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <AppButton
+            label="Takeaway"
+            className="
+                !bg-orange-500 
+                !text-white 
+                shadow-2xl 
+                hover:shadow-3xl
+                transition-all 
+                duration-300
+                !py-3
+                !px-6
+                rounded-full
+              "
+            onClick={() => handleOrderTypeClick("TAKEAWAY")}
+          />
         </div>
 
-        {/* LEFT PANEL */}
-        <div className="col-span-12 flex flex-col gap-4">
-          {/* Recent Bills */}
-          <Card className="p-5 !rounded-3xl shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <Typography fontSize={18} fontWeight={600}>
-                Recent Bills
-              </Typography>
-
-              {/* <Typography className="text-orange-600 cursor-pointer font-semibold text-sm hover:underline">
-                View All →
-              </Typography> */}
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {recentBills.map((bill) => (
-                <div
-                  key={bill._id}
-                  className="flex justify-between items-center bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition"
-                >
-                  <div>
-                    <Typography fontSize={14} fontWeight={600}>
-                      {bill.billNo}
-                    </Typography>
-                    <Typography fontSize={12} color="text.secondary">
-                      Table {bill.tableNo} • {bill.time}
-                    </Typography>
-                  </div>
-
-                  <Typography fontSize={14} fontWeight={600} color="green">
-                    ₹{bill.grandTotal}
-                  </Typography>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
       </div>
     </Box>
   );
