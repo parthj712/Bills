@@ -162,6 +162,7 @@ const ItemsReport = () => {
                 borderRadius: 2,
                 textTransform: "none",
                 background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
+                color : "white"
               }}
             >
               Export Excel
