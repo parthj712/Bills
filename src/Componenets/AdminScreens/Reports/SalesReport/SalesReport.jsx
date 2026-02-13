@@ -21,6 +21,9 @@ import DownloadIcon from "@mui/icons-material/Download";
 import { useEffect, useMemo, useState } from "react";
 import { getBills } from "@/service/billsService";
 import { motion } from "framer-motion";
+import RestaurantIcon from "@mui/icons-material/Restaurant";
+import TakeoutDiningIcon from "@mui/icons-material/TakeoutDining";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 
 /* Date Picker */
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
@@ -32,7 +35,8 @@ import dayjs from "dayjs";
 import { saveAs } from "file-saver";
 import BillDetails from "../../AdminBillsManagment/BillDetails";
 import SalesBillCard from "./SalesBillCard";
-import MonthlySummaryCard from "./MonthlySummaryCard";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 
 export default function SalesReport() {
   const theme = useTheme();
@@ -48,6 +52,7 @@ export default function SalesReport() {
   const [selectedBill, setSelectedBill] = useState(null);
 
   const [showReport, setShowReport] = useState(false);
+  const [billType, setBilltype] = useState("ALL");
 
   const quickRanges = [
     { label: "1 Day", days: 1 },
@@ -68,11 +73,18 @@ export default function SalesReport() {
   const filteredBills = useMemo(() => {
     return billsData.filter((b) => {
       const d = new Date(b.createdAt);
+
+      // Date filter
       if (fromDate && d < new Date(fromDate)) return false;
       if (toDate && d > new Date(toDate)) return false;
+
+      // Bill Type filter
+      if (billType === "DINEIN" && !b.tableId) return false;
+      if (billType === "TAKEAWAY" && b.tableId) return false;
+
       return true;
     });
-  }, [billsData, fromDate, toDate]);
+  }, [billsData, fromDate, toDate, billType]);
 
   const totals = useMemo(() => {
     return filteredBills.reduce(
@@ -205,6 +217,114 @@ export default function SalesReport() {
                 />
               ))}
             </Box>
+            {/* bill type toggle buttons */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              {/* PREMIUM SEGMENT CONTROL */}
+              <Box
+                sx={{
+                  position: "relative",
+                  display: "flex",
+                  background: "linear-gradient(145deg,#eef2f7,#ffffff)",
+                  borderRadius: "14px",
+                  padding: "6px",
+                  boxShadow:
+                    "0 6px 18px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9)",
+                }}
+              >
+                {/* Sliding Active Pill */}
+                <motion.div
+                  layout
+                  transition={{ type: "spring", stiffness: 300, damping: 28 }}
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    bottom: 6,
+                    width: "calc(100% / 3 - 8px)",
+                    borderRadius: "10px",
+                    background: "linear-gradient(135deg,#2563EB,#22D3EE)",
+                    // boxShadow: "0 4px 12px rgba(37,99,235,0.35)",
+                    left:
+                      billType === "ALL"
+                        ? 6
+                        : billType === "DINEIN"
+                          ? "calc(33.33% + 2px)"
+                          : "calc(66.66% - 2px)",
+                  }}
+                />
+
+                {[
+                  {
+                    label: "All",
+                    value: "ALL",
+                    icon: <ReceiptLongIcon sx={{ fontSize: 18 }} />,
+                  },
+                  {
+                    label: "Dine-In",
+                    value: "DINEIN",
+                    icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
+                  },
+                  {
+                    label: "Takeaway",
+                    value: "TAKEAWAY",
+                    icon: <TakeoutDiningIcon sx={{ fontSize: 18 }} />,
+                  },
+                ].map((item) => {
+                  const active = billType === item.value;
+
+                  return (
+                    <Box
+                      key={item.value}
+                      onClick={() => {
+                        setBilltype(item.value);
+                        setShowReport(false);
+                      }}
+                      component={motion.div}
+                      whileTap={{ scale: 0.92 }}
+                      whileHover={{ y: -1 }}
+                      sx={{
+                        position: "relative",
+                        zIndex: 2,
+                        px: 2.6,
+                        py: 1.2,
+                        minWidth: 110,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 1,
+                        cursor: "pointer",
+                        borderRadius: "10px",
+                        userSelect: "none",
+                        fontWeight: active ? 600 : 500,
+                        letterSpacing: "0.3px",
+                        fontSize: 14,
+                        color: active ? "#ffffff" : "#334155",
+                        transition: "all .25s ease",
+
+                        /* Active text glow (THIS fixes premium feel) */
+                        textShadow: active
+                          ? "0 1px 2px rgba(0,0,0,0.25)"
+                          : "none",
+
+                        "& svg": {
+                          color: active ? "#ffffff" : "#64748b",
+                          transition: "all .25s ease",
+                        },
+                      }}
+                    >
+                      {item.icon}
+                      {item.label}
+                    </Box>
+                  );
+                })}
+              </Box>
+            </Box>
 
             {/* Date Pickers */}
             <Box display="flex" gap={3} flexWrap="wrap">
@@ -265,6 +385,7 @@ export default function SalesReport() {
                   {[
                     "Date",
                     "Bill No",
+                    "Type",
                     "Subtotal",
                     "GST",
                     "Total",
@@ -296,6 +417,14 @@ export default function SalesReport() {
                       {new Date(b.createdAt).toLocaleDateString("en-IN")}
                     </TableCell>
                     <TableCell align="center">{b.billNo}</TableCell>
+                    <TableCell align="center">
+                      {b.tableId ? (
+                        <Chip label="Dine-In" color="success" size="small" />
+                      ) : (
+                        <Chip label="Takeaway" color="warning" size="small" />
+                      )}
+                    </TableCell>
+
                     <TableCell align="center">₹ {b.subtotal}</TableCell>
                     <TableCell align="center">₹ {b.gstAmount}</TableCell>
                     <TableCell align="center" fontWeight={700}>
@@ -320,20 +449,56 @@ export default function SalesReport() {
 
                 {/* Totals */}
                 {filteredBills.length > 0 && (
-                  <TableRow sx={{ backgroundColor: "#f8fafc" }}>
-                    <TableCell align="center" fontWeight={700}>
-                      TOTAL
-                    </TableCell>
+                  <TableRow
+                    sx={{
+                      background: "#f1f5f9",
+                      "& td": {
+                        fontWeight: 700,
+                        fontSize: 15,
+                        borderTop: "2px solid #cbd5e1",
+                      },
+                    }}
+                  >
+                    {/* Date column */}
+                    <TableCell align="center">TOTAL</TableCell>
+
+                    {/* Bill No */}
                     <TableCell />
-                    <TableCell align="center" fontWeight={700}>
-                      ₹ {totals.subtotal.toFixed(2)}
+
+                    {/* Type */}
+                    <TableCell />
+
+                    {/* Subtotal */}
+                    <TableCell align="center" sx={{ color: "#0f172a" }}>
+                      ₹{" "}
+                      {totals.subtotal.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                      })}
                     </TableCell>
-                    <TableCell align="center" fontWeight={700}>
-                      ₹ {totals.gst.toFixed(2)}
+
+                    {/* GST */}
+                    <TableCell align="center" sx={{ color: "#0f172a" }}>
+                      ₹{" "}
+                      {totals.gst.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                      })}
                     </TableCell>
-                    <TableCell align="center" fontWeight={700}>
-                      ₹ {totals.total.toFixed(2)}
+
+                    {/* Grand Total (highlighted) */}
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: "#047857",
+                        fontSize: 16,
+                      }}
+                    >
+                      ₹{" "}
+                      {totals.total.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                      })}
                     </TableCell>
+
+                    {/* Action */}
                     <TableCell />
                   </TableRow>
                 )}

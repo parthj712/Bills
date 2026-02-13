@@ -16,6 +16,9 @@ export const addWebsite = async (payload) => {
   return await API.put("/shops/update-website", payload);
 };
 
+export const addTagline = async (payload) => {
+  return await API.put("/shops/tagline", payload);
+};
 export const uploadShopLogo = async (file) => {
   const formData = new FormData();
   formData.append("logo", file);
