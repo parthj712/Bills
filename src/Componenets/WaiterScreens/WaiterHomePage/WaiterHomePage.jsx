@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
 
 import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
+import { getRecentBills } from "@/service/billsService";
 
 const tableStyles = {
   AVAILABLE: `
@@ -43,18 +44,7 @@ const tableStyles = {
   `,
 };
 export default function WaiterHomePage() {
-
-
-  const recentBills = [
-    { id: "BILL001", tableNo: 2, amount: 1250, time: "10:45 AM" },
-    { id: "BILL002", tableNo: 4, amount: 860, time: "11:10 AM" },
-    { id: "BILL003", tableNo: 1, amount: 2140, time: "11:30 AM" },
-    { id: "BILL004", tableNo: 3, amount: 980, time: "12:00 PM" },
-    { id: "BILL005", tableNo: 5, amount: 1750, time: "12:25 PM" },
-    { id: "BILL006", tableNo: 2, amount: 720, time: "01:00 PM" },
-  ];
-
-
+  const [recentBills, setRecentBills] = useState([]);
 
   const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -67,12 +57,24 @@ export default function WaiterHomePage() {
   const [keyBuffer, setKeyBuffer] = useState("");
   const [highlightTableNo, setHighlightTableNo] = useState(null);
 
+  const fetchRecentBills = async () => {
+    try {
+      const res = await getRecentBills();
+
+      setRecentBills(res.data?.data);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+      console.error("Recent Bills Error:", message);
+    }
+  };
+
   const handleGetTables = async () => {
     try {
       setLoading(true);
       const res = await getTables();
-      console.log(res);
-
       setTables(res);
     } catch (error) {
       console.log("failed to get tables", error);
@@ -83,6 +85,7 @@ export default function WaiterHomePage() {
 
   useEffect(() => {
     handleGetTables();
+    fetchRecentBills();
   }, []);
 
   useEffect(() => {
@@ -164,12 +167,12 @@ export default function WaiterHomePage() {
     router.push(`/waiter/order?orderType=${orderType}`);
   };
 
-  const topProducts = [
-    { name: "Paneer Butter Masala", percent: 72 },
-    { name: "Veg Biryani", percent: 65 },
-    { name: "Butter Naan", percent: 54 },
-    { name: "Cold Coffee", percent: 41 },
-  ];
+  // const topProducts = [
+  //   { name: "Paneer Butter Masala", percent: 72 },
+  //   { name: "Veg Biryani", percent: 65 },
+  //   { name: "Butter Naan", percent: 54 },
+  //   { name: "Cold Coffee", percent: 41 },
+  // ];
 
   const getRunningTime = (occupiedAt) => {
     if (!occupiedAt) return "";
@@ -191,17 +194,13 @@ export default function WaiterHomePage() {
       <WaiterNavbar />
 
       <div className="grid grid-cols-12 gap-6 p-6">
-
         {/* RIGHT PANEL */}
         <div className="col-span-12">
-
-
           <AppButton
             label="Takeaway"
             className="!bg-orange-500 !text-white mb-4 block lg:hidden shadow-lg hover:shadow-xl transition !py-3"
             onClick={() => handleOrderTypeClick("TAKEAWAY")}
           />
-
 
           <Card className="p-7 my-6 !rounded-4xl shadow-md !bg-[#F1F1F1]">
             <div className="flex items-center justify-between  mb-4">
@@ -229,29 +228,29 @@ export default function WaiterHomePage() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {loading
                 ? Array.from({ length: 9 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    variant="rounded"
-                    height={110}
-                    className="!rounded-2xl"
-                  />
-                ))
+                    <Skeleton
+                      key={index}
+                      variant="rounded"
+                      height={110}
+                      className="!rounded-2xl"
+                    />
+                  ))
                 : tables.map((table) => (
-                  <Tooltip
-                    key={table._id}
-                    title={
-                      table.status === "OCCUPIED"
-                        ? "Active table"
-                        : "Add order"
-                    }
-                    arrow
-                    placement="bottom"
-                  >
-                    <div
-                      onClick={() =>
-                        handleTableClick(table._id, table.tableNo)
+                    <Tooltip
+                      key={table._id}
+                      title={
+                        table.status === "OCCUPIED"
+                          ? "Active table"
+                          : "Add order"
                       }
-                      className={`
+                      arrow
+                      placement="bottom"
+                    >
+                      <div
+                        onClick={() =>
+                          handleTableClick(table._id, table.tableNo)
+                        }
+                        className={`
                           relative
                           h-28 w-full
                           rounded-2xl
@@ -264,57 +263,58 @@ export default function WaiterHomePage() {
                           transition-all duration-300
                           hover:shadow-lg hover:scale-[1.03]
                           ${tableStyles[table.status]}
-                          ${highlightTableNo === table.tableNo
-                          ? table.status === "OCCUPIED"
-                            ? "ring-4 ring-red-500 ring-offset-2"
-                            : "ring-4 ring-green-500 ring-offset-2"
-                          : ""
-                        }
+                          ${
+                            highlightTableNo === table.tableNo
+                              ? table.status === "OCCUPIED"
+                                ? "ring-4 ring-red-500 ring-offset-2"
+                                : "ring-4 ring-green-500 ring-offset-2"
+                              : ""
+                          }
                         `}
-                    >
-                      {/* ✅ Table Number */}
-                      <Typography
-                        fontSize={26}
-                        fontWeight={600}
-                        className={
-                          table.status === "OCCUPIED"
-                            ? "text-red-800"
-                            : "text-green-800"
-                        }
                       >
-                        {table.tableNo}
-                      </Typography>
+                        {/* ✅ Table Number */}
+                        <Typography
+                          fontSize={26}
+                          fontWeight={600}
+                          className={
+                            table.status === "OCCUPIED"
+                              ? "text-red-800"
+                              : "text-green-800"
+                          }
+                        >
+                          {table.tableNo}
+                        </Typography>
 
-                      {/* ✅ Status Badge */}
-                      <Typography
-                        fontSize={table.status === "OCCUPIED" ? 12 : 13}
-                        fontWeight={table.status === "OCCUPIED" ? 700 : 600}
-                        className={`px-2 py-[2px] rounded-full
-                          ${table.status === "OCCUPIED"
-                            ? "bg-red-100 text-red-700 border border-red-500"
-                            : "bg-green-100 text-green-700 border border-green-500"
+                        {/* ✅ Status Badge */}
+                        <Typography
+                          fontSize={table.status === "OCCUPIED" ? 12 : 13}
+                          fontWeight={table.status === "OCCUPIED" ? 700 : 600}
+                          className={`px-2 py-[2px] rounded-full
+                          ${
+                            table.status === "OCCUPIED"
+                              ? "bg-red-100 text-red-700 border border-red-500"
+                              : "bg-green-100 text-green-700 border border-green-500"
                           }
                           `}
-                      >
-                        {table.status}
-                      </Typography>
+                        >
+                          {table.status}
+                        </Typography>
 
-                      {/* ✅ Time (only if occupied) */}
-                      {table.status === "OCCUPIED" && table.occupiedAt && (
-                        <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
-                          {getRunningTime(table.occupiedAt)}
-                        </div>
-                      )}
-                    </div>
-                  </Tooltip>
-                ))}
+                        {/* ✅ Time (only if occupied) */}
+                        {table.status === "OCCUPIED" && table.occupiedAt && (
+                          <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                            {getRunningTime(table.occupiedAt)}
+                          </div>
+                        )}
+                      </div>
+                    </Tooltip>
+                  ))}
             </div>
           </Card>
         </div>
 
         {/* LEFT PANEL */}
         <div className="col-span-12 flex flex-col gap-4">
-
           {/* Recent Bills */}
           <Card className="p-5 !rounded-3xl shadow-md">
             <div className="flex justify-between items-center mb-4">
@@ -322,23 +322,20 @@ export default function WaiterHomePage() {
                 Recent Bills
               </Typography>
 
-              <Typography
-                className="text-orange-600 cursor-pointer font-semibold text-sm hover:underline"
-              >
+              {/* <Typography className="text-orange-600 cursor-pointer font-semibold text-sm hover:underline">
                 View All →
-              </Typography>
-
+              </Typography> */}
             </div>
 
             <div className="flex flex-col gap-3">
-              {recentBills.slice(0, 5).map((bill) => (
+              {recentBills.map((bill) => (
                 <div
-                  key={bill.id}
+                  key={bill._id}
                   className="flex justify-between items-center bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition"
                 >
                   <div>
                     <Typography fontSize={14} fontWeight={600}>
-                      {bill.id}
+                      {bill.billNo}
                     </Typography>
                     <Typography fontSize={12} color="text.secondary">
                       Table {bill.tableNo} • {bill.time}
@@ -346,16 +343,13 @@ export default function WaiterHomePage() {
                   </div>
 
                   <Typography fontSize={14} fontWeight={600} color="green">
-                    ₹{bill.amount}
+                    ₹{bill.grandTotal}
                   </Typography>
                 </div>
               ))}
             </div>
           </Card>
         </div>
-
-
-
       </div>
     </Box>
   );

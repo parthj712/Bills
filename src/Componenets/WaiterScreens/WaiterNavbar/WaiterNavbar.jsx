@@ -25,9 +25,7 @@ import { showToast } from "@/Componenets/ToastConstant/toast";
 import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "@mui/material/Drawer";
 
-
 const WaiterNavbar = () => {
-
   const theme = useTheme();
 
   // BREAKPOINTS
@@ -35,26 +33,26 @@ const WaiterNavbar = () => {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const [kbAnchorEl, setKbAnchorEl] = useState(null);
   const [kbOpen, setKbOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-
-
   //avatr mail
 
   const [userInitial, setUserInitial] = useState("A");
 
   useEffect(() => {
-    const email = localStorage.getItem("email");
-    if (email) {
-      setUserInitial(email.charAt(0).toUpperCase());
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user?.email) {
+        setUserInitial(user.email);
+      }
     }
   }, []);
-
 
   const router = useRouter();
 
@@ -130,90 +128,92 @@ const WaiterNavbar = () => {
           <>
             {/* Right: Menu + Sign Out */}
             <div className="flex items-center gap-3">
-              {isDesktop && (<>
-                <IconButton onClick={handleKbOpen}>
-                  <KeyboardIcon />
-                </IconButton>
+              {isDesktop && (
+                <>
+                  <IconButton onClick={handleKbOpen}>
+                    <KeyboardIcon />
+                  </IconButton>
 
-                {/* Swiggy */}
-                <Box position="relative" display="inline-block">
-                  <AppButton
-                    label="Swiggy"
-                    className="
+                  {/* Swiggy */}
+                  <Box position="relative" display="inline-block">
+                    <AppButton
+                      label="Swiggy"
+                      className="
       !bg-[#FC8019]/80
       !text-white
       !px-5
       opacity-80
       cursor-not-allowed
     "
-                    disabled
-                  />
+                      disabled
+                    />
 
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: -6,
-                      right: -8,
-                      backgroundColor: "#f97316",
-                      color: "white",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      px: 1,
-                      py: "2px",
-                      borderRadius: 1.5,
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    Incoming
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: -6,
+                        right: -8,
+                        backgroundColor: "#f97316",
+                        color: "white",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        px: 1,
+                        py: "2px",
+                        borderRadius: 1.5,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                      }}
+                    >
+                      Incoming
+                    </Box>
                   </Box>
-                </Box>
 
-                {/* Zomato */}
-                <Box position="relative" display="inline-block">
-                  <AppButton
-                    label="Zomato"
-                    className="
+                  {/* Zomato */}
+                  <Box position="relative" display="inline-block">
+                    <AppButton
+                      label="Zomato"
+                      className="
                     !bg-[#E23744]/80
                     !text-white
                     !px-5
                     opacity-80
                     cursor-not-allowed
                   "
-                    disabled
-                  />
+                      disabled
+                    />
 
-                  <Box
-                    sx={{
-                      position: "absolute",
-                      top: -6,
-                      right: -8,
-                      backgroundColor: "#dc2626",
-                      color: "white",
-                      fontSize: 10,
-                      fontWeight: 600,
-                      px: 1,
-                      py: "2px",
-                      borderRadius: 1.5,
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-                    }}
-                  >
-                    Incoming
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: -6,
+                        right: -8,
+                        backgroundColor: "#dc2626",
+                        color: "white",
+                        fontSize: 10,
+                        fontWeight: 600,
+                        px: 1,
+                        py: "2px",
+                        borderRadius: 1.5,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                      }}
+                    >
+                      Incoming
+                    </Box>
                   </Box>
-                </Box>
+                </>
+              )}
 
-              </>)}
-
-
-              <IconButton onClick={handleMenuOpen} sx={{ position: "relative" }}>
+              <IconButton
+                onClick={handleMenuOpen}
+                sx={{ position: "relative" }}
+              >
                 <Box position="relative">
                   <Avatar
                     sx={{
                       bgcolor: "#2563EB",
                       fontWeight: 600,
-
                     }}
                   >
-                    {userInitial}
+                    {userInitial.charAt(0).toUpperCase()}
                   </Avatar>
 
                   {/* 🟢 Online Status Dot */}
@@ -232,7 +232,6 @@ const WaiterNavbar = () => {
                 </Box>
               </IconButton>
 
-
               <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -250,7 +249,7 @@ const WaiterNavbar = () => {
                 {/* User Info */}
                 <Box px={2} py={1}>
                   <Typography fontSize={14} fontWeight={600}>
-                    {localStorage.getItem("userEmail")} mail
+                    {userInitial}
                   </Typography>
                   <Typography fontSize={12} color="text.secondary">
                     Logged In
@@ -273,7 +272,12 @@ const WaiterNavbar = () => {
               </Menu>
             </div>
 
-            <Dialog open={kbOpen} onClose={handleKbClose} maxWidth="xs" fullWidth>
+            <Dialog
+              open={kbOpen}
+              onClose={handleKbClose}
+              maxWidth="xs"
+              fullWidth
+            >
               <DialogTitle className="flex items-center justify-between">
                 <Typography fontWeight={600}>Keyboard Shortcuts</Typography>
 

@@ -26,7 +26,6 @@ import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 import { showToast } from "@/Componenets/ToastConstant/toast";
 
 export default function OrderForm() {
-
   const searchRef = useRef(null);
   const kotRef = useRef(null);
   const dispatch = useDispatch();
@@ -45,8 +44,6 @@ export default function OrderForm() {
 
   const [customerName, setCustomerName] = useState("");
   const [nameError, setNameError] = useState("");
-
-
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -69,8 +66,9 @@ export default function OrderForm() {
 
     const q = search.trim().toLowerCase();
     if (!q) return byCategory;
+    console.log("byCa", byCategory);
 
-    return byCategory.filter((i) => {
+    return byCategory?.filter((i) => {
       const name = (i.name || "").toLowerCase();
       const code = (i.itemCode || "").toLowerCase();
       return name.includes(q) || code.includes(q);
@@ -141,7 +139,6 @@ export default function OrderForm() {
   const handleAddAllToOrder = async () => {
     if (!selectedItems.length) return;
 
-
     // 🚨 Takeaway name validation
     if (orderType === "TAKEAWAY") {
       if (!customerName.trim()) {
@@ -166,11 +163,11 @@ export default function OrderForm() {
       }
     }
 
-
     try {
       const payload = {
         orderType,
         tableId,
+        customerName,
         items: selectedItems.map((x) => ({
           menuItemId: x.item._id,
           name: x.item.name,
@@ -183,11 +180,12 @@ export default function OrderForm() {
       console.log(payload);
 
       if (orderType === "TAKEAWAY") {
+        console.log("hellp");
         await addTakeawayOrder(payload);
       } else {
+        console.log("hellooo");
         await saveOrdersToDraft(payload);
       }
-
 
       // ✅ SUCCESS TOAST HERE
       showToast({
@@ -206,8 +204,6 @@ export default function OrderForm() {
           router.replace("/waiter");
         }, 1100);
       }
-
-
     } catch (err) {
       console.error("Add item failed", err);
 
@@ -259,13 +255,11 @@ export default function OrderForm() {
 
               // Capitalize first letters
               setCustomerName(
-                value.replace(/\b\w/g, (char) => char.toUpperCase())
+                value.replace(/\b\w/g, (char) => char.toUpperCase()),
               );
             }}
           />
         )}
-
-
 
         {/* Search */}
         <TextField
@@ -322,12 +316,13 @@ export default function OrderForm() {
                         onClick={() => handleSelectItem(item)}
                         className={`
                         p-3 cursor-pointer border !rounded-xl transition-all duration-150
-                        ${index === activeIndex
+                        ${
+                          index === activeIndex
                             ? "border-blue-500 bg-blue-50"
                             : isItemSelected(item._id)
                               ? "border-green-500 bg-green-50"
                               : "border-gray-200 hover:bg-gray-50"
-                          }
+                        }
                       `}
                       >
                         <Typography fontWeight={600}>{item.name}</Typography>
