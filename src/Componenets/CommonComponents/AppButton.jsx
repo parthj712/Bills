@@ -1,7 +1,4 @@
-"use client";
-
 import { Button } from "@mui/material";
-import clsx from "clsx";
 
 export default function AppButton({
   label,
@@ -11,16 +8,23 @@ export default function AppButton({
   onClick,
   sx,
   size,
+  color = "primary", // 👈 add this
   ...rest
 }) {
   return (
     <Button
       fullWidth={fullWidth}
       variant={variant}
+      color={color} // 👈 pass color
       onClick={onClick}
       size={size}
-      sx={sx}
-      className={clsx("!py-3 !rounded-lg !font-semibold", className)}
+      sx={{
+        py: 1.5,
+        borderRadius: 2,
+        fontWeight: 600,
+        ...sx,
+      }}
+      className={className}
       {...rest}
     >
       {label}

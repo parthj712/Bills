@@ -15,34 +15,37 @@ import {
   MenuItem,
   Tooltip,
   Skeleton,
+  Button,
 } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
 import { getRecentBills } from "@/service/billsService";
 
 const tableStyles = {
   AVAILABLE: `
-    bg-green-100
-    border-2 border-green-600
-    text-green-900
-    shadow-green-200
-    hover:bg-green-200
-    hover:border-green-700
+    bg-white
+    border border-green-500
+    text-green-700
+    hover:bg-green-50
+    hover:shadow-md
   `,
 
   OCCUPIED: `
-    bg-red-100
-    border-2 border-red-600
-    text-red-900
-    shadow-red-200
-    hover:bg-red-200
-    hover:border-red-700
+    bg-white
+    border border-red-500
+    text-red-600
+    hover:bg-red-50
+    hover:shadow-md
   `,
 };
+
+
+
 export default function WaiterHomePage() {
   const [recentBills, setRecentBills] = useState([]);
 
@@ -52,6 +55,11 @@ export default function WaiterHomePage() {
   const router = useRouter();
   const [tables, setTables] = useState([]);
   const [loading, setLoading] = useState(true);
+  const initialCount = 5;
+  const [visibleCount, setVisibleCount] = useState(initialCount);
+  const [expanded, setExpanded] = useState(false);
+
+
 
   // keyboard states
   const [keyBuffer, setKeyBuffer] = useState("");
@@ -207,17 +215,35 @@ export default function WaiterHomePage() {
             {/* Recent Bills */}
             <Card className="p-5 !rounded-3xl shadow-md">
               <div className="flex justify-between items-center mb-4">
-                <Typography fontSize={18} fontWeight={600}>
+                <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
                   Recent Bills
                 </Typography>
 
-                {/* <Typography className="text-orange-600 cursor-pointer font-semibold text-sm hover:underline">
-                View All →
-              </Typography> */}
+                {recentBills.length > initialCount && (
+                  <Button
+                    variant="text"
+                    onClick={() => {
+                      if (expanded) {
+                        setVisibleCount(initialCount);
+                        setExpanded(false);
+                      } else {
+                        setVisibleCount(recentBills.length);
+                        setExpanded(true);
+                      }
+                    }}
+                  >
+                    {expanded ? "View Less" : "View More"}
+                  </Button>
+                )}
               </div>
 
-              <div className="flex flex-col gap-3">
-                {recentBills.map((bill) => (
+              <motion.div
+                layout
+                className="flex flex-col gap-3 overflow-hidden"
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+              >
+
+                {recentBills.slice(0, visibleCount).map((bill) => (
                   <div
                     key={bill._id}
                     className="flex justify-between items-center bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition"
@@ -236,29 +262,35 @@ export default function WaiterHomePage() {
                     </Typography>
                   </div>
                 ))}
-              </div>
+
+              </motion.div>
+
             </Card>
           </div>
 
           {/* RIGHT PANEL */}
           <div className="flex-1">
-            {/* <div className="flex justify-end mb-4">
-            <AppButton
-              label="Takeaway"
-              className="
-                    !bg-orange-500 
-                    !text-white 
-                    shadow-lg 
-                    hover:shadow-xl 
-                    transition 
-                    !py-3
-                    w-full 
-                    sm:w-[220px] 
-                    md:w-[240px]
-                  "
-              onClick={() => handleOrderTypeClick("TAKEAWAY")}
-            />
-          </div> */}
+            <div className="flex justify-end mb-4">
+              <AppButton
+                label="Takeaway"
+                onClick={() => handleOrderTypeClick("TAKEAWAY")}
+                sx={{
+                  backgroundColor: "#334155",
+                  color: "#ffffff",
+                  py: 1.5,
+                  borderRadius: 2,
+                  boxShadow: "0px 2px 6px rgba(0,0,0,0.08)",
+                  textTransform: "none",
+                  letterSpacing: "0.5px",
+                  "&:hover": {
+                    backgroundColor: "#1E293B",
+                    boxShadow: "0px 4px 12px rgba(0,0,0,0.12)",
+                  },
+                }}
+              />
+
+
+            </div>
 
 
             <Card className="p-7 shadow-md ">
@@ -277,14 +309,14 @@ export default function WaiterHomePage() {
                       text-green-700
                       px-3
                       py-1
-                      rounded-full
+                      rounded-xl
                     "
                 >
                   {totalActiveTables} Active
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
                 {loading
                   ? Array.from({ length: 9 }).map((_, index) => (
                     <Skeleton
@@ -312,13 +344,14 @@ export default function WaiterHomePage() {
                         className={`
                           relative
                           h-28 w-full
-                          rounded-2xl
+                          rounded-xl
                           cursor-pointer
                           flex flex-col
                           items-center
                           justify-center
                           gap-2
                           px-4 py-3
+                          
                           transition-all duration-300
                           hover:shadow-lg hover:scale-[1.03]
                           ${tableStyles[table.status]}
@@ -332,12 +365,12 @@ export default function WaiterHomePage() {
                       >
                         {/* ✅ Table Number */}
                         <Typography
-                          fontSize={26}
+                          fontSize={22}
                           fontWeight={600}
                           className={
                             table.status === "OCCUPIED"
                               ? "text-red-800"
-                              : "text-green-800"
+                              : "text-green-600"
                           }
                         >
                           {table.tableNo}
@@ -372,26 +405,6 @@ export default function WaiterHomePage() {
 
 
         </Box>
-
-
-        {/* Floating Takeaway Button */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <AppButton
-            label="Takeaway"
-            className="
-                !bg-orange-500 
-                !text-white 
-                shadow-2xl 
-                hover:shadow-3xl
-                transition-all 
-                duration-300
-                !py-3
-                !px-6
-                rounded-full
-              "
-            onClick={() => handleOrderTypeClick("TAKEAWAY")}
-          />
-        </div>
 
       </div>
     </Box>
