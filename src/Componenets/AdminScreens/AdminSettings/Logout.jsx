@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addTagline,
   addWebsite,
   getShofInfo,
   removeShopLogo,
@@ -34,6 +35,7 @@ export default function Settings() {
 
   const [loading, setLoading] = useState(true);
   const [editWebsite, setEditWebsite] = useState(false);
+  const [editTagline, setEditTagline] = useState(false);
 
   const [logoPreview, setLogoPreview] = useState("");
   const [qrPreview, setQrPreview] = useState("");
@@ -78,6 +80,21 @@ export default function Settings() {
   // ✅ Website Edit Change
   const handleWebsiteChange = (e) => {
     setShopData({ ...shopData, website: e.target.value });
+  };
+
+  const handleTaglineChange = (e) => {
+    setShopData({ ...shopData, tagline: e.target.value });
+  };
+
+  const handleSaveTagline = async () => {
+    try {
+      await addTagline({
+        tagline: shopData.tagline,
+      });
+      alert("Tagline Updated Successfully ✅");
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   // ✅ Save Website Update
@@ -208,239 +225,294 @@ export default function Settings() {
 
         {/* WEBSITE & BRANDING SECTION */}
         <SettingsCard title="Website & Branding">
-          {/* WEBSITE */}
-          {/* WEBSITE */}
-          <Box>
-            <Typography fontWeight={600} fontSize={14} mb={0.5}>
+          {/* WEBSITE SECTION */}
+          <Box
+            mb={2}
+            p={3}
+            sx={{
+              borderRadius: 2,
+              boxShadow: 1,
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            <Typography fontWeight={600} fontSize={14} mb={1}>
               Website Link
             </Typography>
 
-            {/* If no website → show input directly */}
-            {!shopData.website ? (
-              <TextField
-                value={shopData.website}
-                onChange={handleWebsiteChange}
-                fullWidth
-                size="small"
-                placeholder="Enter website link"
-              />
-            ) : (
-              <>
-                {/* Website exists */}
-                {!editWebsite ? (
-                  <Box display="flex" alignItems="center" gap={1}>
-                    {/* Clickable Website */}
-                    <Typography
-                      component="a"
-                      href={
-                        shopData.website.startsWith("http")
-                          ? shopData.website
-                          : `https://${shopData.website}`
-                      }
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{
-                        fontSize: 15,
-                        fontWeight: 600,
-                        color: "#0b3c5d",
-                        textDecoration: "underline",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {shopData.website}
-                    </Typography>
-
-                    {/* Edit Icon */}
+            {!shopData.website || editWebsite ? (
+              <Box>
+                <TextField
+                  value={shopData.website}
+                  onChange={handleWebsiteChange}
+                  fullWidth
+                  size="small"
+                  autoFocus={editWebsite}
+                  placeholder="Enter website link"
+                  sx={{
+                    mt: 1,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#0b3c5d" },
+                    },
+                  }}
+                />
+                {editWebsite && (
+                  <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
                     <Button
                       size="small"
-                      onClick={() => setEditWebsite(true)}
+                      variant="outlined"
+                      onClick={() => setEditWebsite(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => {
+                        handleSaveWebsite();
+                        setEditWebsite(false);
+                      }}
                       sx={{
-                        minWidth: "auto",
-                        padding: "4px",
-                        borderRadius: "50%",
+                        backgroundColor: "#0b3c5d",
+                        textTransform: "none",
+                        "&:hover": { backgroundColor: "#09406a" },
                       }}
                     >
-                      ✏️
+                      Save
                     </Button>
                   </Box>
-                ) : (
-                  <>
-                    {/* Edit Mode Input */}
-                    <TextField
-                      value={shopData.website}
-                      onChange={handleWebsiteChange}
-                      fullWidth
-                      size="small"
-                      autoFocus
-                      placeholder="Enter website link"
-                      sx={{ mt: 1 }}
-                    />
-
-                    {/* Action Buttons */}
-                    <Box
-                      display="flex"
-                      justifyContent="flex-end"
-                      gap={1}
-                      mt={1}
-                    >
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => setEditWebsite(false)}
-                      >
-                        Cancel
-                      </Button>
-
-                      <Button
-                        size="small"
-                        variant="contained"
-                        onClick={() => {
-                          handleSaveWebsite();
-                          setEditWebsite(false);
-                        }}
-                        sx={{
-                          backgroundColor: "#0b3c5d",
-                          textTransform: "none",
-                        }}
-                      >
-                        Save
-                      </Button>
-                    </Box>
-                  </>
                 )}
-              </>
+              </Box>
+            ) : (
+              <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                <Typography
+                  component="a"
+                  href={
+                    shopData.website.startsWith("http")
+                      ? shopData.website
+                      : `https://${shopData.website}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    fontSize: 15,
+                    fontWeight: 600,
+                    color: "#0b3c5d",
+                    textDecoration: "underline",
+                    "&:hover": { color: "#09406a" },
+                  }}
+                >
+                  {shopData.website}
+                </Typography>
+                <Button
+                  size="small"
+                  onClick={() => setEditWebsite(true)}
+                  sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
+                >
+                  ✏️
+                </Button>
+              </Box>
             )}
           </Box>
 
-          {/* COMPANY LOGO */}
-          <Box mt={3}>
+          {/* TAGLINE SECTION */}
+          <Box
+            mb={2}
+            p={3}
+            sx={{
+              borderRadius: 2,
+              boxShadow: 1,
+              backgroundColor: "#f9f9f9",
+            }}
+          >
             <Typography fontWeight={600} fontSize={14} mb={1}>
-              Company Logo
+              Your Tagline
             </Typography>
 
-            {logoLoading ? (
-              <CircularProgress size={30} />
-            ) : logoPreview ? (
-              <Box position="relative" display="inline-block">
-                <img
-                  src={logoPreview}
-                  alt="Logo Preview"
-                  style={{
-                    height: 80,
-                    borderRadius: 8,
-                    border: "1px solid #ddd",
+            {!shopData.tagline || editTagline ? (
+              <Box>
+                <TextField
+                  value={shopData.tagline}
+                  onChange={handleTaglineChange}
+                  fullWidth
+                  size="small"
+                  autoFocus={editTagline}
+                  placeholder="Enter Tagline here"
+                  sx={{
+                    mt: 1,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      "&:hover fieldset": { borderColor: "#0b3c5d" },
+                    },
                   }}
                 />
-
-                {/* Remove Button */}
+                {editTagline && (
+                  <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => setEditTagline(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={() => {
+                        handleSaveTagline();
+                        setEditTagline(false);
+                      }}
+                      sx={{
+                        backgroundColor: "#0b3c5d",
+                        textTransform: "none",
+                        "&:hover": { backgroundColor: "#09406a" },
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            ) : (
+              <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                <Typography
+                  sx={{ fontSize: 15, fontWeight: 600, color: "black" }}
+                >
+                  {shopData.tagline}
+                </Typography>
                 <Button
                   size="small"
-                  onClick={handleRemoveLogo}
-                  sx={{
-                    position: "absolute",
-                    top: -10,
-                    right: -10,
-                    minWidth: 0,
-                    width: 24,
-                    height: 24,
-                    borderRadius: "50%",
-                    backgroundColor: "red",
-                    color: "white",
-                    fontSize: 12,
-                    "&:hover": { backgroundColor: "#b91c1c" },
-                  }}
+                  onClick={() => setEditTagline(true)}
+                  sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
                 >
-                  ✕
+                  ✏️
                 </Button>
               </Box>
-            ) : null}
-
-            <Button
-              variant="outlined"
-              component="label"
-              sx={{ textTransform: "none", m: qrPreview ? 1 : 2 }}
-            >
-              Upload Logo
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleLogoChange}
-              />
-            </Button>
+            )}
           </Box>
 
-          {/* QR UPI IMAGE */}
-          <Box mt={3}>
-            <Typography fontWeight={600} fontSize={14} mb={1}>
-              UPI QR Code
-            </Typography>
-
-            {qrLoading ? (
-              <CircularProgress size={30} />
-            ) : qrPreview ? (
-              <Box position="relative" display="inline-block">
-                <img
-                  src={qrPreview}
-                  alt="QR Preview"
-                  style={{
-                    height: 120,
-                    borderRadius: 8,
-                    border: "1px solid #ddd",
-                  }}
+          {/* LOGO & QR SECTION */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", md: "row" }}
+            gap={4}
+            mb={2}
+          >
+            {/* Logo */}
+            <Box
+              flex={1}
+              p={3}
+              sx={{ borderRadius: 2, boxShadow: 1, backgroundColor: "#f9f9f9" }}
+            >
+              <Typography fontWeight={600} fontSize={14} mb={1}>
+                Company Logo
+              </Typography>
+              {logoLoading ? (
+                <CircularProgress size={30} />
+              ) : logoPreview ? (
+                <Box position="relative" display="inline-block">
+                  <img
+                    src={logoPreview}
+                    alt="Logo Preview"
+                    style={{
+                      height: 80,
+                      borderRadius: 8,
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                  <Button
+                    size="small"
+                    onClick={handleRemoveLogo}
+                    sx={{
+                      position: "absolute",
+                      top: -10,
+                      right: -10,
+                      minWidth: 0,
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      backgroundColor: "red",
+                      color: "white",
+                      fontSize: 12,
+                      "&:hover": { backgroundColor: "#b91c1c" },
+                    }}
+                  >
+                    ✕
+                  </Button>
+                </Box>
+              ) : null}
+              <Button
+                variant="outlined"
+                component="label"
+                sx={{ textTransform: "none", mt: 2 }}
+              >
+                Upload Logo
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleLogoChange}
                 />
+              </Button>
+            </Box>
 
-                {/* Remove Button */}
-                <Button
-                  size="small"
-                  onClick={handleRemoveQr}
-                  sx={{
-                    position: "absolute",
-                    top: -10,
-                    right: -10,
-                    minWidth: 0,
-                    width: 24,
-                    height: 24,
-                    borderRadius: "50%",
-                    backgroundColor: "red",
-                    color: "white",
-                    fontSize: 12,
-                    "&:hover": { backgroundColor: "#b91c1c" },
-                  }}
-                >
-                  ✕
-                </Button>
-              </Box>
-            ) : null}
-
-            <Button
-              variant="outlined"
-              component="label"
-              sx={{ textTransform: "none", m: qrPreview ? 1 : 2 }}
+            {/* QR */}
+            <Box
+              flex={1}
+              p={3}
+              sx={{ borderRadius: 2, boxShadow: 1, backgroundColor: "#f9f9f9" }}
             >
-              Upload QR Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleQrChange}
-              />
-            </Button>
-          </Box>
-
-          {/* SAVE BUTTON */}
-          <Box mt={3} textAlign="right">
-            <Button
-              variant="contained"
-              onClick={handleSaveWebsite}
-              sx={{
-                backgroundColor: "#0b3c5d",
-                textTransform: "none",
-                fontWeight: 600,
-              }}
-            >
-              Save Changes
-            </Button>
+              <Typography fontWeight={600} fontSize={14} mb={1}>
+                UPI QR Code
+              </Typography>
+              {qrLoading ? (
+                <CircularProgress size={30} />
+              ) : qrPreview ? (
+                <Box position="relative" display="inline-block">
+                  <img
+                    src={qrPreview}
+                    alt="QR Preview"
+                    style={{
+                      height: 120,
+                      borderRadius: 8,
+                      border: "1px solid #ddd",
+                    }}
+                  />
+                  <Button
+                    size="small"
+                    onClick={handleRemoveQr}
+                    sx={{
+                      position: "absolute",
+                      top: -10,
+                      right: -10,
+                      minWidth: 0,
+                      width: 24,
+                      height: 24,
+                      borderRadius: "50%",
+                      backgroundColor: "red",
+                      color: "white",
+                      fontSize: 12,
+                      "&:hover": { backgroundColor: "#b91c1c" },
+                    }}
+                  >
+                    ✕
+                  </Button>
+                </Box>
+              ) : null}
+              <Button
+                variant="outlined"
+                component="label"
+                sx={{ textTransform: "none", mt: 2 }}
+              >
+                Upload QR Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleQrChange}
+                />
+              </Button>
+            </Box>
           </Box>
         </SettingsCard>
 

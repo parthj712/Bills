@@ -55,7 +55,7 @@ export default function AdminDashboard() {
   const currentYear = today.getFullYear();
   yesterday.setDate(today.getDate() - 1);
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
-
+  console.log(summary);
   const hasAccess =
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
@@ -181,28 +181,16 @@ export default function AdminDashboard() {
           <Typography fontSize={14} sx={{ mt: 1, opacity: 0.95 }}>
             {subscription.daysLeft > 1 &&
               `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.`}
-
             {subscription.daysLeft === 1 &&
               `Your subscription expires tomorrow.`}
-
-            {subscription.daysLeft <= 0 &&
-              `Your subscription has expired.`}
-
-            {" "}Please contact our support team for renewal assistance.
+            {subscription.daysLeft <= 0 && `Your subscription has expired.`}{" "}
+            Please contact our support team for renewal assistance.
           </Typography>
 
           {/* ACTION BUTTONS */}
-          <Box
-            mt={3}
-            display="flex"
-            gap={2}
-            flexWrap="wrap"
-          >
+          <Box mt={3} display="flex" gap={2} flexWrap="wrap">
             {/* CALL BUTTON */}
-            <a
-              href="tel:+919545934174"
-              style={{ textDecoration: "none" }}
-            >
+            <a href="tel:+919545934174" style={{ textDecoration: "none" }}>
               <Card
                 sx={{
                   px: 3,
@@ -335,7 +323,11 @@ export default function AdminDashboard() {
                   🔒 Locked Features
                 </Typography>
 
-                <Typography fontSize={14} sx={{ mt: 1, opacity: 0.8 }} color="black">
+                <Typography
+                  fontSize={14}
+                  sx={{ mt: 1, opacity: 0.8 }}
+                  color="black"
+                >
                   Upgrade your subscription to view analytics, reports &
                   insights.
                 </Typography>
@@ -362,7 +354,6 @@ export default function AdminDashboard() {
                     Upgrade to Premium 🚀
                   </Card>
                 </a>
-
               </Box>
             )}
           </Box>
@@ -390,7 +381,9 @@ export default function AdminDashboard() {
               mb={1}
             >
               <Typography fontSize={16}>{item.orderType} Orders</Typography>
-              <Typography fontSize={16} fontWeight={700}>{item.todayOrders}</Typography>
+              <Typography fontSize={16} fontWeight={700}>
+                {item.todayOrders}
+              </Typography>
             </Box>
           ))}
 
