@@ -200,7 +200,7 @@ export default function OrderCart() {
 
     const html2pdf = (await import("html2pdf.js")).default;
 
-    const element = document.getElementById("bill-pdf");
+    const element = document.getElementById("print-bill");
     if (!element) return;
 
     html2pdf()
@@ -428,134 +428,31 @@ export default function OrderCart() {
               },
             }}
 
-            onClick={handleOpenConfirm}
+            onClick={handleConfirmBilling}
           />
         </div>
       )}
 
-      <Dialog
-        open={openConfirm}
-        onClose={() => setOpenConfirm(false)}
-        maxWidth="sm"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            p: 1,
-          },
+      {/* Hidden printable bill */}
+      <div
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          top: 0,
         }}
       >
-        {/* HEADER */}
-        <DialogTitle
-          sx={{
-            fontWeight: 700,
-            fontSize: 20,
-            pb: 1,
-          }}
-        >
-          Confirm Billing
-        </DialogTitle>
+        <BillPreview
+          items={cartItems}
+          subtotal={subtotal}
+          tax={tax}
+          total={grandTotal}
+          shopInfo={shopInfo}
+          orderType={orderType}
+          date={currentDate}
+          customerName={customerName}
+        />
+      </div>
 
-        <Divider />
-
-        {/* CONTENT */}
-        <DialogContent sx={{ pt: 3 }}>
-
-          {/* Order Meta Info */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2,
-              flexWrap: "wrap",
-              gap: 1,
-            }}
-          >
-            <Typography fontWeight={600}>
-              Order Type:{" "}
-              <span style={{ color: orderType === "TAKEAWAY" ? "#f97316" : "#2563eb" }}>
-                {orderType}
-              </span>
-            </Typography>
-
-            <Typography fontSize={14} color="text.secondary">
-              {currentDate}
-            </Typography>
-          </Box>
-
-          {/* Bill Preview */}
-          <Box
-            sx={{
-              backgroundColor: "#f9fafb",
-              borderRadius: 2,
-              p: 2,
-            }}
-          >
-            <BillPreview
-              items={cartItems}
-              subtotal={subtotal}
-              tax={tax}
-              total={grandTotal}
-              shopInfo={shopInfo}
-              orderType={orderType}
-              date={currentDate}
-              customerName={customerName}
-            />
-          </Box>
-
-          {/* Download Button */}
-          <Button
-            fullWidth
-            variant="outlined"
-            sx={{
-              mt: 3,
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-            }}
-            onClick={downloadBillPDF}
-          >
-            Download Bill PDF
-          </Button>
-        </DialogContent>
-
-
-        <Divider />
-
-        {/* FOOTER ACTIONS */}
-        <DialogActions
-          sx={{
-            px: 3,
-            py: 2,
-            justifyContent: "space-between",
-          }}
-        >
-          <Button
-            onClick={() => setOpenConfirm(false)}
-            sx={{
-              textTransform: "none",
-              fontWeight: 500,
-            }}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: 2,
-              px: 4,
-              fontWeight: 600,
-              textTransform: "none",
-            }}
-            onClick={handleConfirmBilling}
-            disabled={loading}
-          >
-            {loading ? "Processing..." : "Confirm & Bill"}
-          </Button>
-        </DialogActions>
-      </Dialog>
 
 
 
