@@ -58,24 +58,24 @@ body {
     visibility: hidden;
   }
 
-  #bill-pdf,
-  #bill-pdf * {
+  #print-bill,
+  #print-bill * {
     visibility: visible;
   }
 
-  #bill-pdf {
+  #print-bill {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
     top: 0;
     width: 76mm;
   }
 
   @page {
-    size: 79mm auto;
+    size: 80mm auto;
     margin: 0;
   }
 }
+
 
 
 

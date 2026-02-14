@@ -41,22 +41,23 @@ const BillPreview = ({
   return (
     <div>
       <div
-        id="bill-pdf"
+        id="print-bill"
         style={{
           width: "76mm",   // for 58mm printer
           // fontFamily: "monospace",
           fontSize: 12,
           margin: "0 auto",
-          padding: 24,
           fontFamily: "'Inter', sans-serif",
-          background: "#ffffff",
-          borderRadius: 12,
-          boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
           color: "#1E293B",
+          padding: 8,
+          background: "#fff",
+          boxShadow: "none",
+          borderRadius: 0,
+
         }}
       >
         {/* Logo */}
-        {shopInfo?.logo && (
+        {shopInfo?.logo?.url && (
           <Box display="flex" justifyContent="center" mb={2}>
             <img
               src={shopInfo.logo?.url}
@@ -195,7 +196,8 @@ const BillPreview = ({
         </Typography>
 
         {/* QR */}
-        {shopInfo?.upiQr.url && (
+        {shopInfo?.upiQr?.url && (
+
           <Box mt={3} display="flex" flexDirection="column" alignItems="center">
             <Typography fontSize={12} fontWeight={600} mb={1}>
               Scan to Pay
