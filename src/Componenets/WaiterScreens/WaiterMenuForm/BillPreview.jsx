@@ -31,14 +31,21 @@ const BillPreview = ({
     }
   );
 
-  console.log("shopinfo",shopInfo)
-  
+  console.log("shopinfo", shopInfo)
+
+
+
+
+
+
   return (
     <div>
       <div
         id="bill-pdf"
         style={{
-          width: 420,
+          width: "76mm",   // for 58mm printer
+          // fontFamily: "monospace",
+          fontSize: 12,
           margin: "0 auto",
           padding: 24,
           fontFamily: "'Inter', sans-serif",
@@ -89,6 +96,7 @@ const BillPreview = ({
         {/* Order Meta */}
         <Box
           display="flex"
+          flexDirection={"column"}
           justifyContent="space-between"
           sx={{ fontSize: 12, color: "#64748B" }}
         >
@@ -98,11 +106,12 @@ const BillPreview = ({
 
         <Box
           display="flex"
+          flexDirection={"column"}
           justifyContent="space-between"
           sx={{ fontSize: 12, color: "#64748B", mb: 2 }}
         >
-          <span>{customerName || "-"}</span>
           <span>{formattedTime}</span>
+          <span>{customerName || "-"}</span>
         </Box>
 
         <Divider sx={{ mb: 2 }} />
@@ -112,21 +121,24 @@ const BillPreview = ({
           <Box
             key={item.menuItemId}
             display="flex"
+            flexDirection={"column"}
             justifyContent="space-between"
             sx={{ mb: 1.5 }}
           >
-            <Box>
-              <Typography fontSize={14} fontWeight={600}>
-                {item.name}
-              </Typography>
-              <Typography fontSize={12} color="#64748B">
+
+            <Typography fontSize={14} fontWeight={500}>
+              {item.name}
+            </Typography>
+
+            <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} my={0.5}>
+              <Typography fontSize={14} >
                 {item.qty} × ₹ {item.price.toFixed(2)}
               </Typography>
-            </Box>
+              <Typography fontSize={14} fontWeight={500}>
+                ₹ {(item.price * item.qty).toFixed(2)}
+              </Typography>
 
-            <Typography fontSize={14} fontWeight={600}>
-              ₹ {(item.price * item.qty).toFixed(2)}
-            </Typography>
+            </Box>
           </Box>
         ))}
 
