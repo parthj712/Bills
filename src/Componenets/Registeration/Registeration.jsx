@@ -11,6 +11,10 @@ import {
   DialogActions,
   Button,
   IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import Image from "next/image";
 import AppButton from "../CommonComponents/AppButton";
@@ -24,9 +28,16 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 //toast notification
 import { showToast } from "../ToastConstant/toast";
-import { NOTIFICATIONS } from "../ToastConstant/notifications";
-const MotionDiv = motion.div;
 
+const MotionDiv = motion.div;
+const businessCategories = [
+  { value: "DINE_IN", label: "Restaurant (Dine-In)" },
+  { value: "QUICK_SERVICE", label: "Fast Food / Snack Center" },
+  { value: "CAFE", label: "Cafe / Coffee Shop" },
+  { value: "BAKERY", label: "Bakery / Sweet Shop" },
+  { value: "RETAIL", label: "Retail Store / Kirana" },
+  { value: "CLOUD_KITCHEN", label: "Cloud Kitchen" },
+];
 export default function RegisterScreen() {
   const router = useRouter();
   const theme = useTheme();
@@ -45,6 +56,7 @@ export default function RegisterScreen() {
     gstNumber: "",
     address: "",
     password: "",
+    businessCategory: "",
   });
 
   // ✅ OTP States
@@ -557,6 +569,26 @@ export default function RegisterScreen() {
                       helperText={errors.shopName}
                     />
 
+                    <FormControl fullWidth>
+                      <InputLabel id="business-category-label">
+                        Business Type
+                      </InputLabel>
+
+                      <Select
+                        labelId="business-category-label"
+                        value={form.businessCategory}
+                        label="Business Type"
+                        onChange={(e) =>
+                          setForm({ ...form, businessCategory: e.target.value })
+                        }
+                      >
+                        {businessCategories.map((cat) => (
+                          <MenuItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                     {/* GST Number */}
                     <TextField
                       label="GST Number"

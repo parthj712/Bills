@@ -19,6 +19,8 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useDispatch } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
+
+import { showToast } from "@/Componenets/ToastConstant/toast";
 // import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
@@ -27,6 +29,7 @@ import {
   finalizeBillAndOrder,
   itemDecrement,
   itemIncrement,
+  printKot,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { adminInfo, getShofInfo, getShopName } from "@/service/shopService";
@@ -41,6 +44,7 @@ export default function OrderCart() {
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const isDineIn = orderType === "DINE-IN";
   const [shopInfo, setShopInfo] = useState([]);
+  const [orderId, setOrderId] = useState(null);
 
   // ✅ cartKey: tableId for DINE-IN, else orderType
   const cartKey = isDineIn ? tableId : orderType;
@@ -54,12 +58,10 @@ export default function OrderCart() {
     timeStyle: "short",
   });
 
-
   const [loading, setLoading] = useState(false);
 
   const nameRegex = /^[A-Za-z\s]+$/;
   const [nameError, setNameError] = useState("");
-
 
   const subtotal = useMemo(
     () =>
@@ -98,8 +100,7 @@ export default function OrderCart() {
       }
 
       setCartItems(res?.data?.items || []);
-
-      setCartItems(res.data.items);
+      setOrderId(res.data.orderId);
     } catch {
       setCartItems([]);
     }
@@ -160,7 +161,6 @@ export default function OrderCart() {
   };
 
   const handleConfirmBilling = async () => {
-
     setLoading(true);
 
     try {
@@ -198,10 +198,112 @@ export default function OrderCart() {
       .save();
   };
 
+  const handlePrintKOT = async () => {
+    try {
+      await printKot(tableId);
 
+      showToast({
+        type: "success",
+        message: "KOT Printed",
+      });
+    } catch (err) {
+      showToast({
+        type: "error",
+        message: err?.response?.data?.message || "KOT Failed",
+      });
+    }
+  };
+  const printedItems = cartItems.filter((item) => item.kotPrinted);
 
+  // New items (not printed)
+  const newItems = cartItems.filter((item) => !item.kotPrinted);
 
+  useEffect(() => {
+    if (!socket) return;
 
+    // 🟢 when captain adds items
+    const handleNewItemsAdded = ({ tableId: updatedTable, items }) => {
+      if (isDineIn && updatedTable !== tableId) return;
+
+      setCartItems((prev) => {
+        // avoid duplicate items when loadOrder also triggers
+        const existing = new Set(
+          prev.map((i) => i.menuItemId + "_" + i.addedAt),
+        );
+
+        const uniqueItems = items.filter(
+          (i) => !existing.has(i.menuItemId + "_" + i.addedAt),
+        );
+
+        return [...prev, ...uniqueItems];
+      });
+    };
+
+    socket.on("newItemsAdded", handleNewItemsAdded);
+
+    return () => {
+      socket.off("newItemsAdded", handleNewItemsAdded);
+    };
+  }, [tableId, orderType]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleKotPrinted = ({ tableId: updatedTable, kotNumber }) => {
+      if (isDineIn && updatedTable !== tableId) return;
+
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.kotPrinted
+            ? item
+            : {
+                ...item,
+                kotPrinted: true,
+                kotNumber: kotNumber,
+              },
+        ),
+      );
+    };
+
+    socket.on("kotPrinted", handleKotPrinted);
+
+    return () => {
+      socket.off("kotPrinted", handleKotPrinted);
+    };
+  }, [tableId, orderType]);
+
+  const renderItem = (item, highlight = false) => (
+    <div
+      key={item.menuItemId + item.portion + item.addedAt}
+      className="flex justify-between items-center my-3"
+    >
+      <div>
+        <Typography fontSize={16} fontWeight={600}>
+          {item.name} ({item.portion})
+        </Typography>
+
+        <Typography fontSize={14}>₹ {item.price}/-</Typography>
+
+        {highlight && (
+          <Typography fontSize={12} sx={{ color: "red", fontWeight: 700 }}>
+            NEW ITEM
+          </Typography>
+        )}
+      </div>
+
+      <div className="flex items-center gap-3">
+        <IconButton size="small" onClick={() => handleDecrease(item)}>
+          <RemoveIcon fontSize="small" />
+        </IconButton>
+
+        <Typography fontWeight={700}>{item.qty}</Typography>
+
+        <IconButton size="small" onClick={() => handleIncrease(item)}>
+          <AddIcon fontSize="small" />
+        </IconButton>
+      </div>
+    </div>
+  );
   return (
     <Suspense fallback={<div>Loading order...</div>}>
       <Card
@@ -212,7 +314,6 @@ export default function OrderCart() {
           boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
         }}
       >
-
         {/* Items */}
         {cartItems.length === 0 ? (
           <Box
@@ -229,66 +330,32 @@ export default function OrderCart() {
               Add items from menu to build this order
             </Typography>
           </Box>
-
         ) : (
-          cartItems.map((item) => (
-            <div
-              key={item.menuItemId}
-              className="flex justify-between items-center my-3"
-            >
-              <div>
-                <Typography fontSize={16} fontWeight={600}>
-                  {item.name} ({item.portion})
-                </Typography>
-                <Typography fontSize={14}>₹ {item.price}/-</Typography>
-              </div>
+          <>
+            {/* 1️⃣ Already Printed Items (Kitchen already received) */}
+            {printedItems.map((item) => renderItem(item, false))}
 
-              <div className="flex items-center gap-3">
-                {/* Decrease */}
-                <IconButton
-                  size="small"
-                  onClick={() => handleDecrease(item)}
-                  sx={{
-                    backgroundColor: "#F1F5F9",
-                    color: "#334155",
-                    "&:hover": { backgroundColor: "#E2E8F0" },
-                  }}
+            {/* 2️⃣ Divider (shows only when new items exist) */}
+            {newItems.length > 0 && (
+              <>
+                <Divider sx={{ my: 3 }} />
 
-                >
-                  <RemoveIcon fontSize="small" />
-                </IconButton>
-
-                {/* Quantity */}
                 <Typography
-                  fontWeight={700}
                   sx={{
-                    minWidth: 32,
                     textAlign: "center",
-                    padding: "4px 10px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                    backgroundColor: "#f9fafb",
+                    fontWeight: 700,
+                    color: "#dc2626",
+                    mb: 2,
                   }}
                 >
-                  {item.qty}
+                  New Items (Not Sent To Kitchen)
                 </Typography>
+              </>
+            )}
 
-                {/* Increase */}
-                <IconButton
-                  size="small"
-                  onClick={() => handleIncrease(item)}
-                  sx={{
-                    backgroundColor: "#F1F5F9",
-                    color: "#334155",
-                    "&:hover": { backgroundColor: "#E2E8F0" },
-                  }}
-
-                >
-                  <AddIcon fontSize="small" />
-                </IconButton>
-              </div>
-            </div>
-          ))
+            {/* 3️⃣ Newly Added Items */}
+            {newItems.map((item) => renderItem(item, true))}
+          </>
         )}
 
         <Divider className="my-4" />
@@ -341,7 +408,6 @@ export default function OrderCart() {
               </Typography>
             </Box>
           </Box>
-
         </div>
       </Card>
 
@@ -358,7 +424,7 @@ export default function OrderCart() {
                 fontWeight: 600,
                 "&:hover": { backgroundColor: "#E2E8F0" },
               }}
-
+              onClick={handlePrintKOT}
             />
           ) : (
             <AppButton
@@ -387,7 +453,6 @@ export default function OrderCart() {
                 backgroundColor: "#0F172A",
               },
             }}
-
             onClick={handleOpenConfirm}
           />
         </div>
@@ -420,7 +485,6 @@ export default function OrderCart() {
 
         {/* CONTENT */}
         <DialogContent sx={{ pt: 3 }}>
-
           {/* Order Meta Info */}
           <Box
             sx={{
@@ -434,7 +498,11 @@ export default function OrderCart() {
           >
             <Typography fontWeight={600}>
               Order Type:{" "}
-              <span style={{ color: orderType === "TAKEAWAY" ? "#f97316" : "#2563eb" }}>
+              <span
+                style={{
+                  color: orderType === "TAKEAWAY" ? "#f97316" : "#2563eb",
+                }}
+              >
                 {orderType}
               </span>
             </Typography>
@@ -480,7 +548,6 @@ export default function OrderCart() {
           </Button>
         </DialogContent>
 
-
         <Divider />
 
         {/* FOOTER ACTIONS */}
@@ -516,7 +583,6 @@ export default function OrderCart() {
           </Button>
         </DialogActions>
       </Dialog>
-
     </Suspense>
   );
 }

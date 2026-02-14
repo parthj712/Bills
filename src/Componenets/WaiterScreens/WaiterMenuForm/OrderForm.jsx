@@ -16,11 +16,9 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMenuItems } from "@/redux/slices/menuSlice";
-import { addToCart } from "@/redux/slices/cartSlice";
 import { useRouter, useSearchParams } from "next/navigation";
 import { nanoid } from "@reduxjs/toolkit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { ToggleButton, ToggleButtonGroup } from "@mui/material";
 import { useRef } from "react";
 import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 import { showToast } from "@/Componenets/ToastConstant/toast";
@@ -40,7 +38,6 @@ export default function OrderForm() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [kotMessage, setKotMessage] = useState("");
   const orderType = searchParams.get("orderType") || "DINE-IN";
-  const cartKey = orderType === "DINE-IN" ? tableId : orderType;
 
   const [customerName, setCustomerName] = useState("");
   const [nameError, setNameError] = useState("");
@@ -66,7 +63,6 @@ export default function OrderForm() {
 
     const q = search.trim().toLowerCase();
     if (!q) return byCategory;
-    console.log("byCa", byCategory);
 
     return byCategory?.filter((i) => {
       const name = (i.name || "").toLowerCase();
@@ -74,7 +70,7 @@ export default function OrderForm() {
       return name.includes(q) || code.includes(q);
     });
   }, [items, category, search]);
-
+  console.log("byCa", selectedItems);
   useEffect(() => {
     setActiveIndex(0);
   }, [filteredItems]);
@@ -171,6 +167,7 @@ export default function OrderForm() {
         items: selectedItems.map((x) => ({
           menuItemId: x.item._id,
           name: x.item.name,
+          category: x.item.categoryName,
           price: getUnitPrice(x.item, x.portion),
           qty: x.qty,
           itemCode: x.item.itemCode,
@@ -204,8 +201,6 @@ export default function OrderForm() {
       //     router.replace("/waiter");
       //   }, 1100);
       // }
-
-
     } catch (err) {
       console.error("Add item failed", err);
 
@@ -319,13 +314,13 @@ export default function OrderForm() {
                           onClick={() => handleSelectItem(item)}
                           className={`
                             p-3 cursor-pointer border  transition-all duration-150
-                            ${isItemSelected(item._id)
-                              ? "border-slate-800 bg-slate-50 shadow-sm"
-                              : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
+                            ${
+                              isItemSelected(item._id)
+                                ? "border-slate-800 bg-slate-50 shadow-sm"
+                                : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
                             }
 
 `}
-
                         >
                           <Typography fontWeight={600}>{item.name}</Typography>
                           <Typography
@@ -369,7 +364,6 @@ export default function OrderForm() {
                           boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
                         }}
                       >
-
                         <div className="flex flex-col lg:flex-row md:flex-row items-start lg:items-center md:items-center justify-between gap-3">
                           <div className="flex gap-3">
                             <Typography fontWeight={600}>
@@ -384,18 +378,23 @@ export default function OrderForm() {
                           <div className="flex gap-2 flex-wrap">
                             {x.item?.price?.full && (
                               <Chip
-
                                 label={`Full ₹${x.item.price.full}`}
                                 sx={{
                                   fontWeight: 600,
                                   borderRadius: 2,
-                                  backgroundColor: x.portion === "full" ? "#334155" : "#F1F5F9",
-                                  color: x.portion === "full" ? "#fff" : "#475569",
+                                  backgroundColor:
+                                    x.portion === "full"
+                                      ? "#334155"
+                                      : "#F1F5F9",
+                                  color:
+                                    x.portion === "full" ? "#fff" : "#475569",
                                   "&:hover": {
-                                    backgroundColor: x.portion === "full" ? "#1E293B" : "#E2E8F0",
+                                    backgroundColor:
+                                      x.portion === "full"
+                                        ? "#1E293B"
+                                        : "#E2E8F0",
                                   },
                                 }}
-
                                 onClick={() => updatePortion(x.tempId, "full")}
                               />
                             )}
@@ -404,12 +403,13 @@ export default function OrderForm() {
                               <Chip
                                 sx={{ fontWeight: 600 }}
                                 label={`Half ₹${x.item.price.half}`}
-                                color={x.portion === "half" ? "primary" : "default"}
+                                color={
+                                  x.portion === "half" ? "primary" : "default"
+                                }
                                 onClick={() => updatePortion(x.tempId, "half")}
                               />
                             )}
                           </div>
-
 
                           {/* Qty */}
                           <div className="flex items-center gap-3">
@@ -451,7 +451,6 @@ export default function OrderForm() {
                                 color: "#334155",
                                 "&:hover": { backgroundColor: "#E2E8F0" },
                               }}
-
                             >
                               <AddIcon fontSize="small" />
                             </IconButton>
@@ -519,7 +518,6 @@ export default function OrderForm() {
                     </Typography>
                   </Box>
 
-
                   <AppButton
                     label="Add All to Order"
                     sx={{
@@ -535,7 +533,6 @@ export default function OrderForm() {
                         boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
                       },
                     }}
-
                     onClick={handleAddAllToOrder}
                   />
                 </div>
