@@ -31,6 +31,7 @@ import {
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { adminInfo, getShofInfo, getShopName } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
+import BillPreviewKOT from "./BillPreviewKOT";
 
 export default function OrderCart() {
   const dispatch = useDispatch();
@@ -48,6 +49,9 @@ export default function OrderCart() {
   const [cartItems, setCartItems] = useState([]);
 
   const [customerName, setCustomerName] = useState("");
+
+  const [openKOT, setOpenKOT] = useState(false);
+
 
   const currentDate = new Date().toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -159,6 +163,15 @@ export default function OrderCart() {
     setOpenConfirm(true);
   };
 
+
+  const printThermalBill = () => {
+    setTimeout(() => {
+      window.print();
+    }, 300);
+  };
+
+
+
   const handleConfirmBilling = async () => {
 
     setLoading(true);
@@ -169,8 +182,12 @@ export default function OrderCart() {
         await updateTableStatus(tableId, "AVAILABLE");
       }
 
+
+      printThermalBill();   // 🔥 PRINT HERE
+
       setOpenConfirm(false);
-      router.back(); // billing machine
+      // router.back(); // billing machine
+
     } catch (error) {
       console.error("Billing failed", error);
     } finally {
@@ -197,6 +214,28 @@ export default function OrderCart() {
       .from(element)
       .save();
   };
+
+
+  const downloadKOTPDF = async () => {
+    if (typeof window === "undefined") return;
+
+    const html2pdf = (await import("html2pdf.js")).default;
+
+    const element = document.getElementById("kot-pdf");
+    if (!element) return;
+
+    html2pdf()
+      .set({
+        margin: 5,
+        filename: "KOT.pdf",
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .from(element)
+      .save();
+  };
+
 
 
 
@@ -351,6 +390,7 @@ export default function OrderCart() {
           {isDineIn ? (
             <AppButton
               label="Print KOT"
+              onClick={() => setOpenKOT(true)}
               sx={{
                 backgroundColor: "#F1F5F9",
                 color: "#334155",
@@ -358,8 +398,8 @@ export default function OrderCart() {
                 fontWeight: 600,
                 "&:hover": { backgroundColor: "#E2E8F0" },
               }}
-
             />
+
           ) : (
             <AppButton
               label="Cancel"
@@ -516,6 +556,96 @@ export default function OrderCart() {
           </Button>
         </DialogActions>
       </Dialog>
+
+
+
+      <Dialog
+        open={openKOT}
+        onClose={() => setOpenKOT(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            p: 0,
+            overflow: "hidden",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+          },
+        }}
+      >
+        {/* Header */}
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            fontSize: 18,
+            bgcolor: "#1E293B",
+            color: "#fff",
+            textAlign: "center",
+            py: 2,
+          }}
+        >
+          Kitchen Order Ticket
+        </DialogTitle>
+
+        {/* Content */}
+        <DialogContent sx={{ p: 3, bgcolor: "#f8fafc" }}>
+          <Box
+            sx={{
+              bgcolor: "#fff",
+              borderRadius: 3,
+              p: 2,
+              m: 2,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            }}
+          >
+            <BillPreviewKOT
+              items={cartItems}
+              shopInfo={shopInfo}
+              orderType={orderType}
+              tableId={tableId}
+              date={currentDate}
+            />
+          </Box>
+        </DialogContent>
+
+        <Divider />
+
+        {/* Footer */}
+        <DialogActions
+          sx={{
+            p: 2,
+            justifyContent: "space-between",
+          }}
+        >
+          <Button
+            onClick={() => setOpenKOT(false)}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "#64748B",
+            }}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={downloadKOTPDF}
+            sx={{
+              borderRadius: 2,
+              px: 4,
+              fontWeight: 600,
+              textTransform: "none",
+              bgcolor: "#2563EB",
+              "&:hover": { bgcolor: "#1D4ED8" },
+            }}
+          >
+            Print KOT
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
 
     </Suspense>
   );
