@@ -37,3 +37,4 @@ export const itemDecrement = async (data) => {
 export const getCustomerInfo = async (data) => {
   await API.post("/orders/takeaway-customers", data);
 };
+export const printKot = (tableId) => API.post("/orders/kot/print", { tableId });

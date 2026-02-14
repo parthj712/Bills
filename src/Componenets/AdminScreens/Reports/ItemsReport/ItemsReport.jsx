@@ -44,7 +44,7 @@ const ItemsReport = () => {
   const [showReport, setShowReport] = useState(false);
 
   const quickRanges = [
-    { label: "1 Day", days: 0 },
+    { label: "1 Day", days: 1 },
     { label: "1 Week", days: 7 },
     { label: "1 Month", months: 1 },
     { label: "6 Months", months: 6 },
@@ -57,7 +57,7 @@ const ItemsReport = () => {
       setOrders(res.data?.orders || []);
     });
   }, []);
-
+  console.log("orders", orders);
   const filteredOrders = useMemo(() => {
     if (!fromDate || !toDate) return orders;
 
@@ -79,6 +79,7 @@ const ItemsReport = () => {
         if (!reportMap[item.name]) {
           reportMap[item.name] = {
             itemName: item.name,
+            category: item.category,
             totalOrders: 0,
             qtySold: 0,
             unitPrice: item.price,
@@ -102,6 +103,7 @@ const ItemsReport = () => {
   const exportExcel = () => {
     const data = itemsReport.map((row) => ({
       "Item Name": row.itemName,
+      "Item Category": row.category,
       "Item Code": row.itemCode,
       "Total Orders": row.totalOrders,
       "Qty Sold": row.qtySold,
@@ -162,7 +164,7 @@ const ItemsReport = () => {
                 borderRadius: 2,
                 textTransform: "none",
                 background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
-                color : "white"
+                color: "white",
               }}
             >
               Export Excel
@@ -288,7 +290,7 @@ const ItemsReport = () => {
                       "Item Name",
                       "Item Code",
                       "Category",
-                      "Sub-Category",
+
                       "Total Order Count",
                       "Total Qty Sold",
                       "Unit Price",
@@ -326,10 +328,6 @@ const ItemsReport = () => {
                           </TableCell>
 
                           <TableCell align="center">
-                            {row.subCategory || "-"}
-                          </TableCell>
-
-                          <TableCell align="center">
                             {row.totalOrders}
                           </TableCell>
 
@@ -349,7 +347,6 @@ const ItemsReport = () => {
                           TOTAL
                         </TableCell>
 
-                        <TableCell align="center">-</TableCell>
                         <TableCell align="center">-</TableCell>
                         <TableCell align="center">-</TableCell>
 

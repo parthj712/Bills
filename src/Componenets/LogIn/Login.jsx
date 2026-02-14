@@ -51,11 +51,6 @@ const slidePanel = {
 
 export default function Login() {
   const router = useRouter();
-
-  const emailRef = useRef(null);
-  const passwordRef = useRef(null);
-  const phoneRef = useRef(null);
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
@@ -94,7 +89,6 @@ export default function Login() {
       return;
     }
 
-
     setLoading(true);
     setApiError("");
 
@@ -110,12 +104,7 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-
-      // showToast(NOTIFICATIONS.AUTH.LOGIN_SUCCESS);
-      showToast({
-        type: "success",
-        message: "Login Sucessfull!!",
-      });
+      showToast(NOTIFICATIONS.AUTH.LOGIN_SUCCESS);
 
       // ✅ REDIRECT BY ROLE
       if (user.role === "ADMIN") {
@@ -264,7 +253,6 @@ export default function Login() {
               disabled={loading}
               className="!bg-orange-500 hover:!bg-orange-600 !text-white px-10"
             />
-
           </div>
         </Box>
       </MotionDiv>
