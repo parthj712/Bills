@@ -34,6 +34,7 @@ import {
 import { Suspense, useState, useMemo, useEffect } from "react";
 import { adminInfo, getShofInfo, getShopName } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
+import BillPreviewKOT from "./BillPreviewKOT";
 
 export default function OrderCart() {
   const dispatch = useDispatch();
@@ -52,6 +53,9 @@ export default function OrderCart() {
   const [cartItems, setCartItems] = useState([]);
 
   const [customerName, setCustomerName] = useState("");
+
+  const [openKOT, setOpenKOT] = useState(false);
+
 
   const currentDate = new Date().toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -160,6 +164,140 @@ export default function OrderCart() {
     setOpenConfirm(true);
   };
 
+
+  const formatBillForPrint = () => {
+    return `
+    <div class="center bold" style="font-size:18px;">
+      ${shopInfo?.shopName || ""}
+    </div>
+
+    <div class="center" style="font-size:12px;">
+      ${shopInfo?.tagline || ""}
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="center">
+      ${orderType}
+    </div>
+
+    <div class="center">
+      ${new Date().toLocaleString("en-IN")}
+    </div>
+
+    <div class="divider"></div>
+
+    ${cartItems
+        .map(
+          (item) => `
+        <div>
+          <div class="bold">${item.name}</div>
+          <div class="row">
+            <span>${item.qty} x ₹${item.price.toFixed(2)}</span>
+            <span>₹${(item.qty * item.price).toFixed(2)}</span>
+          </div>
+        </div>
+      `
+        )
+        .join("")}
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <span>Subtotal</span>
+      <span>₹${subtotal.toFixed(2)}</span>
+    </div>
+
+    <div class="row">
+      <span>Tax</span>
+      <span>₹${tax.toFixed(2)}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row total">
+      <span>TOTAL</span>
+      <span>₹${grandTotal.toFixed(2)}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="center bold">
+      Thank You • Visit Again
+    </div>
+  `;
+  };
+
+
+
+  const printThermalBill = () => {
+    const billElement = document.getElementById("print-bill");
+    if (!billElement) return;
+
+    const printWindow = window.open("", "_blank", "width=400,height=600");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Bill</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 10px;
+            width: 80mm;
+            font-family: monospace;
+            font-size: 13px;
+          }
+
+          .center {
+            text-align: center;
+          }
+
+          .bold {
+            font-weight: bold;
+          }
+
+          .divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+          }
+
+          .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+          }
+
+          .total {
+            font-size: 18px;
+            font-weight: bold;
+          }
+
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        ${formatBillForPrint()}
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
+
+
+
+
   const handleConfirmBilling = async () => {
     setLoading(true);
 
@@ -169,8 +307,15 @@ export default function OrderCart() {
         await updateTableStatus(tableId, "AVAILABLE");
       }
 
+
       setOpenConfirm(false);
-      router.back(); // billing machine
+
+      setTimeout(() => {
+        printThermalBill();
+      }, 300);
+
+      // router.back(); // billing machine
+
     } catch (error) {
       console.error("Billing failed", error);
     } finally {
@@ -183,7 +328,7 @@ export default function OrderCart() {
 
     const html2pdf = (await import("html2pdf.js")).default;
 
-    const element = document.getElementById("bill-pdf");
+    const element = document.getElementById("print-bill");
     if (!element) return;
 
     html2pdf()
@@ -417,6 +562,7 @@ export default function OrderCart() {
           {isDineIn ? (
             <AppButton
               label="Print KOT"
+              onClick={() => setOpenKOT(true)}
               sx={{
                 backgroundColor: "#F1F5F9",
                 color: "#334155",
@@ -426,6 +572,7 @@ export default function OrderCart() {
               }}
               onClick={handlePrintKOT}
             />
+
           ) : (
             <AppButton
               label="Cancel"
@@ -458,27 +605,58 @@ export default function OrderCart() {
         </div>
       )}
 
+      {/* Hidden printable bill */}
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      >
+        <BillPreview
+          items={cartItems}
+          subtotal={subtotal}
+          tax={tax}
+          total={grandTotal}
+          shopInfo={shopInfo}
+          orderType={orderType}
+          date={currentDate}
+          customerName={customerName}
+        />
+      </div>
+
+
+
+
+
       <Dialog
-        open={openConfirm}
-        onClose={() => setOpenConfirm(false)}
-        maxWidth="sm"
+        open={openKOT}
+        onClose={() => setOpenKOT(false)}
+        maxWidth="xs"
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: 3,
-            p: 1,
+            borderRadius: 4,
+            p: 0,
+            overflow: "hidden",
+            boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
           },
         }}
       >
-        {/* HEADER */}
+        {/* Header */}
         <DialogTitle
           sx={{
             fontWeight: 700,
-            fontSize: 20,
-            pb: 1,
+            fontSize: 18,
+            bgcolor: "#1E293B",
+            color: "#fff",
+            textAlign: "center",
+            py: 2,
           }}
         >
-          Confirm Billing
+          Kitchen Order Ticket
         </DialogTitle>
 
         <Divider />
@@ -518,51 +696,35 @@ export default function OrderCart() {
               backgroundColor: "#f9fafb",
               borderRadius: 2,
               p: 2,
+              m: 2,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             }}
           >
-            <BillPreview
+            <BillPreviewKOT
               items={cartItems}
-              subtotal={subtotal}
-              tax={tax}
-              total={grandTotal}
               shopInfo={shopInfo}
               orderType={orderType}
+              tableId={tableId}
               date={currentDate}
-              customerName={customerName}
             />
           </Box>
-
-          {/* Download Button */}
-          <Button
-            fullWidth
-            variant="outlined"
-            sx={{
-              mt: 3,
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-            }}
-            onClick={downloadBillPDF}
-          >
-            Download Bill PDF
-          </Button>
         </DialogContent>
 
         <Divider />
 
-        {/* FOOTER ACTIONS */}
+        {/* Footer */}
         <DialogActions
           sx={{
-            px: 3,
-            py: 2,
+            p: 2,
             justifyContent: "space-between",
           }}
         >
           <Button
-            onClick={() => setOpenConfirm(false)}
+            onClick={() => setOpenKOT(false)}
             sx={{
               textTransform: "none",
-              fontWeight: 500,
+              fontWeight: 600,
+              color: "#64748B",
             }}
           >
             Cancel
@@ -570,16 +732,17 @@ export default function OrderCart() {
 
           <Button
             variant="contained"
+            onClick={downloadKOTPDF}
             sx={{
               borderRadius: 2,
               px: 4,
               fontWeight: 600,
               textTransform: "none",
+              bgcolor: "#2563EB",
+              "&:hover": { bgcolor: "#1D4ED8" },
             }}
-            onClick={handleConfirmBilling}
-            disabled={loading}
           >
-            {loading ? "Processing..." : "Confirm & Bill"}
+            Print KOT
           </Button>
         </DialogActions>
       </Dialog>

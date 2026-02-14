@@ -19,9 +19,14 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 
 import { useEffect, useState } from "react";
 import { getShopName } from "@/service/shopService";
-import { Box, Typography } from "@mui/material";
+import { Box, Dialog, DialogContent, DialogTitle, Divider, IconButton, Typography } from "@mui/material";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import LockIcon from "@mui/icons-material/Lock";
+import UpdateIcon from "@mui/icons-material/Update";
+import NewReleasesIcon from "@mui/icons-material/NewReleases";
+import CloseIcon from "@mui/icons-material/Close";
+import { Badge } from "@mui/material";
+
 
 
 const mainItems = [
@@ -92,10 +97,18 @@ const settingsItem = {
   icon: <Settings fontSize="small" />,
 };
 
+const incomingChangesItem = {
+  label: "Incoming Features",
+  href: "/admin/incoming-changes",
+  icon: <NewReleasesIcon fontSize="small" />,
+};
+
 export default function Sidebar() {
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
+  const [openIncoming, setOpenIncoming] = useState(false);
+
 
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
 
@@ -153,9 +166,9 @@ export default function Sidebar() {
         <img src="/Logo.png" className="h-8" alt="Logo" />
       </div>
       <div className="border-t mb-4"></div>
-      <Box className="mb-8 px-3">
+      <Box className="mb-4 px-2">
         <motion.div
-          className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-4 text-center shadow-sm"
+          className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-2 text-center shadow-sm"
         >
           {/* ✨ SHIMMER / MIRROR REFLECTION */}
           <motion.span
@@ -296,7 +309,73 @@ export default function Sidebar() {
       </div>
 
       {/* SETTINGS AT BOTTOM */}
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-4">
+        <Box onClick={() => setOpenIncoming(true)} >
+          <motion.div
+            onClick={() => setOpenIncoming(true)}
+            whileHover={{ x: 4, scale: 1.01 }}
+            transition={{ duration: 0.25 }}
+            className="relative flex items-center gap-3 px-4 py-3 rounded-xl
+  cursor-pointer transition-all duration-300 group
+  bg-white hover:bg-orange-50 text-gray-700 overflow-hidden"
+          >
+
+            {/* ✨ MIRROR SHIMMER EFFECT */}
+            <motion.span
+              initial={{ x: "-120%" }}
+              animate={{ x: "130%" }}
+              transition={{
+                repeat: Infinity,
+                duration: 2.5,
+                ease: "linear",
+              }}
+              className="
+      pointer-events-none
+      absolute top-0 left-0
+      h-full w-1/3
+      bg-gradient-to-r
+      from-transparent
+      via-white/60
+      to-transparent
+      skew-x-[-20deg]
+      opacity-70
+    "
+            />
+
+            {/* Animated Left Indicator */}
+            <span
+              className={`
+      absolute left-0 top-0 h-full w-1 rounded-l-xl transition-all duration-300
+      bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.8)]
+    `}
+            />
+
+            {/* Icon */}
+            <motion.div
+              animate={{ rotate: [0, 8, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 3 }}
+              className="text-orange-500 relative z-10"
+            >
+              <UpdateIcon fontSize="small" />
+            </motion.div>
+
+            {/* Label */}
+            <Box
+              display="flex"
+              flexDirection="column"
+              textAlign="left"
+              justifyContent="flex-start"
+              className="relative z-10"
+            >
+              <span className="text-[16px] font-semibold tracking-wide">
+                {incomingChangesItem.label}
+              </span>
+            </Box>
+          </motion.div>
+
+        </Box>
+
+
         <Link href={settingsItem.href}>
           <motion.div
             whileHover={{ x: 6 }}
@@ -313,6 +392,95 @@ export default function Sidebar() {
           </motion.div>
         </Link>
       </div>
+
+
+      <Dialog
+        open={openIncoming}
+        onClose={() => setOpenIncoming(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+          },
+        }}
+      >
+        {/* HEADER */}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            fontWeight: 600,
+            color: "#ea580c",
+            background: "#fff7ed",
+            borderBottom: "1px solid #fde3c8",
+          }}
+        >
+          <Typography fontSize={16} fontWeight={600}>
+            Exciting new features arriving soon to enhance your business operations.
+          </Typography>
+
+
+
+
+          <IconButton onClick={() => setOpenIncoming(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent >
+          <Box display="flex" flexDirection="column" gap={2} my={3}>
+
+            {[
+              "Swiggy/Zomato Integration",
+              "Advanced Inventory Alerts",
+              "Auto Daily Profit Summary on WhatsApp",
+              "Staff Performance Tracking",
+              "CRM",
+              "QR Table Ordering",
+            ].map((feature, index) => (
+              <Box
+                key={feature}
+                sx={{
+                  p: 2.2,
+                  borderRadius: 3,
+                  background: "linear-gradient(135deg, #fff7ed, #ffffff)",
+                  border: "1px solid #fde3c8",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // 👈 Default soft shadow
+                  transition: "all 0.3s ease",
+                  cursor: "pointer",
+                  "&:hover": {
+                    transform: "translateY(-3px) scale(1.02)", // 👈 Lift up instead of side move
+                    boxShadow: "0 8px 20px rgba(249,115,22,0.2)", // 👈 Orange glow shadow
+                    borderColor: "#fb923c",
+                    background: "linear-gradient(135deg, #ffedd5, #ffffff)",
+                  },
+                }}
+              >
+                <Typography
+                  fontWeight={600}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    transition: "color 0.3s ease",
+                  }}
+                >
+                  🚀 {feature}
+                </Typography>
+              </Box>
+
+            ))}
+
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+
+
+
     </motion.aside>
   );
 }

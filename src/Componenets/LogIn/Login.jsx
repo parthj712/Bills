@@ -19,7 +19,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 //toast notification
 import { showToast } from "../ToastConstant/toast";
-import { NOTIFICATIONS } from "../ToastConstant/notifications";
+// import { NOTIFICATIONS } from "../ToastConstant/notifications";
 
 const MotionDiv = motion.div;
 
@@ -117,9 +117,17 @@ export default function Login() {
       setErrors(message);
 
       if (message === "Invalid credentials") {
-        showToast(NOTIFICATIONS.AUTH.LOGIN_FAILED);
+        // showToast(NOTIFICATIONS.AUTH.LOGIN_FAILED);
+        showToast({
+          type: "warning",
+          message: "Login Failed",
+        });
       } else {
-        showToast(NOTIFICATIONS.SYSTEM.SOMETHING_WENT_WRONG);
+        // showToast(NOTIFICATIONS.SYSTEM.SOMETHING_WENT_WRONG);
+        showToast({
+          type: "warning",
+          message: "Something Went Wrong",
+        });
       }
     } finally {
       setLoading(false);
