@@ -164,11 +164,136 @@ export default function OrderCart() {
   };
 
 
-  const printThermalBill = () => {
-    setTimeout(() => {
-      window.print();
-    }, 300);
+  const formatBillForPrint = () => {
+    return `
+    <div class="center bold" style="font-size:18px;">
+      ${shopInfo?.shopName || ""}
+    </div>
+
+    <div class="center" style="font-size:12px;">
+      ${shopInfo?.tagline || ""}
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="center">
+      ${orderType}
+    </div>
+
+    <div class="center">
+      ${new Date().toLocaleString("en-IN")}
+    </div>
+
+    <div class="divider"></div>
+
+    ${cartItems
+        .map(
+          (item) => `
+        <div>
+          <div class="bold">${item.name}</div>
+          <div class="row">
+            <span>${item.qty} x ₹${item.price.toFixed(2)}</span>
+            <span>₹${(item.qty * item.price).toFixed(2)}</span>
+          </div>
+        </div>
+      `
+        )
+        .join("")}
+
+    <div class="divider"></div>
+
+    <div class="row">
+      <span>Subtotal</span>
+      <span>₹${subtotal.toFixed(2)}</span>
+    </div>
+
+    <div class="row">
+      <span>Tax</span>
+      <span>₹${tax.toFixed(2)}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row total">
+      <span>TOTAL</span>
+      <span>₹${grandTotal.toFixed(2)}</span>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="center bold">
+      Thank You • Visit Again
+    </div>
+  `;
   };
+
+
+
+  const printThermalBill = () => {
+    const billElement = document.getElementById("print-bill");
+    if (!billElement) return;
+
+    const printWindow = window.open("", "_blank", "width=400,height=600");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Bill</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 10px;
+            width: 80mm;
+            font-family: monospace;
+            font-size: 13px;
+          }
+
+          .center {
+            text-align: center;
+          }
+
+          .bold {
+            font-weight: bold;
+          }
+
+          .divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+          }
+
+          .row {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+          }
+
+          .total {
+            font-size: 18px;
+            font-weight: bold;
+          }
+
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        ${formatBillForPrint()}
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
+
 
 
 
@@ -183,9 +308,12 @@ export default function OrderCart() {
       }
 
 
-      printThermalBill();   // 🔥 PRINT HERE
-
       setOpenConfirm(false);
+
+      setTimeout(() => {
+        printThermalBill();
+      }, 300);
+
       // router.back(); // billing machine
 
     } catch (error) {
@@ -436,9 +564,11 @@ export default function OrderCart() {
       {/* Hidden printable bill */}
       <div
         style={{
-          position: "absolute",
-          left: "-9999px",
+          position: "fixed",
           top: 0,
+          left: 0,
+          opacity: 0,
+          pointerEvents: "none",
         }}
       >
         <BillPreview
@@ -452,6 +582,7 @@ export default function OrderCart() {
           customerName={customerName}
         />
       </div>
+
 
 
 
