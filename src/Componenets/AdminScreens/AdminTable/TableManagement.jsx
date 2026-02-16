@@ -22,6 +22,7 @@ import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 import { socket } from "@/app/lib/socket";
 import { NOTIFICATIONS } from "@/Componenets/ToastConstant/notifications";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export const STATUS_CONFIG = {
   AVAILABLE: {
@@ -64,6 +65,8 @@ export default function TableManagement() {
   const hasAccess =
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
+
+      const { showSnackbar } = useAppSnackbarr();
 
 
   const fetchSubscriptionExpiry = async () => {
