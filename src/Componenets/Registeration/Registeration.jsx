@@ -27,7 +27,7 @@ import OtpBoxes from "../CommonComponents/OTPBoxes";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 //toast notification
-import { showToast } from "../ToastConstant/toast";
+import { useAppSnackbar } from "../CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const MotionDiv = motion.div;
 const businessCategories = [
@@ -39,6 +39,10 @@ const businessCategories = [
   { value: "CLOUD_KITCHEN", label: "Cloud Kitchen" },
 ];
 export default function RegisterScreen() {
+
+  const { showSnackbar } = useAppSnackbar();
+
+
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -105,10 +109,7 @@ export default function RegisterScreen() {
   // -------------------------------
   const sendOtp = useCallback(async () => {
     if (!form.email) {
-      showToast({
-        type: "warning",
-        message: "Please enter your email address first",
-      });
+      showSnackbar("Please enter your email address first", "warning");
       return;
     }
 
@@ -126,18 +127,13 @@ export default function RegisterScreen() {
 
       setOtpDialogOpen(true); // 👈 OPEN DIALOG
 
-      showToast({
-        type: "success",
-        message:
-          resendTimer > 0
-            ? "OTP resent successfully"
-            : "OTP sent to your email",
-      });
+      showSnackbar(resendTimer > 0
+        ? "OTP resent successfully"
+        : "OTP sent to your email", "success");
     } catch (err) {
-      showToast({
-        type: "error",
-        message: err.response?.data?.message || "Failed to send OTP. Try again",
-      });
+
+      showSnackbar(err.response?.data?.message || "Failed to send OTP. Try again", "error");
+
     } finally {
       setOtpLoading(false);
     }
@@ -148,10 +144,7 @@ export default function RegisterScreen() {
   // -------------------------------
   const verifyOtp = async () => {
     if (!otp) {
-      showToast({
-        type: "warning",
-        message: "Please enter the OTP",
-      });
+      showSnackbar("Please enter the OTP", "warning");
       return;
     }
 
@@ -165,12 +158,10 @@ export default function RegisterScreen() {
 
       setOtpVerified(true);
       setStep(2);
-      showToast({
-        type: "success",
-        message: "Email verified successfully",
-      });
+
+      showSnackbar("Email verified successfully", "success");
     } catch (err) {
-      alert(err.response?.data?.message || "Invalid OTP");
+      showSnackbar(err.response?.data?.message || "Invalid OTP", "warning");
     } finally {
       setOtpLoading(false);
     }
@@ -181,18 +172,12 @@ export default function RegisterScreen() {
   // -------------------------------
   const handleRegister = async () => {
     if (!validate()) {
-      showToast({
-        type: "warning",
-        message: "Please fix the highlighted errors",
-      });
+      showSnackbar("Please fix the highlighted errors", "warning");
       return;
     }
 
     if (!otpVerified) {
-      showToast({
-        type: "warning",
-        message: "Please verify your email before creating an account",
-      });
+      showSnackbar("Please verify your email before creating an account", "warning");
       return;
     }
 
@@ -200,22 +185,15 @@ export default function RegisterScreen() {
     console.log("form", form);
     try {
       await API.post("/auth/register", form);
-      showToast({
-        type: "success",
-        message: "Account created successfully! Please login",
-      });
+      showSnackbar("Account created successfully! Please login", "success");
       setTimeout(() => {
         router.push("/login");
       }, 800);
 
       router.push("/login");
     } catch (err) {
-      showToast({
-        type: "error",
-        message:
-          err.response?.data?.message ||
-          "Registration failed. Please try again",
-      });
+      showSnackbar(err.response?.data?.message ||
+        "Registration failed. Please try again ", "error");
     } finally {
       setLoading(false);
     }
@@ -639,11 +617,10 @@ export default function RegisterScreen() {
                         onClick={handleRegister}
                         disabled={loading || !otpVerified}
                         className={`
-                                  ${
-                                    otpVerified
-                                      ? "!bg-orange-500 hover:!bg-orange-600"
-                                      : "!bg-gray-300 cursor-not-allowed"
-                                  }
+                                  ${otpVerified
+                            ? "!bg-orange-500 hover:!bg-orange-600"
+                            : "!bg-gray-300 cursor-not-allowed"
+                          }
                                !text-white px-10
                                   `}
                       />

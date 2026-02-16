@@ -48,7 +48,6 @@ import { saveAs } from "file-saver";
 import { fetchMenuItems } from "@/redux/slices/menuSlice";
 import AppPagination from "@/Componenets/CommonComponents/PaginationControl";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
-import { showToast } from "@/Componenets/ToastConstant/toast";
 
 export default function MenuManagement() {
 
@@ -321,10 +320,7 @@ export default function MenuManagement() {
               startIcon={<Add />}
               onClick={() => {
                 if (!hasAccess) {
-                  showToast({
-                    type: "warning",
-                    message: "Upgrade to Premium to add more tables 🚀",
-                  });
+                   showSnackbar("Upgrade to Premium to add more tables 🚀", "warning");
                   return;
                 }
 

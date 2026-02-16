@@ -21,7 +21,6 @@ import { Edit, Delete, Add, Search } from "@mui/icons-material";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 import { socket } from "@/app/lib/socket";
-import { showToast } from "@/Componenets/ToastConstant/toast";
 import { NOTIFICATIONS } from "@/Componenets/ToastConstant/notifications";
 
 export const STATUS_CONFIG = {
@@ -194,10 +193,7 @@ export default function TableManagement() {
                 startIcon={<Add />}
                 onClick={() => {
                   if (!hasAccess) {
-                    showToast({
-                      type: "warning",
-                      message: "Upgrade to Premium to add more tables 🚀",
-                    });
+                    showSnackbar("Upgrade to Premium to add more tables 🚀", "warning");
                     return;
                   }
 
