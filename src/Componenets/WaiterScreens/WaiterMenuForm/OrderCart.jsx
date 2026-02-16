@@ -32,7 +32,7 @@ import {
   printKot,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
-import { adminInfo, getShofInfo, getShopName } from "@/service/shopService";
+import { getShopInfo } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
 
 export default function OrderCart() {
@@ -78,7 +78,7 @@ export default function OrderCart() {
 
   const handleFecthShopInfo = async () => {
     try {
-      const res = await getShofInfo();
+      const res = await getShopInfo();
 
       setShopInfo(res.data?.data);
     } catch (error) {

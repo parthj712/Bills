@@ -3,14 +3,57 @@
 import { Card, Typography, Box, Divider } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { getDineInTakeAway } from "@/utils/reportHelper";
+import { useEffect, useState } from "react";
 
 export default function RevenueDonutChart({ bills }) {
+  const [shopData, setShopData] = useState(null);
+
+  const fecthShopData = async () => {
+    try {
+      const res = await getShopInfo();
+
+      // IMPORTANT
+      setShopData(res.data.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fecthShopData();
+  }, []);
+
+  const isDineIn = shopData?.businessCategory === "DINE_IN";
   if (!bills?.length) return null;
 
-  const { totalRevenue, data } = getDineInTakeAway(bills);
+  let totalRevenue = 0;
+  let data = [];
+  let dineIn = 0;
+  let takeAway = 0;
 
-  const dineIn = data.find((d) => d.label === "Dine In")?.value || 0;
-  const takeAway = data.find((d) => d.label === "Take Away")?.value || 0;
+  totalRevenue = bills.reduce((sum, b) => sum + (b.grandTotal || 0), 0);
+
+  if (isDineIn) {
+    // Restaurant analytics
+    const result = getDineInTakeAway(bills);
+    data = result.data;
+
+    dineIn = data.find((d) => d.label === "Dine In")?.value || 0;
+    takeAway = data.find((d) => d.label === "Take Away")?.value || 0;
+  } else {
+    // Bakery / Chocolate shop / Counter billing analytics
+    takeAway = totalRevenue;
+
+    data = [
+      {
+        id: 0,
+        value: totalRevenue,
+        label: "Orders",
+        color: "#3b82f6",
+      },
+    ];
+  }
+
   return (
     <Card
       sx={{
@@ -24,11 +67,13 @@ export default function RevenueDonutChart({ bills }) {
       {/* Header */}
       <Box mb={2}>
         <Typography fontSize={18} fontWeight={700}>
-          🍽 Revenue Split
+          {isDineIn ? "🍽 Revenue Split" : "🧾 Total Sales"}
         </Typography>
 
         <Typography fontSize={13} sx={{ opacity: 0.65 }}>
-          Dine-In vs TakeAway Contribution
+          {isDineIn
+            ? "Dine-In vs TakeAway Contribution"
+            : "Total billing revenue"}
         </Typography>
       </Box>
 
@@ -86,48 +131,51 @@ export default function RevenueDonutChart({ bills }) {
         </Box>
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      {isDineIn && (
+        <>
+          <Divider sx={{ my: 2 }} />
 
-      {/* Breakdown Totals */}
-      <Box sx={{ display: "flex", gap: 2 }}>
-        {/* Dine In */}
-        <Box
-          sx={{
-            flex: 1,
-            p: 2,
-            borderRadius: "16px",
-            background: "rgba(34,197,94,0.08)",
-            textAlign: "center",
-          }}
-        >
-          <Typography fontSize={13} sx={{ opacity: 0.7 }}>
-            Dine In
-          </Typography>
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {/* Dine In */}
+            <Box
+              sx={{
+                flex: 1,
+                p: 2,
+                borderRadius: "16px",
+                background: "rgba(34,197,94,0.08)",
+                textAlign: "center",
+              }}
+            >
+              <Typography fontSize={13} sx={{ opacity: 0.7 }}>
+                Dine In
+              </Typography>
 
-          <Typography fontWeight={800} fontSize={16}>
-            ₹{dineIn.toLocaleString("en-IN")}
-          </Typography>
-        </Box>
+              <Typography fontWeight={800} fontSize={16}>
+                ₹{dineIn.toLocaleString("en-IN")}
+              </Typography>
+            </Box>
 
-        {/* Take Away */}
-        <Box
-          sx={{
-            flex: 1,
-            p: 2,
-            borderRadius: "16px",
-            background: "rgba(59,130,246,0.08)",
-            textAlign: "center",
-          }}
-        >
-          <Typography fontSize={13} sx={{ opacity: 0.7 }}>
-            Take Away
-          </Typography>
+            {/* Take Away */}
+            <Box
+              sx={{
+                flex: 1,
+                p: 2,
+                borderRadius: "16px",
+                background: "rgba(59,130,246,0.08)",
+                textAlign: "center",
+              }}
+            >
+              <Typography fontSize={13} sx={{ opacity: 0.7 }}>
+                Take Away
+              </Typography>
 
-          <Typography fontWeight={800} fontSize={16}>
-            ₹{takeAway.toLocaleString("en-IN")}
-          </Typography>
-        </Box>
-      </Box>
+              <Typography fontWeight={800} fontSize={16}>
+                ₹{takeAway.toLocaleString("en-IN")}
+              </Typography>
+            </Box>
+          </Box>
+        </>
+      )}
     </Card>
   );
 }

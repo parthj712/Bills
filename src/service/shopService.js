@@ -8,7 +8,7 @@ export const adminInfo = async () => {
   return await API.get("/staff/admin");
 };
 
-export const getShofInfo = async () => {
+export const getShopInfo = async () => {
   return await API.get("/shops/shop-info");
 };
 
