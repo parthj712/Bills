@@ -66,7 +66,7 @@ export default function TableManagement() {
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
 
-      const { showSnackbar } = useAppSnackbarr();
+      const { showSnackbar } = useAppSnackbar();
 
 
   const fetchSubscriptionExpiry = async () => {
