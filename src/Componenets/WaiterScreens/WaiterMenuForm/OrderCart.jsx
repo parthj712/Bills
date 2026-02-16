@@ -20,7 +20,6 @@ import { useDispatch } from "react-redux";
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { showToast } from "@/Componenets/ToastConstant/toast";
 // import html2pdf from "html2pdf.js";
 import BillPreview from "./BillPreview";
 import {
@@ -46,6 +45,8 @@ export default function OrderCart() {
   const isDineIn = orderType === "DINE-IN";
   const [shopInfo, setShopInfo] = useState([]);
   const [orderId, setOrderId] = useState(null);
+
+
 
   // ✅ cartKey: tableId for DINE-IN, else orderType
   const cartKey = isDineIn ? tableId : orderType;
@@ -229,6 +230,104 @@ export default function OrderCart() {
   };
 
 
+  const formatKOTForPrint = () => {
+    return `
+    <div style="font-size:18px; font-weight:bold; text-align:center;">
+      🔥 KOT
+    </div>
+
+
+    <div class="center bold" style="font-size:16px;">
+      ${shopInfo?.shopName || ""}
+    </div>
+
+    <div class="divider"></div>
+
+     <div class="center bold" style="font-size:15px;">
+      ${isDineIn ? `TABLE NO: ${tableId}` : "TAKEAWAY ORDER"}
+    </div>
+
+    <div class="center">
+      ${orderType}
+    </div>
+
+    <div class="center">
+      ${new Date().toLocaleString("en-IN")}
+    </div>
+
+    <div class="divider"></div>
+
+    ${cartItems
+        .filter(item => !item.kotPrinted && item.qty > 0)  // only new items
+        .map(item => `
+        <div style="margin-bottom:6px;">
+          <div class="bold">${item.name} (${item.portion})</div>
+          <div>Qty: ${item.qty}</div>
+        </div>
+      `)
+        .join("")}
+
+    <div class="divider"></div>
+
+    <div class="center">
+      --- END OF KOT ---
+    </div>
+  `;
+  };
+
+
+  const printThermalKOT = () => {
+    const printWindow = window.open("", "_blank", "width=400,height=600");
+
+    printWindow.document.write(`
+    <html>
+      <head>
+        <title>KOT Print</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 10px;
+            width: 80mm;
+            font-family: monospace;
+            font-size: 13px;
+          }
+
+          .center {
+            text-align: center;
+          }
+
+          .bold {
+            font-weight: bold;
+          }
+
+          .divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+          }
+
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+        </style>
+      </head>
+      <body>
+        ${formatKOTForPrint()}
+      </body>
+    </html>
+  `);
+
+    printWindow.document.close();
+
+    printWindow.onload = function () {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    };
+  };
+
+
+
 
   const printThermalBill = () => {
     const billElement = document.getElementById("print-bill");
@@ -297,16 +396,29 @@ export default function OrderCart() {
 
 
 
-
   const handleConfirmBilling = async () => {
+    if (!cartItems.length) {
+
+
+      showSnackbar("No items to bill", "warning");
+      return;
+    }
+
     setLoading(true);
+
+
+
+    showSnackbar("Processing billing...", "info");
 
     try {
       await finalizeBillAndOrder({ tableId, orderType });
+
       if (isDineIn) {
         await updateTableStatus(tableId, "AVAILABLE");
       }
 
+
+      showSnackbar("Billing completed successfully!l", "success");
 
       setOpenConfirm(false);
 
@@ -314,14 +426,18 @@ export default function OrderCart() {
         printThermalBill();
       }, 300);
 
-      // router.back(); // billing machine
-
     } catch (error) {
       console.error("Billing failed", error);
+
+
+      showSnackbar(error?.response?.data?.message ||
+        "Billing failed. Please try again.", "error");
+
     } finally {
       setLoading(false);
     }
   };
+
 
   const downloadBillPDF = async () => {
     if (typeof window === "undefined") return;
@@ -345,19 +461,19 @@ export default function OrderCart() {
 
   const handlePrintKOT = async () => {
     try {
-      await printKot(tableId);
+      await printKot(tableId);  // backend update
 
-      showToast({
-        type: "success",
-        message: "KOT Printed",
-      });
+      printThermalKOT();        // frontend thermal print
+
+      showSnackbar("KOT Printed", "success");
+
     } catch (err) {
-      showToast({
-        type: "error",
-        message: err?.response?.data?.message || "KOT Failed",
-      });
+      showSnackbar(err?.response?.data?.message || "KOT Failed", "error");
     }
   };
+
+
+
   const printedItems = cartItems.filter((item) => item.kotPrinted);
 
   // New items (not printed)
@@ -402,10 +518,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-                ...item,
-                kotPrinted: true,
-                kotNumber: kotNumber,
-              },
+              ...item,
+              kotPrinted: true,
+              kotNumber: kotNumber,
+            },
         ),
       );
     };
@@ -562,7 +678,7 @@ export default function OrderCart() {
           {isDineIn ? (
             <AppButton
               label="Print KOT"
-              onClick={() => setOpenKOT(true)}
+              // onClick={() => setOpenKOT(true)}
               sx={{
                 backgroundColor: "#F1F5F9",
                 color: "#334155",
@@ -732,7 +848,8 @@ export default function OrderCart() {
 
           <Button
             variant="contained"
-            onClick={downloadKOTPDF}
+            // onClick={downloadKOTPDF}
+            onClick={handlePrintKOT}
             sx={{
               borderRadius: 2,
               px: 4,
@@ -746,6 +863,59 @@ export default function OrderCart() {
           </Button>
         </DialogActions>
       </Dialog>
+
+
+
+      <Dialog
+        open={openConfirm}
+        onClose={() => setOpenConfirm(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 700, backgroundColor: "#0F172A", color: "white" }}>
+          Confirm Billing
+        </DialogTitle>
+
+        <Box>
+          <DialogContent>
+            <Typography>
+              Are you sure you want to finalize this bill?
+            </Typography>
+
+
+            <Typography fontWeight={600}>
+              Grand Total: ₹ {grandTotal.toFixed(2)}
+            </Typography>
+
+          </DialogContent>
+        </Box>
+
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)}>
+            Cancel
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={handleConfirmBilling}
+            disabled={loading}
+            sx={{
+              backgroundColor: "#1E293B",
+              color: "#fff",
+              borderRadius: 2,
+              fontWeight: 600,
+              px: 4,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              "&:hover": {
+                backgroundColor: "#0F172A",
+              },
+            }}
+          >
+            {loading ? "Processing..." : "Confirm & Print"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
     </Suspense>
   );
 }

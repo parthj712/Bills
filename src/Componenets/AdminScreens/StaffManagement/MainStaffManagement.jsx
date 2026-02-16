@@ -38,7 +38,6 @@ import { Download, UploadFile, Description } from "@mui/icons-material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
-import { showToast } from "@/Componenets/ToastConstant/toast";
 
 const MainStaffManagement = () => {
 
@@ -325,10 +324,7 @@ const MainStaffManagement = () => {
                 startIcon={<Add />}
                 onClick={() => {
                   if (!hasAccess) {
-                    showToast({
-                      type: "warning",
-                      message: "Upgrade to Premium to add more tables 🚀",
-                    });
+                    showSnackbar("Upgrade to Premium to add more tables 🚀", "warning");
                     return;
                   }
 

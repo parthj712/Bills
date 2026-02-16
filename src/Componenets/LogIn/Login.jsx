@@ -16,9 +16,11 @@ import { useRouter } from "next/navigation";
 import API from "@/service/api";
 import { useRef } from "react";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+// import { useAppSnackbar } from "@/app/SnackbarProvider";
+
 
 //toast notification
-import { showToast } from "../ToastConstant/toast";
+import { useAppSnackbar } from "../CommonComponents/SnackbarProvider/SnackbarProvider";
 // import { NOTIFICATIONS } from "../ToastConstant/notifications";
 
 const MotionDiv = motion.div;
@@ -61,6 +63,9 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
+  const { showSnackbar } = useAppSnackbar();
+
+
   const validate = () => {
     const newErrors = {};
 
@@ -82,10 +87,8 @@ export default function Login() {
 
   const handleLogin = async () => {
     if (!validate()) {
-      showToast({
-        type: "warning",
-        message: "Please fix the highlighted errors",
-      });
+      showSnackbar("Please fix the highlighted errors", "warning");
+
       return;
     }
 
@@ -104,7 +107,7 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      showToast(NOTIFICATIONS.AUTH.LOGIN_SUCCESS);
+      showSnackbar("Login Successful", "success");
 
       // ✅ REDIRECT BY ROLE
       if (user.role === "ADMIN") {
@@ -117,17 +120,11 @@ export default function Login() {
       setErrors(message);
 
       if (message === "Invalid credentials") {
-        // showToast(NOTIFICATIONS.AUTH.LOGIN_FAILED);
-        showToast({
-          type: "warning",
-          message: "Login Failed",
-        });
+
+        showSnackbar("Invalid Email or Password", "error");
       } else {
-        // showToast(NOTIFICATIONS.SYSTEM.SOMETHING_WENT_WRONG);
-        showToast({
-          type: "warning",
-          message: "Something Went Wrong",
-        });
+
+        showSnackbar("Something Went Wrong", "error");
       }
     } finally {
       setLoading(false);

@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "@/Componenets/ToastConstant/toast.css";
 import SocketProvider from "./socketProvider";
+import SnackbarProvider from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,8 +30,9 @@ export default function RootLayout({ children }) {
       >
         <Providers>
           <SocketProvider>
-            {children}
-            <ToastContainer />
+            <SnackbarProvider>
+              {children}
+            </SnackbarProvider>
           </SocketProvider>
         </Providers>
       </body>

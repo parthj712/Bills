@@ -21,11 +21,14 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { NOTIFICATIONS } from "@/Componenets/ToastConstant/notifications";
-import { showToast } from "@/Componenets/ToastConstant/toast";
 import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "@mui/material/Drawer";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const WaiterNavbar = () => {
+
+  const { showSnackbar } = useAppSnackbar();
+
   const theme = useTheme();
 
   // BREAKPOINTS
@@ -68,26 +71,24 @@ const WaiterNavbar = () => {
     // clear auth
     localStorage.removeItem("token"); // or cookies
 
-    showToast(NOTIFICATIONS.AUTH.LOGOUT_SUCCESS);
+    showSnackbar("Logout Sucessfull", "success");
 
     router.push("/login");
   };
 
   const handleKbOpen = () => {
-    showToast({
-      type: "info",
-      message: "Keyboard shortcuts opened",
-    });
+
+
+    showSnackbar("Keyboard shortcuts opened", "info");
     setKbOpen(true);
   };
 
   const handleKbClose = () => setKbOpen(false);
 
   const handleOrderTypeClick = (orderType) => {
-    showToast({
-      type: "info",
-      message: `${orderType} order selected`,
-    });
+
+
+    showSnackbar(`${orderType} order selected`, "info");
 
     router.push(`/waiter/order?orderType=${orderType}`);
   };

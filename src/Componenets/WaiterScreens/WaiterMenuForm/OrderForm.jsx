@@ -21,9 +21,13 @@ import { nanoid } from "@reduxjs/toolkit";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { useRef } from "react";
 import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
-import { showToast } from "@/Componenets/ToastConstant/toast";
+
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function OrderForm() {
+
+  const { showSnackbar } = useAppSnackbar();
+
   const searchRef = useRef(null);
   const kotRef = useRef(null);
   const dispatch = useDispatch();
@@ -140,20 +144,18 @@ export default function OrderForm() {
       if (!customerName.trim()) {
         setNameError("Customer name is required");
 
-        showToast({
-          type: "error",
-          message: "Please add customer name first",
-        });
+
+
+        showSnackbar("Please add customer name first", "error");
 
         document.querySelector("input[label='Customer Name']")?.focus();
         return;
       }
 
       if (nameError) {
-        showToast({
-          type: "error",
-          message: "Customer name is invalid",
-        });
+
+
+        showSnackbar("Customer name is invalid", "error");
 
         return;
       }
@@ -185,10 +187,8 @@ export default function OrderForm() {
       }
 
       // ✅ SUCCESS TOAST HERE
-      showToast({
-        type: "success",
-        message: "Order added successfully",
-      });
+
+      showSnackbar("Order added successfully", "success");
 
       // clear UI selections
       setSelectedItems([]);
@@ -204,10 +204,8 @@ export default function OrderForm() {
     } catch (err) {
       console.error("Add item failed", err);
 
-      showToast({
-        type: "error",
-        message: "Failed to add order. Please try again.",
-      });
+
+      showSnackbar("Failed to add order. Please try again.", "error");
     }
   };
 
@@ -314,10 +312,9 @@ export default function OrderForm() {
                           onClick={() => handleSelectItem(item)}
                           className={`
                             p-3 cursor-pointer border  transition-all duration-150
-                            ${
-                              isItemSelected(item._id)
-                                ? "border-slate-800 bg-slate-50 shadow-sm"
-                                : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
+                            ${isItemSelected(item._id)
+                              ? "border-slate-800 bg-slate-50 shadow-sm"
+                              : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
                             }
 
 `}

@@ -120,7 +120,7 @@ const BillPreview = ({
         {/* Items */}
         {items.map((item) => (
           <Box
-            key={item.menuItemId}
+            key={`${item.menuItemId}-${item.portion}-${item.addedAt}`}
             display="flex"
             flexDirection={"column"}
             justifyContent="space-between"
