@@ -34,8 +34,14 @@ import { Suspense, useState, useMemo, useEffect } from "react";
 import { getShopInfo } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
 import BillPreviewKOT from "./BillPreviewKOT";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function OrderCart() {
+
+
+    const { showSnackbar } = useAppSnackbar();
+
+
   const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();

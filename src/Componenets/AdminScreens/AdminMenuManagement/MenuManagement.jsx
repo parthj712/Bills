@@ -48,8 +48,11 @@ import { saveAs } from "file-saver";
 import { fetchMenuItems } from "@/redux/slices/menuSlice";
 import AppPagination from "@/Componenets/CommonComponents/PaginationControl";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function MenuManagement() {
+
+    const { showSnackbar } = useAppSnackbar();
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
