@@ -3,7 +3,7 @@
 import {
   addTagline,
   addWebsite,
-  getShofInfo,
+  getShopInfo,
   removeShopLogo,
   removeShopQR,
   uploadShopLogo,
@@ -50,7 +50,7 @@ export default function Settings() {
   useEffect(() => {
     const fetchInfo = async () => {
       try {
-        const res = await getShofInfo();
+        const res = await getShopInfo();
 
         console.log("res", res.data?.data);
 

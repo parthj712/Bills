@@ -6,7 +6,7 @@ import OrderForm from "./OrderForm";
 
 import OrderCart from "./OrderCart";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 export default function WaiterMenuForm() {
   const router = useRouter();
@@ -15,7 +15,11 @@ export default function WaiterMenuForm() {
   const orderType = searchParams.get("orderType") || "DINE-IN";
 
   const isDineIn = orderType === "DINE-IN";
-
+  useEffect(() => {
+    if (!isDineIn && searchParams.get("tableNo")) {
+      router.replace("/waiter");
+    }
+  }, [isDineIn]);
   return (
     <Suspense fallback={<div>Loading order...</div>}>
       <Box className="min-h-screen bg-gray-50 p-6">
