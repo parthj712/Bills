@@ -165,12 +165,12 @@ const BillsMain = () => {
   }, [filteredBills]);
 
   return (
-    <Box className="flex flex-col gap-6 p-2">
+    <Box className="flex flex-col gap-6 px-4">
       <Box className="flex flex-col gap-2 w-full">
         <Typography
           fontSize={isMobile ? 24 : 30}
-          fontWeight={isMobile ? 600 : 700}
-          className="text-[#0b3c5d]"
+          fontWeight={700}
+          className="text-[#000C5A]"
         >
           Bills Management
         </Typography>
@@ -190,11 +190,22 @@ const BillsMain = () => {
           }}
           // className="grid-cols-1"
           sx={{
-            gridColumn: { lg: "span 4" },
+            gridColumn: { lg: "span 3" },
             backgroundColor: "#f9fafb",
-            borderRadius: 3,
+            borderRadius: 1.5,
+            height: 44,
+            "& .MuiInputBase-root": {
+              height: 44,
+            },
+            "& input": {
+              fontSize: 14,
+              padding: "8px 0",
+            },
             "& fieldset": { border: "none" },
-            boxShadow: "0 4px 12px rgba(0,0,0,0.10)",
+            // boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
+            border: "2px solid",
+            borderColor: "gray.200",
+            bgcolor: "white",
           }}
         />
 
@@ -256,8 +267,8 @@ const BillsMain = () => {
         <TableContainer
           component={Paper}
           sx={{
-            borderRadius: 4,
-            boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
+            borderRadius: 2,
+            // boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
             alignItems: "left",
           }}
         >

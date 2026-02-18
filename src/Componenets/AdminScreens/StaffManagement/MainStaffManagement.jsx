@@ -42,7 +42,7 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 
 const MainStaffManagement = () => {
 
-    const { showSnackbar } = useAppSnackbar();
+  const { showSnackbar } = useAppSnackbar();
 
 
   const [subscription, setSubscription] = useState(null);
@@ -310,12 +310,12 @@ const MainStaffManagement = () => {
 
 
   return (
-    <Box className="flex flex-col gap-6 p-2">
+    <Box className="flex flex-col gap-6 px-4">
       {/* Premium Header */}
       <Box className="flex flex-col gap-2">
         <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
           <Box>
-            <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#0b3c5d]">
+            <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#000C5A]">
               Staff Management
             </Typography>
           </Box>
@@ -340,10 +340,10 @@ const MainStaffManagement = () => {
                   px: 2,
                   minWidth: 140,
                   height: 40,
-                  borderRadius: 3,
+                  borderRadius: 2,
                   textTransform: "none",
                   fontWeight: 700,
-                  boxShadow: "0 10px 20px rgba(11,60,93,0.25)",
+                  // boxShadow: "0 10px 20px rgba(11,60,93,0.25)",
                   "&:hover": { backgroundColor: "#0a3552" },
                 }}
                 size="medium"
@@ -377,8 +377,8 @@ const MainStaffManagement = () => {
               padding: "8px 0",
             },
             "& fieldset": { border: "none" },
-            boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
-            border: "1px solid",
+            // boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
+            border: "2px solid",
             borderColor: "gray.200",
             bgcolor: "white",
           }}
@@ -399,7 +399,7 @@ const MainStaffManagement = () => {
               backgroundColor: "#e3f2fd",
               color: "#0b3c5d",
               "&:hover": { backgroundColor: "#bbdefb" },
-              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
             <Download />
@@ -413,7 +413,7 @@ const MainStaffManagement = () => {
               backgroundColor: "#e8f5e9",
               color: "#2e7d32",
               "&:hover": { backgroundColor: "#c8e6c9" },
-              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
             <UploadFile />
@@ -428,7 +428,7 @@ const MainStaffManagement = () => {
               backgroundColor: "#fff3e0",
               color: "#ef6c00",
               "&:hover": { backgroundColor: "#ffe0b2" },
-              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
             <Description />
@@ -441,9 +441,9 @@ const MainStaffManagement = () => {
         <TableContainer
           component={Paper}
           sx={{
-            borderRadius: 4,
+            borderRadius: 2,
             overflow: "hidden",
-            boxShadow: "0 20px 45px rgba(0,0,0,0.10)",
+            // boxShadow: "0 20px 45px rgba(0,0,0,0.10)",
           }}
         >
           <Table stickyHeader>

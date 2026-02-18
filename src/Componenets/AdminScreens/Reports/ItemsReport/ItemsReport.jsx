@@ -145,7 +145,7 @@ const ItemsReport = () => {
             <Typography
               fontSize={isMobile ? 24 : 30}
               fontWeight={isMobile ? 600 : 700}
-              className="text-[#0b3c5d]"
+              className="text-[#000C5A]"
             >
               Items Report
             </Typography>
@@ -159,12 +159,10 @@ const ItemsReport = () => {
               variant="contained"
               startIcon={<DownloadIcon />}
               onClick={exportExcel}
-              disabled={itemsReport.length === 0}
               sx={{
                 borderRadius: 2,
                 textTransform: "none",
                 background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
-                color: "white",
               }}
             >
               Export Excel
@@ -178,7 +176,7 @@ const ItemsReport = () => {
           sx={{
             p: 3,
             mb: isMobile ? 8 : 4,
-            borderRadius: 3,
+            borderRadius: 2,
             border: "1px solid #e5e7eb",
           }}
         >
@@ -225,6 +223,7 @@ const ItemsReport = () => {
                       fontSize: 14,
                       px: 1.5,
                       fontWeight: activeRange === range.label ? 600 : 500,
+                      borderRadius: 2
                     }}
                   />
                 ))}
@@ -281,7 +280,7 @@ const ItemsReport = () => {
 
         {/* Report Table */}
         {showReport && isDesktop && (
-          <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
+          <Paper sx={{ borderRadius: 2, overflow: "hidden" }}>
             <TableContainer sx={{ maxHeight: 660 }}>
               <Table stickyHeader>
                 <TableHead>

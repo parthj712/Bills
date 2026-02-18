@@ -166,7 +166,7 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
             animate: "visible",
             exit: "exit",
             sx: {
-              borderRadius: 4,
+              borderRadius: 2,
               overflow: "hidden",
               boxShadow: "0 30px 70px rgba(0,0,0,0.20)",
             },

@@ -74,12 +74,12 @@ export default function SalesReport() {
     // show ONLY if shop supports tables
     ...(isDineIn
       ? [
-          {
-            label: "Dine-In",
-            value: "DINEIN",
-            icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
-          },
-        ]
+        {
+          label: "Dine-In",
+          value: "DINEIN",
+          icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
+        },
+      ]
       : []),
 
     {
@@ -180,7 +180,7 @@ export default function SalesReport() {
           <Typography
             fontSize={isMobile ? 24 : 30}
             fontWeight={isMobile ? 600 : 700}
-            className="text-[#0b3c5d]"
+             className="text-[#000C5A]"
           >
             Sales Report
           </Typography>
@@ -211,7 +211,7 @@ export default function SalesReport() {
         sx={{
           p: 3,
           mb: isMobile ? 8 : 4,
-          borderRadius: 3,
+          borderRadius: 2,
           border: "1px solid #e5e7eb",
         }}
       >
@@ -256,97 +256,12 @@ export default function SalesReport() {
                     fontSize: 14,
                     px: isMobile ? 0.5 : 1.5,
                     fontWeight: activeRange === range.label ? 600 : 500,
+                    borderRadius : 2
                   }}
                 />
               ))}
             </Box>
-            {/* bill type toggle buttons */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-                flexWrap: "wrap",
-              }}
-            >
-              {/* PREMIUM SEGMENT CONTROL */}
-              <Box
-                sx={{
-                  position: "relative",
-                  display: "flex",
-                  background: "linear-gradient(145deg,#eef2f7,#ffffff)",
-                  borderRadius: "14px",
-                  padding: "6px",
-                  boxShadow:
-                    "0 6px 18px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9)",
-                }}
-              >
-                {/* Sliding Active Pill */}
-                <motion.div
-                  layout
-                  transition={{ type: "spring", stiffness: 300, damping: 28 }}
-                  style={{
-                    position: "absolute",
-                    top: 6,
-                    bottom: 6,
-                    width: `calc(100% / ${tabCount} - 8px)`,
-                    borderRadius: "10px",
-                    background: "linear-gradient(135deg,#2563EB,#22D3EE)",
-                    // boxShadow: "0 4px 12px rgba(37,99,235,0.35)",
-                    left: `calc(${activeIndex * (100 / tabCount)}% + 6px)`,
-                  }}
-                />
 
-                {billTypeOptions.map((item) => {
-                  const active = billType === item.value;
-
-                  return (
-                    <Box
-                      key={item.value}
-                      onClick={() => {
-                        setBilltype(item.value);
-                        setShowReport(false);
-                      }}
-                      component={motion.div}
-                      whileTap={{ scale: 0.92 }}
-                      whileHover={{ y: -1 }}
-                      sx={{
-                        position: "relative",
-                        zIndex: 2,
-                        px: 2.6,
-                        py: 1.2,
-                        minWidth: 110,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: 1,
-                        cursor: "pointer",
-                        borderRadius: "10px",
-                        userSelect: "none",
-                        fontWeight: active ? 600 : 500,
-                        letterSpacing: "0.3px",
-                        fontSize: 14,
-                        color: active ? "#ffffff" : "#334155",
-                        transition: "all .25s ease",
-
-                        /* Active text glow (THIS fixes premium feel) */
-                        textShadow: active
-                          ? "0 1px 2px rgba(0,0,0,0.25)"
-                          : "none",
-
-                        "& svg": {
-                          color: active ? "#ffffff" : "#64748b",
-                          transition: "all .25s ease",
-                        },
-                      }}
-                    >
-                      {item.icon}
-                      {item.label}
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Box>
 
             {/* Date Pickers */}
             <Box display="flex" gap={3} flexWrap="wrap">
@@ -380,14 +295,14 @@ export default function SalesReport() {
               variant="contained"
               onClick={() => setShowReport(true)}
               sx={{
-                borderRadius: 2,
                 textTransform: "none",
                 fontWeight: 600,
+                borderRadius: 2,
                 px: 4,
                 py: 1.2,
-                background: "linear-gradient(135deg, #2563EB, #22D3EE)",
+                backgroundColor: "#0f172a",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #1E40AF, #06B6D4)",
+                  backgroundColor: "#020617",
                 },
               }}
             >
@@ -396,6 +311,94 @@ export default function SalesReport() {
           </Box>
         </Box>
       </Paper>
+
+      {/* bill type toggle buttons */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          flexWrap: "wrap",
+        }}
+      >
+        {/* PREMIUM SEGMENT CONTROL */}
+        <Box
+          sx={{
+            position: "relative",
+            display: "flex",
+            background: "linear-gradient(145deg,#eef2f7,#ffffff)",
+            borderRadius: "14px",
+            padding: "6px",
+            // boxShadow:
+            //   "0 6px 18px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9)",
+          }}
+        >
+          {/* Sliding Active Pill */}
+          <motion.div
+            layout
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+            style={{
+              position: "absolute",
+              top: 6,
+              bottom: 6,
+              width: `calc(100% / ${tabCount} - 8px)`,
+              borderRadius: "10px",
+              backgroundColor: "#0f172a",
+              // boxShadow: "0 4px 12px rgba(37,99,235,0.35)",
+              left: `calc(${activeIndex * (100 / tabCount)}% + 6px)`,
+            }}
+          />
+
+          {billTypeOptions.map((item) => {
+            const active = billType === item.value;
+
+            return (
+              <Box
+                key={item.value}
+                onClick={() => {
+                  setBilltype(item.value);
+                  setShowReport(false);
+                }}
+                component={motion.div}
+                whileTap={{ scale: 0.92 }}
+                whileHover={{ y: -1 }}
+                sx={{
+                  position: "relative",
+                  zIndex: 2,
+                  px: 2.6,
+                  py: 1.2,
+                  minWidth: 130,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                  cursor: "pointer",
+                  borderRadius: "10px",
+                  userSelect: "none",
+                  fontWeight: active ? 600 : 500,
+                  letterSpacing: "0.3px",
+                  fontSize: 14,
+                  color: active ? "#ffffff" : "#334155",
+                  transition: "all .25s ease",
+
+                  /* Active text glow (THIS fixes premium feel) */
+                  textShadow: active
+                    ? "0 1px 2px rgba(0,0,0,0.25)"
+                    : "none",
+
+                  "& svg": {
+                    color: active ? "#ffffff" : "#64748b",
+                    transition: "all .25s ease",
+                  },
+                }}
+              >
+                {item.icon}
+                {item.label}
+              </Box>
+            );
+          })}
+        </Box>
+      </Box>
 
       {/* Sales Table */}
       {showReport && isDesktop && (
@@ -561,7 +564,7 @@ export default function SalesReport() {
             Monthly Summary
           </Typography>
 
-          <Paper sx={{ borderRadius: 3 }}>
+          <Paper sx={{ borderRadius: 1.5 }}>
             <Table size="small">
               <TableHead>
                 <TableRow>

@@ -340,335 +340,273 @@ export default function RegisterScreen() {
   // );
 
   return (
-    <Box className="min-h-screen w-full flex bg-black">
-      {/* LEFT IMAGE */}
-      <motion.div className=" md:w-1/2 relative">
-        <Image
-          src="/LandingPage/Landing.avif"
-          alt="Food"
-          fill
-          className="object-cover"
-        />
-      </motion.div>
-
-      {/* RIGHT FORM */}
-      <MotionDiv className="w-full md:w-1/2 flex justify-center items-center bg-white">
-        <Box className="w-full max-w-lg px-8 py-10 flex flex-col gap-4">
-          {/* Title */}
+    <Box
+      className="min-h-screen w-full flex items-center justify-center"
+      sx={{ backgroundColor: "#f8fafc" }}
+    >
+      <MotionDiv
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="
+        w-full max-w-2xl
+        bg-white
+        border border-gray-200
+        rounded-2xl
+        shadow-xl
+        px-10 py-10
+      "
+      >
+        {/* Title */}
+        <Box textAlign="center" mb={4}>
           <Typography
-            fontSize={20}
-            fontWeight={700}
-            textAlign="center"
-            color="black"
+            fontSize={22}
+            fontWeight={600}
+            color="#0f172a"
           >
             Begin Your Smart Business Journey 🚀
           </Typography>
 
-          <Dialog open={otpDialogOpen} maxWidth="xs" fullWidth>
-            <DialogContent>
-              <Box
-                display="flex"
-                flexDirection="column"
-                alignItems="center"
-                gap={2}
-                py={3}
-              >
-                <Typography fontSize={26}>📩</Typography>
-
-                <Typography fontSize={16} fontWeight={600} textAlign="center">
-                  OTP Sent
-                </Typography>
-
-                <Typography fontSize={13} color="gray" textAlign="center">
-                  We’ve sent a 6-digit verification code to
-                  <br />
-                  <strong>{form.email}</strong>
-                </Typography>
-
-                <Typography fontSize={12} color="gray">
-                  Please check your inbox
-                </Typography>
-              </Box>
-            </DialogContent>
-          </Dialog>
-
-          {/* Stepper */}
-          <RealStepper step={step} />
-
-          <AnimatePresence mode="wait">
-            {/* ---------------- STEP 0 : BASIC INFO ---------------- */}
-
-            {step === 0 && (
-              <motion.div
-                key="step-0"
-                initial={{ x: 80, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -80, opacity: 0 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              >
-                <Box display={"flex"} flexDirection={"column"} gap={3}>
-                  {/* Full Name */}
-                  <TextField
-                    label="Full Name"
-                    value={form.ownerName}
-                    onChange={handleChange("ownerName")}
-                    error={!!errors.ownerName}
-                    helperText={errors.ownerName}
-                  />
-
-                  {/* Email */}
-                  <TextField
-                    label="Email"
-                    value={form.email}
-                    onChange={handleChange("email")}
-                    error={!!errors.email}
-                    helperText={errors.email}
-                    disabled={otpVerified}
-                  />
-
-                  {/* Phone */}
-                  <TextField
-                    label="Phone Number"
-                    value={form.phone}
-                    onChange={handleChange("phone")}
-                    disabled={otpVerified}
-                    error={!!errors.phone}
-                    helperText={errors.phone}
-                  />
-
-                  <div className="flex items-center gap-6 mt-4">
-                    <IconButton
-                      onClick={() => router.push("/")}
-                      sx={{
-                        // position: "absolute",
-                        // top: 24,
-                        // left: isMobile ? 24 : 800,
-                        color: "#111827",
-                        background: "#F3F4F6",
-                        "&:hover": { background: "#E5E7EB" },
-                      }}
-                    >
-                      <ArrowBackIosNewIcon fontSize="small" />
-                    </IconButton>
-
-                    <AppButton
-                      label={otpLoading ? "Sending OTP..." : "Send OTP"}
-                      onClick={sendOtp}
-                      disabled={otpLoading}
-                      className="!bg-orange-500 hover:!bg-orange-600 !text-white px-10"
-                    />
-                  </div>
-                </Box>
-              </motion.div>
-            )}
-
-            {/* ---------------- STEP 1 : OTP VERIFICATION ---------------- */}
-
-            {step === 1 && (
-              <motion.div
-                key="step-1"
-                initial={{ x: 80, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: -80, opacity: 0 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-              >
-                <Typography
-                  fontSize={16}
-                  textAlign="center"
-                  color="black"
-                  mb={2}
-                >
-                  Enter the 6-digit OTP sent to your email
-                </Typography>
-
-                <Box display="flex" flexDirection="column" gap={3}>
-                  {/* ✅ OTP Boxes */}
-                  <OtpBoxes
-                    otp={otp}
-                    setOtp={setOtp}
-                    onComplete={() => verifyOtp()}
-                  />
-
-                  {/* ✅ Buttons */}
-                  <Box display="flex" gap={2}>
-                    <AppButton
-                      label="← Back"
-                      onClick={() => setStep(0)}
-                      variant="text"
-                      className="!text-gray-600 hover:!text-black"
-                    />
-
-                    <AppButton
-                      label={otpLoading ? "Verifying..." : "Verify OTP"}
-                      onClick={verifyOtp}
-                      className="!bg-green-500"
-                    />
-                  </Box>
-
-                  {/* ✅ Resend OTP Timer */}
-                  {resendTimer > 0 ? (
-                    <Typography align="center" color="gray">
-                      Resend OTP in {resendTimer}s
-                    </Typography>
-                  ) : (
-                    <AppButton
-                      label="Resend OTP"
-                      variant="text"
-                      onClick={sendOtp}
-                      className="!bg-orange-500 hover:!bg-orange-600 !text-white px-10"
-                    />
-                  )}
-                </Box>
-              </motion.div>
-            )}
-
-            {/* ---------------- STEP 2 : BUSINESS SETUP ---------------- */}
-
-            {step === 2 && (
-              <>
-                <motion.div
-                  key="step-2"
-                  initial={{ x: 80, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  exit={{ x: -80, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
-                >
-                  <Typography color="green" fontWeight={600} textAlign="center">
-                    ✅ Email Verified
-                  </Typography>
-
-                  <Box display={"flex"} flexDirection={"column"} gap={3}>
-                    {/* Shop Name */}
-                    <TextField
-                      label="Business Name"
-                      value={form.shopName}
-                      onChange={handleChange("shopName")}
-                      error={!!errors.shopName}
-                      helperText={errors.shopName}
-                    />
-
-                    <FormControl fullWidth>
-                      <InputLabel id="business-category-label">
-                        Business Type
-                      </InputLabel>
-
-                      <Select
-                        labelId="business-category-label"
-                        value={form.businessCategory}
-                        label="Business Type"
-                        onChange={(e) =>
-                          setForm({ ...form, businessCategory: e.target.value })
-                        }
-                      >
-                        {businessCategories.map((cat) => (
-                          <MenuItem key={cat.value} value={cat.value}>
-                            {cat.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    {/* GST Number */}
-                    <TextField
-                      label="GST Number"
-                      value={form.gstNumber}
-                      onChange={handleChange("gstNumber")}
-                      error={!!errors.gstNumber}
-                      helperText={errors.gstNumber}
-                    />
-
-                    {/* Address */}
-                    <TextField
-                      label="Address"
-                      value={form.address}
-                      onChange={handleChange("address")}
-                      error={!!errors.address}
-                      helperText={errors.address}
-                      multiline
-                      rows={2}
-                    />
-
-                    {/* Password */}
-                    <TextField
-                      label="Password"
-                      type="password"
-                      value={form.password}
-                      onChange={handleChange("password")}
-                      error={!!errors.password}
-                      helperText={errors.password}
-                    />
-
-                    <Box display={"flex"} flexDirection={"row"}>
-                      <Button
-                        label="← Back"
-                        onClick={() => setStep(step - 1)}
-                        variant="text"
-                        className="!text-gray-600 hover:!text-black"
-                      />
-
-                      {/* Register */}
-                      <AppButton
-                        label={
-                          !otpVerified
-                            ? "Verify Email to Continue"
-                            : loading
-                              ? "Creating Account..."
-                              : "Create Account"
-                        }
-                        onClick={handleRegister}
-                        disabled={loading || !otpVerified}
-                        className={`
-                                  ${otpVerified
-                            ? "!bg-orange-500 hover:!bg-orange-600"
-                            : "!bg-gray-300 cursor-not-allowed"
-                          }
-                               !text-white px-10
-                                  `}
-                      />
-                    </Box>
-                  </Box>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-
-          {/* OTP Buttons
-          {!otpSent ? (
-            <AppButton
-              label={otpLoading ? "Sending..." : "Send OTP"}
-              onClick={sendOtp}
-              disabled={otpLoading}
-              className="!bg-blue-500"
-            />
-          ) : !otpVerified ? (
-            <>
-
-
-              <AppButton
-                label={otpLoading ? "Verifying..." : "Verify OTP"}
-                onClick={verifyOtp}
-                className="!bg-green-500"
-              />
-
-              {resendTimer > 0 ? (
-                <Typography align="center" color="gray">
-                  Resend OTP in {resendTimer}s
-                </Typography>
-              ) : (
-                <AppButton
-                  label="Resend OTP"
-                  variant="text"
-                  onClick={sendOtp}
-                  className="!text-blue-600"
-                />
-              )}
-            </>
-          ) : (
-            <Typography color="green" fontWeight={600}>
-              Email Verified ✅
-            </Typography>
-          )} */}
+          <Typography fontSize={14} color="#64748b" mt={1}>
+            Create your account in a few simple steps
+          </Typography>
         </Box>
+
+        {/* Stepper */}
+        <Box mb={5}>
+          <RealStepper step={step} />
+        </Box>
+
+        <AnimatePresence mode="wait">
+          {/* STEP 0 */}
+          {step === 0 && (
+            <motion.div
+              key="step-0"
+              initial={{ x: 40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -40, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Box display="flex" flexDirection="column" gap={3}>
+                <TextField
+                  label="Full Name"
+                  value={form.ownerName}
+                  onChange={handleChange("ownerName")}
+                  error={!!errors.ownerName}
+                  helperText={errors.ownerName}
+                />
+
+                <TextField
+                  label="Email"
+                  value={form.email}
+                  onChange={handleChange("email")}
+                  error={!!errors.email}
+                  helperText={errors.email}
+                  disabled={otpVerified}
+                />
+
+                <TextField
+                  label="Phone Number"
+                  value={form.phone}
+                  onChange={handleChange("phone")}
+                  error={!!errors.phone}
+                  helperText={errors.phone}
+                  disabled={otpVerified}
+                />
+
+                <Box display="flex" justifyContent="space-between" gap={4}>
+                  <Button
+                    variant="outlined"
+                    fullWidth
+                    onClick={() => router.push("/")}
+                    sx={{ color: "#64748b" }}
+                  >
+                    ← Back
+                  </Button>
+
+                  <AppButton
+                    label={otpLoading ? "Sending OTP..." : "Send OTP"}
+                    onClick={sendOtp}
+                    disabled={otpLoading}
+                    className="
+                    !bg-[#4f46e5]
+                    hover:!bg-[#4338ca]
+                    !text-white
+                    px-8
+                    !rounded-md
+                  "
+                  />
+                </Box>
+              </Box>
+            </motion.div>
+          )}
+
+          {/* STEP 1 */}
+          {step === 1 && (
+            <motion.div
+              key="step-1"
+              initial={{ x: 40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -40, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Typography
+                fontSize={15}
+                textAlign="center"
+                color="#0f172a"
+                mb={3}
+              >
+                Enter the 6-digit OTP sent to your email
+              </Typography>
+
+              <Box display="flex" flexDirection="column" gap={3}>
+                <OtpBoxes
+                  otp={otp}
+                  setOtp={setOtp}
+                  onComplete={() => verifyOtp()}
+                />
+
+                <Box display="flex" justifyContent="space-between" gap={4}>
+                  <Button
+                  variant="outlined"
+                  fullWidth
+                    onClick={() => setStep(0)}
+                    sx={{ color: "#64748b" }}
+                  >
+                    Back
+                  </Button>
+
+                  <AppButton
+                    label={otpLoading ? "Verifying..." : "Verify OTP"}
+                    onClick={verifyOtp}
+                    className="
+                    !bg-[#4f46e5]
+                    hover:!bg-[#4338ca]
+                    !text-white
+                    px-8
+                    !rounded-md
+                  "
+                  />
+                </Box>
+
+                {resendTimer > 0 ? (
+                  <Typography align="center" color="#64748b">
+                    Resend OTP in {resendTimer}s
+                  </Typography>
+                ) : (
+                  <Button onClick={sendOtp} sx={{ color: "#4f46e5" }}>
+                    Resend OTP
+                  </Button>
+                )}
+              </Box>
+            </motion.div>
+          )}
+
+          {/* STEP 2 */}
+          {step === 2 && (
+            <motion.div
+              key="step-2"
+              initial={{ x: 40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -40, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Typography
+                color="green"
+                fontWeight={600}
+                textAlign="center"
+                mb={3}
+              >
+                ✅ Email Verified
+              </Typography>
+
+              <Box display="flex" flexDirection="column" gap={3}>
+                <TextField
+                  label="Business Name"
+                  value={form.shopName}
+                  onChange={handleChange("shopName")}
+                  error={!!errors.shopName}
+                  helperText={errors.shopName}
+                />
+
+                <FormControl fullWidth>
+                  <InputLabel>Business Type</InputLabel>
+                  <Select
+                    value={form.businessCategory}
+                    label="Business Type"
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        businessCategory: e.target.value,
+                      })
+                    }
+                  >
+                    {businessCategories.map((cat) => (
+                      <MenuItem key={cat.value} value={cat.value}>
+                        {cat.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  label="GST Number"
+                  value={form.gstNumber}
+                  onChange={handleChange("gstNumber")}
+                  error={!!errors.gstNumber}
+                  helperText={errors.gstNumber}
+                />
+
+                <TextField
+                  label="Address"
+                  multiline
+                  rows={2}
+                  value={form.address}
+                  onChange={handleChange("address")}
+                  error={!!errors.address}
+                  helperText={errors.address}
+                />
+
+                <TextField
+                  label="Password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange("password")}
+                  error={!!errors.password}
+                  helperText={errors.password}
+                />
+
+                <Box display="flex" justifyContent="space-between" mt={3}>
+                  <Button
+                    onClick={() => setStep(1)}
+                    sx={{ color: "#64748b" }}
+                  >
+                   Back
+                  </Button>
+
+                  <AppButton
+                    label={
+                      loading
+                        ? "Creating Account..."
+                        : "Create Account"
+                    }
+                    onClick={handleRegister}
+                    disabled={loading}
+                    className="
+                    !bg-[#4f46e5]
+                    hover:!bg-[#4338ca]
+                    !text-white
+                    px-8
+                    !rounded-md
+                  "
+                  />
+                </Box>
+              </Box>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </MotionDiv>
     </Box>
   );
+
 }

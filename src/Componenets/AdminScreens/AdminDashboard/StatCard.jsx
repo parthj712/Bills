@@ -6,7 +6,7 @@ export const StatCard = ({ stat, onClick }) => {
             onClick={onClick}
             sx={{
                 cursor: onClick ? "pointer" : "default",
-                borderRadius: "20px",
+                borderRadius: "10px",
                 border: "1px solid rgba(0,0,0,0.06)",
                 background:
                     "linear-gradient(180deg, #ffffff 0%, #fafafa 100%)",
@@ -54,7 +54,7 @@ export const StatCard = ({ stat, onClick }) => {
                     fontSize={28}
                     fontWeight={700}
                     letterSpacing="-0.5px"
-                    className="text-black"
+                    className="text-[#000C5A]"
                 >
                     {stat.value}
                 </Typography>
@@ -63,7 +63,7 @@ export const StatCard = ({ stat, onClick }) => {
                 <Typography
                     fontSize={18}
                     fontWeight={500}
-                    className="text-gray-500"
+                    className="text-[#000C5A]"
                 >
                     {stat.title}
                 </Typography>

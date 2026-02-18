@@ -233,12 +233,12 @@ export default function AdminDashboard() {
 
       {/* HEADER */}
 
-      <Box className="bg-[#f8fafc] p-4">
+      <Box className="bg-[#f8fafc] px-4">
         {/* HEADER */}
         <Typography
           fontSize={isMobile ? 24 : 30}
           fontWeight={700}
-          className="text-[#0b3c5d]"
+          className="text-[#000C5A]"
           mb={3}
         >
           Dashboard Overview
@@ -290,14 +290,14 @@ export default function AdminDashboard() {
               }}
             >
               {/* STATS */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                 {stats.map((stat, index) => (
                   <StatCard key={index} stat={stat} onClick={stat.onClick} />
                 ))}
               </div>
 
               {/* CONTENT */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-">
                 <TopProductsCard topProducts={topProducts} />
                 <QuickInsights />
               </div>
