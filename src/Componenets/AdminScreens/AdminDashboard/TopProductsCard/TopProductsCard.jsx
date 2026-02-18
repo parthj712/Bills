@@ -48,7 +48,7 @@ export const TopProductsCard = () => {
   return (
     <Card
       sx={{
-        borderRadius: "20px",
+        borderRadius: "10px",
         border: "1px solid rgba(0,0,0,0.06)",
         background: "linear-gradient(180deg, #ffffff 0%, #fafafa 100%)",
       }}

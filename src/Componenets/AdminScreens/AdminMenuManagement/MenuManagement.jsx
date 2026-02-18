@@ -310,8 +310,8 @@ export default function MenuManagement() {
       <Box className="flex flex-row gap-2">
         <Typography
           fontSize={isMobile ? 24 : 30}
-          fontWeight={isMobile ? 600 : 700}
-          className="text-[#0b3c5d]"
+          fontWeight={ 700}
+          className="text-[#000C5A]"
         >
           Menu Management
         </Typography>
@@ -336,8 +336,8 @@ export default function MenuManagement() {
                 px: 2,
                 minWidth: 140,
                 height: 40,
-                borderRadius: 3,
-                fontWeight: 800,
+                borderRadius: 2,
+                fontWeight: 600,
               }}
             />
           )}
@@ -372,7 +372,7 @@ export default function MenuManagement() {
           sx={{
             gridColumn: { lg: "span 3" },
             backgroundColor: "#f9fafb",
-            borderRadius: 2,
+            borderRadius: 1.5,
             height: 44,
             "& .MuiInputBase-root": {
               height: 44,
@@ -382,8 +382,8 @@ export default function MenuManagement() {
               padding: "8px 0",
             },
             "& fieldset": { border: "none" },
-            boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
-            border: "1px solid",
+            // boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
+            border: "2px solid",
             borderColor: "gray.200",
             bgcolor: "white",
           }}
@@ -403,7 +403,7 @@ export default function MenuManagement() {
               backgroundColor: "#e3f2fd",
               color: "#0b3c5d",
               "&:hover": { backgroundColor: "#bbdefb" },
-              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
             <Download />
@@ -417,7 +417,7 @@ export default function MenuManagement() {
               backgroundColor: "#e8f5e9",
               color: "#2e7d32",
               "&:hover": { backgroundColor: "#c8e6c9" },
-              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
             <UploadFile />
@@ -431,7 +431,8 @@ export default function MenuManagement() {
               backgroundColor: "#fff3e0",
               color: "#ef6c00",
               "&:hover": { backgroundColor: "#ffe0b2" },
-              boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+              
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
             <Description />
@@ -444,9 +445,9 @@ export default function MenuManagement() {
         <TableContainer
           component={Paper}
           sx={{
-            borderRadius: 4,
+            borderRadius: 2,
             overflow: "auto",
-            boxShadow: "0 10px 45px rgba(0,0,0,0.10)",
+            // boxShadow: "0 10px 45px rgba(0,0,0,0.10)",
           }}
         >
           <Table stickyHeader>

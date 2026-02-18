@@ -368,7 +368,7 @@ const EditStaff = ({ open, onClose, staff, onSuccess }) => {
               sx={{
                 backgroundColor: "#7c2d12",
                 color: "#fff",
-                borderRadius: 3,
+                borderRadius: 2,
                 textTransform: "none",
                 fontWeight: 900,
                 px: 2.5,
