@@ -35,8 +35,7 @@ import dayjs from "dayjs";
 import { saveAs } from "file-saver";
 import BillDetails from "../../AdminBillsManagment/BillDetails";
 import SalesBillCard from "./SalesBillCard";
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { getShopInfo } from "@/service/shopService";
 
 export default function SalesReport() {
   const theme = useTheme();
@@ -47,12 +46,14 @@ export default function SalesReport() {
   const [billsData, setBillsData] = useState([]);
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
+  const [shopData, setShopData] = useState([]);
 
   const [openBill, setOpenBill] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
 
   const [showReport, setShowReport] = useState(false);
   const [billType, setBilltype] = useState("ALL");
+  const isDineIn = shopData?.businessCategory === "DINE_IN";
 
   const quickRanges = [
     { label: "1 Day", days: 1 },
@@ -63,11 +64,50 @@ export default function SalesReport() {
 
   const [activeRange, setActiveRange] = useState(null);
 
+  const billTypeOptions = [
+    {
+      label: "All",
+      value: "ALL",
+      icon: <ReceiptLongIcon sx={{ fontSize: 18 }} />,
+    },
+
+    // show ONLY if shop supports tables
+    ...(isDineIn
+      ? [
+          {
+            label: "Dine-In",
+            value: "DINEIN",
+            icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
+          },
+        ]
+      : []),
+
+    {
+      label: "Takeaway",
+      value: "TAKEAWAY",
+      icon: <TakeoutDiningIcon sx={{ fontSize: 18 }} />,
+    },
+  ];
+
   useEffect(() => {
     getBills().then((res) => {
       const bills = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setBillsData(bills);
     });
+  }, []);
+
+  const fetchShopData = async () => {
+    try {
+      const res = await getShopInfo();
+
+      // IMPORTANT
+      setShopData(res.data.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  useEffect(() => {
+    fetchShopData();
   }, []);
 
   const filteredBills = useMemo(() => {
@@ -128,7 +168,10 @@ export default function SalesReport() {
     const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([buf]), "Sales_Report.xlsx");
   };
-
+  const tabCount = billTypeOptions.length;
+  const activeIndex = billTypeOptions.findIndex(
+    (item) => item.value === billType,
+  );
   return (
     <Box className="min-h-screen p-4">
       {/* Header */}
@@ -246,36 +289,15 @@ export default function SalesReport() {
                     position: "absolute",
                     top: 6,
                     bottom: 6,
-                    width: "calc(100% / 3 - 8px)",
+                    width: `calc(100% / ${tabCount} - 8px)`,
                     borderRadius: "10px",
                     background: "linear-gradient(135deg,#2563EB,#22D3EE)",
                     // boxShadow: "0 4px 12px rgba(37,99,235,0.35)",
-                    left:
-                      billType === "ALL"
-                        ? 6
-                        : billType === "DINEIN"
-                          ? "calc(33.33% + 2px)"
-                          : "calc(66.66% - 2px)",
+                    left: `calc(${activeIndex * (100 / tabCount)}% + 6px)`,
                   }}
                 />
 
-                {[
-                  {
-                    label: "All",
-                    value: "ALL",
-                    icon: <ReceiptLongIcon sx={{ fontSize: 18 }} />,
-                  },
-                  {
-                    label: "Dine-In",
-                    value: "DINEIN",
-                    icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
-                  },
-                  {
-                    label: "Takeaway",
-                    value: "TAKEAWAY",
-                    icon: <TakeoutDiningIcon sx={{ fontSize: 18 }} />,
-                  },
-                ].map((item) => {
+                {billTypeOptions.map((item) => {
                   const active = billType === item.value;
 
                   return (

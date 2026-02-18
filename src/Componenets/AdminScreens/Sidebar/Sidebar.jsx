@@ -19,49 +19,22 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 
 import { useEffect, useState } from "react";
 import { getShopName } from "@/service/shopService";
-import { Box, Dialog, DialogContent, DialogTitle, Divider, IconButton, Typography } from "@mui/material";
+import {
+  Box,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import LockIcon from "@mui/icons-material/Lock";
 import UpdateIcon from "@mui/icons-material/Update";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import CloseIcon from "@mui/icons-material/Close";
 import { Badge } from "@mui/material";
-
-
-
-const mainItems = [
-  { label: "Dashboard", href: "/admin", icon: <Dashboard fontSize="small" /> },
-  {
-    label: "Table Management",
-    href: "/admin/tables",
-    icon: <TableBar fontSize="small" />,
-  },
-  {
-    label: "Menu Management",
-    href: "/admin/menu",
-    icon: <RestaurantMenu fontSize="small" />,
-  },
-  // {
-  //   label: "Order Management",
-  //   href: "/admin/orders",
-  //   icon: <MenuBook fontSize="small" />,
-  // },
-  {
-    label: "Billing & Payments",
-    href: "/admin/bills",
-    icon: <Receipt fontSize="small" />,
-  },
-  // {
-  //   label: "Analytics & Graphs",
-  //   href: "/admin/analytics",
-  //   icon: <BarChart fontSize="small" />,
-  // },
-  {
-    label: "Staff Management",
-    href: "/admin/staff",
-    icon: <People fontSize="small" />,
-  },
-];
+import { getShopInfo } from "@/service/shopService";
 
 const reportItems = [
   {
@@ -104,13 +77,51 @@ const incomingChangesItem = {
 };
 
 export default function Sidebar() {
-
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
   const [openIncoming, setOpenIncoming] = useState(false);
-
+  const [shopData, setShopData] = useState([]);
+  const isDineIn = shopData?.businessCategory === "DINE_IN";
 
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
+
+  const mainItems = [
+    {
+      label: "Dashboard",
+      href: "/admin",
+      icon: <Dashboard fontSize="small" />,
+    },
+
+    // show only for restaurants
+    ...(isDineIn
+      ? [
+          {
+            label: "Table Management",
+            href: "/admin/tables",
+            icon: <TableBar fontSize="small" />,
+          },
+        ]
+      : []),
+
+    // change label dynamically
+    {
+      label: isDineIn ? "Menu Management" : "Item Management",
+      href: "/admin/menu",
+      icon: <RestaurantMenu fontSize="small" />,
+    },
+
+    {
+      label: "Billing & Payments",
+      href: "/admin/bills",
+      icon: <Receipt fontSize="small" />,
+    },
+
+    {
+      label: "Staff Management",
+      href: "/admin/staff",
+      icon: <People fontSize="small" />,
+    },
+  ];
 
   const hasAccess =
     subscription?.status === "ACTIVE" &&
@@ -127,26 +138,26 @@ export default function Sidebar() {
     }
   };
 
-
-  const [shopName, setShopName] = useState("");
   const pathname = usePathname();
-  const fetchShopName = async () => {
+
+  const [openReports, setOpenReports] = useState(
+    pathname.startsWith("/admin/reports"),
+  );
+
+  const fetchShopInfo = async () => {
     try {
-      const res = await getShopName();
-      console.log("shopname", res.data);
-      setShopName(res.data?.data?.shopName);
+      const res = await getShopInfo();
+      setShopData(res.data?.data);
     } catch (error) {
       console.log(error.message);
     }
   };
 
   useEffect(() => {
-    fetchShopName();
+    fetchShopInfo();
     fetchSubscriptionExpiry();
   }, []);
-  const [openReports, setOpenReports] = useState(
-    pathname.startsWith("/admin/reports"),
-  );
+  console.log("shopinfo", shopData);
 
   return (
     <motion.aside
@@ -167,9 +178,7 @@ export default function Sidebar() {
       </div>
       <div className="border-t mb-4"></div>
       <Box className="mb-4 px-2">
-        <motion.div
-          className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-2 text-center shadow-sm"
-        >
+        <motion.div className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-2 text-center shadow-sm">
           {/* ✨ SHIMMER / MIRROR REFLECTION */}
           <motion.span
             initial={{ x: "-100%" }}
@@ -200,7 +209,7 @@ export default function Sidebar() {
             fontWeight={600}
             className="text-lg font-semibold text-orange-600 mt-1 truncate"
           >
-            {shopName || "Loading..."}
+            {shopData?.shopName || "Loading..."}
           </Typography>
         </motion.div>
       </Box>
@@ -261,7 +270,6 @@ export default function Sidebar() {
               <LockIcon fontSize="small" className="text-gray-400" />
             )}
           </motion.span>
-
         </motion.div>
 
         <motion.div
@@ -283,10 +291,11 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
                             text-[15px] cursor-pointer
-                            ${isActive
-                        ? "font-semibold text-orange-600"
-                        : "text-gray-700"
-                      }`}
+                            ${
+                              isActive
+                                ? "font-semibold text-orange-600"
+                                : "text-gray-700"
+                            }`}
                   >
                     {isActive && (
                       <motion.span
@@ -310,7 +319,7 @@ export default function Sidebar() {
 
       {/* SETTINGS AT BOTTOM */}
       <div className="mt-auto flex flex-col gap-4">
-        <Box onClick={() => setOpenIncoming(true)} >
+        <Box onClick={() => setOpenIncoming(true)}>
           <motion.div
             onClick={() => setOpenIncoming(true)}
             whileHover={{ x: 4, scale: 1.01 }}
@@ -319,7 +328,6 @@ export default function Sidebar() {
   cursor-pointer transition-all duration-300 group
   bg-white hover:bg-orange-50 text-gray-700 overflow-hidden"
           >
-
             {/* ✨ MIRROR SHIMMER EFFECT */}
             <motion.span
               initial={{ x: "-120%" }}
@@ -372,19 +380,18 @@ export default function Sidebar() {
               </span>
             </Box>
           </motion.div>
-
         </Box>
-
 
         <Link href={settingsItem.href}>
           <motion.div
             whileHover={{ x: 6 }}
             className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[17px] cursor-pointer
-          ${pathname === settingsItem.href
-                ? "font-semibold text-orange-600"
-                : "text-black"
-              }
+          ${
+            pathname === settingsItem.href
+              ? "font-semibold text-orange-600"
+              : "text-black"
+          }
         `}
           >
             {settingsItem.icon}
@@ -392,7 +399,6 @@ export default function Sidebar() {
           </motion.div>
         </Link>
       </div>
-
 
       <Dialog
         open={openIncoming}
@@ -419,20 +425,17 @@ export default function Sidebar() {
           }}
         >
           <Typography fontSize={16} fontWeight={600}>
-            Exciting new features arriving soon to enhance your business operations.
+            Exciting new features arriving soon to enhance your business
+            operations.
           </Typography>
-
-
-
 
           <IconButton onClick={() => setOpenIncoming(false)}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent >
+        <DialogContent>
           <Box display="flex" flexDirection="column" gap={2} my={3}>
-
             {[
               "Swiggy/Zomato Integration",
               "Advanced Inventory Alerts",
@@ -471,16 +474,10 @@ export default function Sidebar() {
                   🚀 {feature}
                 </Typography>
               </Box>
-
             ))}
-
           </Box>
         </DialogContent>
       </Dialog>
-
-
-
-
     </motion.aside>
   );
 }
