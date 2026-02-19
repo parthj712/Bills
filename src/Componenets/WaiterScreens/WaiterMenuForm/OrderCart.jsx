@@ -578,7 +578,7 @@ export default function OrderCart() {
           p: 4,
           borderRadius: 3,
           border: "1px solid #E5E7EB",
-          boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
+          // boxShadow: "0 4px 16px rgba(0,0,0,0.04)",
         }}
       >
         {/* Items */}
@@ -615,7 +615,7 @@ export default function OrderCart() {
                     mb: 2,
                   }}
                 >
-                  New Items (Not Sent To Kitchen)
+                  New Items
                 </Typography>
               </>
             )}

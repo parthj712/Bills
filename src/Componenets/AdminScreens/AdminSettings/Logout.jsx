@@ -579,7 +579,7 @@ function SettingsCard({ title, children }) {
       sx={{
         p: 3,
         borderRadius: 3,
-        boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
+        // boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
       }}
     >
       <Typography fontSize={18} fontWeight={700} mb={2}>

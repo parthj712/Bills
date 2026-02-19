@@ -27,6 +27,29 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 
 const WaiterNavbar = () => {
 
+
+  const stringToColor = (string) => {
+    let hash = 0;
+    for (let i = 0; i < string.length; i++) {
+      hash = string.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const colors = [
+      "#2563EB", // blue
+      "#16A34A", // green
+      "#DC2626", // red
+      "#9333EA", // purple
+      "#F59E0B", // amber
+      "#0EA5E9", // sky
+      "#EC4899", // pink
+      "#14B8A6", // teal
+    ];
+
+    return colors[Math.abs(hash) % colors.length];
+  };
+
+
+
   const { showSnackbar } = useAppSnackbar();
 
   const theme = useTheme();
@@ -110,7 +133,7 @@ const WaiterNavbar = () => {
           gap={2}
           alignItems={"center"}
         >
-          <div className="relative w-8 h-10">
+          <div className="relative w-10 h-10">
             <Image
               src="/LogoIcon.png" // put logo inside /public folder
               alt="Billing Logo"
@@ -210,10 +233,11 @@ const WaiterNavbar = () => {
                 <Box position="relative">
                   <Avatar
                     sx={{
-                      bgcolor: "#2563EB",
+                      bgcolor: stringToColor(userInitial || "A"),
                       fontWeight: 600,
                     }}
                   >
+
                     {userInitial.charAt(0).toUpperCase()}
                   </Avatar>
 

@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }) {
           flex-1
           overflow-y-auto
           bg-[#f9fafb]
-          p-4
+          p-2
         "
           >
             {children}

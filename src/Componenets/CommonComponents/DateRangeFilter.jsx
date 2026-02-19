@@ -26,8 +26,7 @@ export default function DateRangeFilter({
             boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
 
             "& .MuiToggleButton-root": {
-              px: 2.5,
-              py: 0.8,
+             
               fontSize: 13,
               fontWeight: 600,
               textTransform: "none",
