@@ -51,8 +51,7 @@ import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function MenuManagement() {
-
-    const { showSnackbar } = useAppSnackbar();
+  const { showSnackbar } = useAppSnackbar();
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
@@ -74,7 +73,6 @@ export default function MenuManagement() {
     }
   };
 
-
   const theme = useTheme();
 
   // BREAKPOINTS
@@ -94,7 +92,7 @@ export default function MenuManagement() {
   const [openUpload, setOpenUpload] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(3);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleFetchMenu = async () => {
     try {
@@ -266,7 +264,7 @@ export default function MenuManagement() {
 
     const isExcel =
       file.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -310,7 +308,7 @@ export default function MenuManagement() {
       <Box className="flex flex-row gap-2">
         <Typography
           fontSize={isMobile ? 24 : 30}
-          fontWeight={ 700}
+          fontWeight={700}
           className="text-[#000C5A]"
         >
           Menu Management
@@ -323,7 +321,10 @@ export default function MenuManagement() {
               startIcon={<Add />}
               onClick={() => {
                 if (!hasAccess) {
-                   showSnackbar("Upgrade to Premium to add more tables 🚀", "warning");
+                  showSnackbar(
+                    "Upgrade to Premium to add more tables 🚀",
+                    "warning",
+                  );
                   return;
                 }
 
@@ -431,7 +432,7 @@ export default function MenuManagement() {
               backgroundColor: "#fff3e0",
               color: "#ef6c00",
               "&:hover": { backgroundColor: "#ffe0b2" },
-              
+
               // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
@@ -651,7 +652,7 @@ export default function MenuManagement() {
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => { }}
+        onSubmit={(data) => {}}
         onSuccess={handleFetchMenu}
       />
 

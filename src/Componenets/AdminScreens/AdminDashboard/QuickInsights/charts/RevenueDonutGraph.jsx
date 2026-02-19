@@ -5,7 +5,7 @@ import { PieChart } from "@mui/x-charts/PieChart";
 import { getDineInTakeAway } from "@/utils/reportHelper";
 import { useEffect, useState } from "react";
 import { useTheme, useMediaQuery } from "@mui/material";
-
+import { getShopInfo } from "@/service/shopService";
 
 export default function RevenueDonutChart({ bills }) {
   const theme = useTheme();
@@ -29,10 +29,7 @@ export default function RevenueDonutChart({ bills }) {
   const isDineIn = shopData?.businessCategory === "DINE_IN";
   if (!bills?.length) return null;
 
-  let totalRevenue = bills.reduce(
-    (sum, b) => sum + (b.grandTotal || 0),
-    0
-  );
+  let totalRevenue = bills.reduce((sum, b) => sum + (b.grandTotal || 0), 0);
 
   let data = [];
   let dineIn = 0;
@@ -43,8 +40,7 @@ export default function RevenueDonutChart({ bills }) {
     data = result.data;
 
     dineIn = data.find((d) => d.label === "Dine In")?.value || 0;
-    takeAway =
-      data.find((d) => d.label === "Take Away")?.value || 0;
+    takeAway = data.find((d) => d.label === "Take Away")?.value || 0;
   } else {
     takeAway = totalRevenue;
 
@@ -65,25 +61,16 @@ export default function RevenueDonutChart({ bills }) {
         border: "1px solid rgba(0,0,0,0.06)",
         boxShadow: "0 8px 25px rgba(0,0,0,0.06)",
         p: isMobile ? 2 : 3,
-        background:
-          "linear-gradient(180deg,#ffffff,#fafafa)",
+        background: "linear-gradient(180deg,#ffffff,#fafafa)",
       }}
     >
       {/* Header */}
       <Box mb={isMobile ? 1.5 : 2}>
-        <Typography
-          fontSize={isMobile ? 16 : 18}
-          fontWeight={700}
-        >
-          {isDineIn
-            ? "🍽 Revenue Split"
-            : "🧾 Total Sales"}
+        <Typography fontSize={isMobile ? 16 : 18} fontWeight={700}>
+          {isDineIn ? "🍽 Revenue Split" : "🧾 Total Sales"}
         </Typography>
 
-        <Typography
-          fontSize={isMobile ? 12 : 13}
-          sx={{ opacity: 0.65 }}
-        >
+        <Typography fontSize={isMobile ? 12 : 13} sx={{ opacity: 0.65 }}>
           {isDineIn
             ? "Dine-In vs TakeAway Contribution"
             : "Total billing revenue"}
@@ -131,27 +118,17 @@ export default function RevenueDonutChart({ bills }) {
             position: "absolute",
             top: "50%",
             left: "50%",
-            transform:
-              "translate(-50%, -50%)",
+            transform: "translate(-50%, -50%)",
             textAlign: "center",
             pointerEvents: "none",
           }}
         >
-          <Typography
-            fontSize={isMobile ? 11 : 13}
-            sx={{ opacity: 0.6 }}
-          >
+          <Typography fontSize={isMobile ? 11 : 13} sx={{ opacity: 0.6 }}>
             Total Revenue
           </Typography>
 
-          <Typography
-            fontSize={isMobile ? 18 : 22}
-            fontWeight={800}
-          >
-            ₹
-            {totalRevenue.toLocaleString(
-              "en-IN"
-            )}
+          <Typography fontSize={isMobile ? 18 : 22} fontWeight={800}>
+            ₹{totalRevenue.toLocaleString("en-IN")}
           </Typography>
         </Box>
       </Box>
@@ -164,9 +141,7 @@ export default function RevenueDonutChart({ bills }) {
           <Box
             sx={{
               display: "flex",
-              flexDirection: isMobile
-                ? "column"
-                : "row",
+              flexDirection: isMobile ? "column" : "row",
               gap: 2,
             }}
           >
@@ -175,26 +150,16 @@ export default function RevenueDonutChart({ bills }) {
                 flex: 1,
                 p: 2,
                 borderRadius: 3,
-                background:
-                  "rgba(34,197,94,0.08)",
+                background: "rgba(34,197,94,0.08)",
                 textAlign: "center",
               }}
             >
-              <Typography
-                fontSize={12}
-                sx={{ opacity: 0.7 }}
-              >
+              <Typography fontSize={12} sx={{ opacity: 0.7 }}>
                 Dine In
               </Typography>
 
-              <Typography
-                fontWeight={800}
-                fontSize={isMobile ? 15 : 16}
-              >
-                ₹
-                {dineIn.toLocaleString(
-                  "en-IN"
-                )}
+              <Typography fontWeight={800} fontSize={isMobile ? 15 : 16}>
+                ₹{dineIn.toLocaleString("en-IN")}
               </Typography>
             </Box>
 
@@ -203,26 +168,16 @@ export default function RevenueDonutChart({ bills }) {
                 flex: 1,
                 p: 2,
                 borderRadius: 3,
-                background:
-                  "rgba(59,130,246,0.08)",
+                background: "rgba(59,130,246,0.08)",
                 textAlign: "center",
               }}
             >
-              <Typography
-                fontSize={12}
-                sx={{ opacity: 0.7 }}
-              >
+              <Typography fontSize={12} sx={{ opacity: 0.7 }}>
                 Take Away
               </Typography>
 
-              <Typography
-                fontWeight={800}
-                fontSize={isMobile ? 15 : 16}
-              >
-                ₹
-                {takeAway.toLocaleString(
-                  "en-IN"
-                )}
+              <Typography fontWeight={800} fontSize={isMobile ? 15 : 16}>
+                ₹{takeAway.toLocaleString("en-IN")}
               </Typography>
             </Box>
           </Box>
@@ -231,4 +186,3 @@ export default function RevenueDonutChart({ bills }) {
     </Card>
   );
 }
-
