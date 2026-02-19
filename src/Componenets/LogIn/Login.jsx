@@ -82,9 +82,9 @@ export default function Login() {
       showSnackbar("Login Successful 🎉", "success");
 
       if (user.role === "ADMIN") {
-        router.push("/admin");
+        router.push("/welcome");
       } else {
-        router.push("/waiter");
+        router.push("/welcome");
       }
     } catch (err) {
       const message =
