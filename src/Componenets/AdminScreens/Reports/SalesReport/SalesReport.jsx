@@ -180,7 +180,7 @@ export default function SalesReport() {
           <Typography
             fontSize={isMobile ? 24 : 30}
             fontWeight={isMobile ? 600 : 700}
-             className="text-[#000C5A]"
+            className="text-[#000C5A]"
           >
             Sales Report
           </Typography>
@@ -256,7 +256,7 @@ export default function SalesReport() {
                     fontSize: 14,
                     px: isMobile ? 0.5 : 1.5,
                     fontWeight: activeRange === range.label ? 600 : 500,
-                    borderRadius : 2
+                    borderRadius: 2
                   }}
                 />
               ))}
@@ -267,13 +267,14 @@ export default function SalesReport() {
             <Box display="flex" gap={3} flexWrap="wrap">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
+
                   label="From Date"
                   value={fromDate}
                   onChange={(val) => {
                     setFromDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: isMobile ? "100%" : 420 }}
+                  sx={{ minWidth: isMobile || isTablet ? "100%" : 420 }}
                 />
 
                 <DatePicker
@@ -283,7 +284,7 @@ export default function SalesReport() {
                     setToDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: isMobile ? "100%" : 420 }}
+                  sx={{ minWidth: isMobile || isTablet ? "100%" : 420 }}
                 />
               </LocalizationProvider>
             </Box>
@@ -317,6 +318,7 @@ export default function SalesReport() {
         sx={{
           display: "flex",
           alignItems: "center",
+          justifyContent: "right",
           gap: 2,
           flexWrap: "wrap",
         }}
@@ -622,7 +624,7 @@ export default function SalesReport() {
         bill={selectedBill}
       />
 
-      {isMobile && (
+      {(isMobile || isTablet) && (
         <motion.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

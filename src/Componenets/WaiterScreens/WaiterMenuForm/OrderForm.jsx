@@ -24,7 +24,7 @@ import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
-export default function OrderForm() {
+export default function OrderForm({ category }) {
 
   const { showSnackbar } = useAppSnackbar();
 
@@ -38,7 +38,7 @@ export default function OrderForm() {
   const { items = [] } = useSelector((state) => state.menu);
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
+  // const [category, setCategory] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [kotMessage, setKotMessage] = useState("");
   const orderType = searchParams.get("orderType") || "DINE-IN";
@@ -63,7 +63,8 @@ export default function OrderForm() {
   const filteredItems = useMemo(() => {
     const byCategory = category
       ? items.menu?.filter((i) => i.categoryName === category)
-      : items;
+      : items.menu;
+
 
     const q = search.trim().toLowerCase();
     if (!q) return byCategory;
@@ -223,7 +224,7 @@ export default function OrderForm() {
 
   return (
     <Suspense fallback={<div>Loading order...</div>}>
-      <Card className="p-6 !rounded-2xl shadow-lg flex flex-col gap-5">
+      <Card className="p-6 !rounded-xl shadow-lg flex flex-col gap-5">
         <Typography fontSize={20} fontWeight={600}>
           Add Order
         </Typography>
@@ -267,7 +268,7 @@ export default function OrderForm() {
         />
 
         {/* Category Chips */}
-        <div className="flex gap-2 flex-wrap">
+        {/* <div className="flex gap-2 flex-wrap">
           <Chip
             sx={{ fontWeight: 600 }}
             label="All"
@@ -285,7 +286,7 @@ export default function OrderForm() {
               onClick={() => setCategory(cat)}
             />
           ))}
-        </div>
+        </div> */}
 
         <Box className="grid lg:grid-cols-1 gap-4">
           <Box>

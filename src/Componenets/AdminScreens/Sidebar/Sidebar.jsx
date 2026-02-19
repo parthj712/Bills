@@ -70,6 +70,13 @@ const settingsItem = {
   icon: <Settings fontSize="small" />,
 };
 
+const helpItem = {
+  label: "Help & Support",
+  href: "/admin/help",
+  icon: <MenuBook fontSize="small" />,
+};
+
+
 const incomingChangesItem = {
   label: "Incoming Features",
   href: "/admin/incoming-changes",
@@ -95,12 +102,12 @@ export default function Sidebar() {
     // show only for restaurants
     ...(isDineIn
       ? [
-          {
-            label: "Table Management",
-            href: "/admin/tables",
-            icon: <TableBar fontSize="small" />,
-          },
-        ]
+        {
+          label: "Table Management",
+          href: "/admin/tables",
+          icon: <TableBar fontSize="small" />,
+        },
+      ]
       : []),
 
     // change label dynamically
@@ -246,6 +253,7 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      
       <div>
         <motion.div
           onClick={() => {
@@ -291,11 +299,10 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
                             text-[15px] cursor-pointer
-                            ${
-                              isActive
-                                ? "font-semibold text-orange-600"
-                                : "text-gray-700"
-                            }`}
+                            ${isActive
+                        ? "font-semibold text-orange-600"
+                        : "text-gray-700"
+                      }`}
                   >
                     {isActive && (
                       <motion.span
@@ -379,19 +386,36 @@ export default function Sidebar() {
                 {incomingChangesItem.label}
               </span>
             </Box>
+
+
           </motion.div>
         </Box>
+
+        <Link href={helpItem.href}>
+          <motion.div
+            whileHover={{ x: 6 }}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg
+      text-[17px] cursor-pointer
+      ${pathname === helpItem.href
+                ? "font-semibold text-orange-600"
+                : "text-black"
+              }`}
+          >
+            {helpItem.icon}
+            {helpItem.label}
+          </motion.div>
+        </Link>
+
 
         <Link href={settingsItem.href}>
           <motion.div
             whileHover={{ x: 6 }}
             className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[17px] cursor-pointer
-          ${
-            pathname === settingsItem.href
-              ? "font-semibold text-orange-600"
-              : "text-black"
-          }
+          ${pathname === settingsItem.href
+                ? "font-semibold text-orange-600"
+                : "text-black"
+              }
         `}
           >
             {settingsItem.icon}

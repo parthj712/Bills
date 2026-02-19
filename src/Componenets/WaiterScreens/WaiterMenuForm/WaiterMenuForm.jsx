@@ -1,6 +1,12 @@
 "use client";
 
-import { Box, IconButton, Select, MenuItem, Typography } from "@mui/material";
+import {
+  Box, IconButton, Select, MenuItem, Typography, Fab,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Chip,
+} from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import OrderForm from "./OrderForm";
 
@@ -8,11 +14,27 @@ import OrderCart from "./OrderCart";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
+import FilterListIcon from "@mui/icons-material/FilterList";
+import { useSelector } from "react-redux";
+import { useMemo, useState } from "react";
+
 export default function WaiterMenuForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tableNo = searchParams.get("tableNo");
   const orderType = searchParams.get("orderType") || "DINE-IN";
+
+  const [category, setCategory] = useState("");
+  const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
+
+
+  const { items = [] } = useSelector((state) => state.menu);
+
+  const categories = useMemo(() => {
+    return [
+      ...new Set(items.menu?.map((i) => i.categoryName).filter(Boolean)),
+    ];
+  }, [items]);
 
   const isDineIn = orderType === "DINE-IN";
   useEffect(() => {
@@ -52,7 +74,8 @@ export default function WaiterMenuForm() {
         <div className="grid grid-cols-12 gap-6">
           {/* LEFT */}
           <div className="col-span-12 lg:col-span-7">
-            <OrderForm />
+            <OrderForm category={category} />
+
           </div>
 
           {/* RIGHT */}
@@ -60,6 +83,64 @@ export default function WaiterMenuForm() {
             <OrderCart />
           </div>
         </div>
+
+
+
+        {/* Floating Category Button */}
+        <Fab
+          color="primary"
+          onClick={() => setOpenCategoryDialog(true)}
+          sx={{
+            position: "fixed",
+            bottom: 30,
+            right: 30,
+            zIndex: 1000,
+          }}
+        >
+          <FilterListIcon />
+        </Fab>
+
+
+        <Dialog
+          open={openCategoryDialog}
+          onClose={() => setOpenCategoryDialog(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <DialogTitle>Select Category</DialogTitle>
+          <DialogContent
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1.5,
+              pb: 3,
+            }}
+          >
+            <Chip
+              label="All"
+              clickable
+              color={category === "" ? "primary" : "default"}
+              onClick={() => {
+                setCategory("");
+                setOpenCategoryDialog(false);
+              }}
+            />
+
+            {categories.map((cat) => (
+              <Chip
+                key={cat}
+                label={cat}
+                clickable
+                color={category === cat ? "primary" : "default"}
+                onClick={() => {
+                  setCategory(cat);
+                  setOpenCategoryDialog(false);
+                }}
+              />
+            ))}
+          </DialogContent>
+        </Dialog>
+
       </Box>
     </Suspense>
   );

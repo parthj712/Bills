@@ -48,7 +48,7 @@ export default function InsightDialog({ open, onClose, insight, bills }) {
       maxWidth="md"
       PaperProps={{
         sx: {
-          borderRadius: "22px",
+          borderRadius: "10px",
           overflow: "hidden",
           boxShadow: "0 18px 55px rgba(0,0,0,0.18)",
         },
@@ -68,7 +68,7 @@ export default function InsightDialog({ open, onClose, insight, bills }) {
       >
         {/* Title + Subtitle */}
         <Box>
-          <Typography fontSize={18} fontWeight={800}>
+          <Typography fontSize={18} fontWeight={600}>
             {insight.label} Report
           </Typography>
 

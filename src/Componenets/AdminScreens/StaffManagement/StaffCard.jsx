@@ -35,7 +35,7 @@ export default function StaffCard({
             <Box
                 sx={{
                     // p: 2.5,
-                    borderRadius: "18px",
+                    borderRadius: "10px",
                     backgroundColor: "#fff",
                     boxShadow: "0 12px 30px rgba(0,0,0,0.08)",
                 }}

@@ -297,7 +297,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* CONTENT */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <TopProductsCard topProducts={topProducts} />
                 <QuickInsights />
               </div>

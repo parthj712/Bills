@@ -261,14 +261,14 @@ const ItemsReport = () => {
                 variant="contained"
                 onClick={() => setShowReport(true)}
                 sx={{
-                  borderRadius: 2,
                   textTransform: "none",
                   fontWeight: 600,
+                  borderRadius: 2,
                   px: 4,
                   py: 1.2,
-                  background: "linear-gradient(135deg, #2563EB, #22D3EE)",
+                  backgroundColor: "#0f172a",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #1E40AF, #06B6D4)",
+                    backgroundColor: "#020617",
                   },
                 }}
               >
@@ -393,7 +393,7 @@ const ItemsReport = () => {
         )}
       </Box>
 
-      {isMobile && (
+      {(isMobile || isTablet) && (
         <motion.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
