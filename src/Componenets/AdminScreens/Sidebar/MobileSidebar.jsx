@@ -9,10 +9,11 @@ import {
   Settings,
   ExpandMore,
   Assessment,
-  MenuBook
+  MenuBook,
 } from "@mui/icons-material";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import CloseIcon from "@mui/icons-material/Close";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -49,12 +50,12 @@ export default function MobileSidebar({ open, onClose }) {
     // Only restaurants should see tables
     ...(isDineIn
       ? [
-        {
-          label: "Table Management",
-          href: "/admin/tables",
-          icon: <TableBar fontSize="small" />,
-        },
-      ]
+          {
+            label: "Table Management",
+            href: "/admin/tables",
+            icon: <TableBar fontSize="small" />,
+          },
+        ]
       : []),
 
     // Dynamic naming
@@ -73,6 +74,11 @@ export default function MobileSidebar({ open, onClose }) {
       label: "Staff Management",
       href: "/admin/staff",
       icon: <People fontSize="small" />,
+    },
+    {
+      label: "Expense Management",
+      href: "/admin/expense",
+      icon: <ReceiptLongIcon fontSize="small" />,
     },
   ];
 
@@ -189,10 +195,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/settings">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${pathname === "/admin/settings"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/settings"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <Settings fontSize="small" />
@@ -203,10 +210,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/help">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${pathname === "/admin/help"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/help"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <MenuBook fontSize="small" />
@@ -214,14 +222,14 @@ export default function MobileSidebar({ open, onClose }) {
                 </div>
               </Link>
 
-
               <Link href="/admin/incoming-changes">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${pathname === "/admin/help"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/help"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <MenuBook fontSize="small" />
