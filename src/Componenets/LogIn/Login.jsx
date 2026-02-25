@@ -224,16 +224,15 @@ export default function Login() {
           variant="outlined"
           onClick={() => router.push("/")}
           sx={{
-
             py: 1.5,
             textTransform: "none",
-            fontSize: 14,
-            fontWeight: 500,
+            fontSize: 16,
+            fontWeight: 600,
             color: "#64748b",
             borderRadius: 2,
             "&:hover": {
               backgroundColor: "#f1f5f9",
-              color: "#0f172a",
+              color: "#4f46e5",
             },
           }}
         >

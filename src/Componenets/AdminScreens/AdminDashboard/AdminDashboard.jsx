@@ -233,7 +233,7 @@ export default function AdminDashboard() {
 
       {/* HEADER */}
 
-      <Box className="bg-[#f8fafc] px-4">
+      <Box className="bg-[#f8fafc] px-0 lg:px-4 md:px-4">
         {/* HEADER */}
         <Typography
           fontSize={isMobile ? 24 : 30}

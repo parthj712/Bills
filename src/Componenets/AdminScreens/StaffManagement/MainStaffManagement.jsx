@@ -20,6 +20,7 @@ import {
   Skeleton,
   useTheme,
   useMediaQuery,
+  Menu, MenuItem, ListItemIcon, ListItemText
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import AddStaff from "./AddStaff";
@@ -39,6 +40,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const MainStaffManagement = () => {
 
@@ -92,6 +94,18 @@ const MainStaffManagement = () => {
 
 
   const [search, setSearch] = useState("");
+
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const openMenu = Boolean(anchorEl);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
 
   const fetchStaff = async () => {
     try {
@@ -310,7 +324,7 @@ const MainStaffManagement = () => {
 
 
   return (
-    <Box className="flex flex-col gap-6 px-4">
+    <Box className="flex flex-col gap-6 p-2 lg:p-4 md:p-4">
       {/* Premium Header */}
       <Box className="flex flex-col gap-2">
         <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
@@ -356,7 +370,7 @@ const MainStaffManagement = () => {
       </Box>
 
       {/* Search + Stats */}
-      <Box className="grid grid-cols-1 lg:grid-cols-6 gap-4">
+      <Box className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <TextField
           value={search}
           onChange={(e) => setSearch(e.target.value)}

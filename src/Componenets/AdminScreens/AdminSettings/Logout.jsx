@@ -198,13 +198,13 @@ export default function Settings() {
   };
 
   return (
-    <Box className="min-h-screen p-4 bg-[#f9fafb]">
+    <Box className="min-h-screen p-1 lg:p-4 md:p-4 bg-[#f9fafb]">
       {/* PAGE TITLE */}
       <Typography fontSize={28} fontWeight={700} mb={3} color="black">
         Settings
       </Typography>
 
-      <Box className="flex flex-col gap-6 max-w-4xl">
+      <Box className="flex flex-col gap-6 max-w-5xl">
         {/* BUSINESS SETTINGS */}
         <SettingsCard title="Business Information">
           {/* BUSINESS NAME */}
@@ -593,7 +593,7 @@ function SettingsCard({ title, children }) {
 
 function SettingsSkeleton() {
   return (
-    <Box className="min-h-screen p-4 bg-[#f9fafb]">
+    <Box className="min-h-screen bg-[#f9fafb]">
       {/* PAGE TITLE */}
       <Skeleton variant="text" width={160} height={40} sx={{ mb: 3 }} />
 
