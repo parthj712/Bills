@@ -2,6 +2,8 @@ import { Box, Typography } from "@mui/material"
 
 
 const KpiPill = ({ label, value, color }) => {
+
+    
     return (
         <div>
             <Box

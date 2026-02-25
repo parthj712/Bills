@@ -15,6 +15,8 @@ import {
   Chip,
   useTheme,
   useMediaQuery,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
@@ -173,7 +175,7 @@ export default function SalesReport() {
     (item) => item.value === billType,
   );
   return (
-    <Box className="min-h-screen p-4">
+    <Box className="min-h-screen p-2 lg:p-4 md:p-4">
       {/* Header */}
       <Box className="flex items-center justify-between mb-6">
         <Box>
@@ -210,7 +212,6 @@ export default function SalesReport() {
         elevation={0}
         sx={{
           p: 3,
-          mb: isMobile ? 8 : 4,
           borderRadius: 2,
           border: "1px solid #e5e7eb",
         }}
@@ -291,115 +292,127 @@ export default function SalesReport() {
           </Box>
 
           {/* RIGHT SIDE CTA */}
-          <Box>
-            <Button
-              variant="contained"
-              onClick={() => setShowReport(true)}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                borderRadius: 2,
-                px: 4,
-                py: 1.2,
-                backgroundColor: "#0f172a",
-                "&:hover": {
-                  backgroundColor: "#020617",
-                },
-              }}
-            >
-              Get Report
-            </Button>
-          </Box>
+
+          <Button
+            fullWidth={isMobile}
+            variant="contained"
+            onClick={() => setShowReport(true)}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              borderRadius: 2,
+              px: 4,
+              py: 1.2,
+              backgroundColor: "#0f172a",
+              "&:hover": {
+                backgroundColor: "#020617",
+              },
+            }}
+          >
+            Get Report
+          </Button>
+
         </Box>
       </Paper>
 
-      {/* bill type toggle buttons */}
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "right",
+          justifyContent: "left",
           gap: 2,
           flexWrap: "wrap",
+          width: "100%",
+          my: 3,
         }}
       >
-        {/* PREMIUM SEGMENT CONTROL */}
-        <Box
-          sx={{
-            position: "relative",
-            display: "flex",
-            background: "linear-gradient(145deg,#eef2f7,#ffffff)",
-            borderRadius: "14px",
-            padding: "6px",
-            // boxShadow:
-            //   "0 6px 18px rgba(0,0,0,0.08), inset 0 1px 2px rgba(255,255,255,0.9)",
-          }}
-        >
-          {/* Sliding Active Pill */}
-          <motion.div
-            layout
-            transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            style={{
-              position: "absolute",
-              top: 6,
-              bottom: 6,
-              width: `calc(100% / ${tabCount} - 8px)`,
-              borderRadius: "10px",
-              backgroundColor: "#0f172a",
-              // boxShadow: "0 4px 12px rgba(37,99,235,0.35)",
-              left: `calc(${activeIndex * (100 / tabCount)}% + 6px)`,
+        {isMobile ? (
+          // 🔽 MOBILE → Dropdown
+          <Select
+            value={billType}
+            onChange={(e) => {
+              setBilltype(e.target.value);
+              setShowReport(false);
             }}
-          />
+            size="small"
+            sx={{
+              width: "100%",
+              backgroundColor: "#fff",
+              borderRadius: "10px",
+            }}
+          >
+            {billTypeOptions.map((item) => (
+              <MenuItem key={item.value} value={item.value}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {item.icon}
+                  {item.label}
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
+        ) : (
+          // 🖥 DESKTOP → Your Premium Segmented Control
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              background: "linear-gradient(145deg,#eef2f7,#ffffff)",
+              borderRadius: "14px",
+              padding: "6px",
+            }}
+          >
+            <motion.div
+              layout
+              transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              style={{
+                position: "absolute",
+                top: 6,
+                bottom: 6,
+                width: `calc(100% / ${tabCount} - 8px)`,
+                borderRadius: "10px",
+                backgroundColor: "#0f172a",
+                left: `calc(${activeIndex * (100 / tabCount)}% + 6px)`,
+              }}
+            />
 
-          {billTypeOptions.map((item) => {
-            const active = billType === item.value;
+            {billTypeOptions.map((item) => {
+              const active = billType === item.value;
 
-            return (
-              <Box
-                key={item.value}
-                onClick={() => {
-                  setBilltype(item.value);
-                  setShowReport(false);
-                }}
-                component={motion.div}
-                whileTap={{ scale: 0.92 }}
-                whileHover={{ y: -1 }}
-                sx={{
-                  position: "relative",
-                  zIndex: 2,
-                  px: 2.6,
-                  py: 1.2,
-                  minWidth: 130,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                  cursor: "pointer",
-                  borderRadius: "10px",
-                  userSelect: "none",
-                  fontWeight: active ? 600 : 500,
-                  letterSpacing: "0.3px",
-                  fontSize: 14,
-                  color: active ? "#ffffff" : "#334155",
-                  transition: "all .25s ease",
-
-                  /* Active text glow (THIS fixes premium feel) */
-                  textShadow: active
-                    ? "0 1px 2px rgba(0,0,0,0.25)"
-                    : "none",
-
-                  "& svg": {
-                    color: active ? "#ffffff" : "#64748b",
+              return (
+                <Box
+                  key={item.value}
+                  onClick={() => {
+                    setBilltype(item.value);
+                    setShowReport(false);
+                  }}
+                  component={motion.div}
+                  whileTap={{ scale: 0.92 }}
+                  whileHover={{ y: -1 }}
+                  sx={{
+                    position: "relative",
+                    zIndex: 2,
+                    px: 2.6,
+                    py: 1.2,
+                    minWidth: 130,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                    cursor: "pointer",
+                    borderRadius: "10px",
+                    fontWeight: active ? 600 : 500,
+                    fontSize: 14,
+                    color: active ? "#ffffff" : "#334155",
                     transition: "all .25s ease",
-                  },
-                }}
-              >
-                {item.icon}
-                {item.label}
-              </Box>
-            );
-          })}
-        </Box>
+                  }}
+                >
+                  {item.icon}
+                  {item.label}
+                </Box>
+              );
+            })}
+          </Box>
+        )}
       </Box>
 
       {/* Sales Table */}

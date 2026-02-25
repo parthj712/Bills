@@ -10,12 +10,12 @@ export default function MobileNav() {
 
     return (
         <>
-            <div className="lg:hidden flex items-center px-4 py-6 border-b bg-white">
+            <div className="lg:hidden flex justify-between items-center px-4 py-6 border-b bg-white">
                 <MenuIcon
                     onClick={() => setOpen(true)}
                     className="cursor-pointer text-orange-500"
                 />
-                <img src="/Logo.png" className="h-6 ml-3" />
+                <img src="/LogoIcon.png" className="h-8 ml-3" />
             </div>
 
             <MobileSidebar open={open} onClose={() => setOpen(false)} />

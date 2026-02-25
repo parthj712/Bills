@@ -189,27 +189,43 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/settings">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-                  ${pathname === "/admin/settings"
+      ${pathname === "/admin/settings"
                       ? "text-orange-600 font-semibold"
                       : "text-gray-800"
                     }
-                  `}
+      `}
                 >
                   <Settings fontSize="small" />
                   Settings
                 </div>
               </Link>
+
               <Link href="/admin/help">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-                  ${pathname === "/admin/settings"
+      ${pathname === "/admin/help"
                       ? "text-orange-600 font-semibold"
                       : "text-gray-800"
                     }
-                  `}
+      `}
                 >
                   <MenuBook fontSize="small" />
                   Help & Support
+                </div>
+              </Link>
+
+
+              <Link href="/admin/incoming-changes">
+                <div
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
+      ${pathname === "/admin/help"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
+      `}
+                >
+                  <MenuBook fontSize="small" />
+                  Incoming Features
                 </div>
               </Link>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, color } from "framer-motion";
 import AppButton from "../CommonComponents/AppButton";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -79,7 +79,7 @@ export default function LandingScreen() {
 
                         <br />
                         With One Smart
-                        
+
                         POS
                     </Typography>
 
@@ -101,14 +101,35 @@ export default function LandingScreen() {
                             label="Register"
                             variant="contained"
                             onClick={() => router.push("/register")}
-                            className="!bg-[#0f172a] hover:!bg-[#122759] !text-white !px-8 !py-3 !rounded-lg"
+                            sx={{
+                                background:
+                                    "linear-gradient(135deg, #6366f1, #4f46e5)",
+                                boxShadow:
+                                    "0 8px 20px rgba(99,102,241,0.25)",
+                                "&:hover": {
+                                    background:
+                                        "linear-gradient(135deg, #4f46e5, #4338ca)",
+                                },
+                            }}
+                        // className="!bg-[#0f172a] hover:!bg-[#122759] !text-white !px-8 !py-3 !rounded-lg"
                         />
 
                         <AppButton
                             label="Login"
                             variant="outlined"
                             onClick={() => router.push("/login")}
-                            className="!border-[#0f172a] !text-[#122759] hover:!bg-[#0f172a] hover:!text-white !px-8 !py-3 !rounded-lg"
+                            sx={{
+                                color: "#4f46e5",
+                                background:"white",
+                                boxShadow:
+                                    "0 8px 20px rgba(99,102,241,0.25)",
+                                "&:hover": {
+                                    background:
+                                        "linear-gradient(135deg, #4f46e5, #4338ca)",
+                                    color: "white",
+                                },
+                            }}
+                        // className="!border-[#0f172a] !text-[#122759] hover:!bg-[#0f172a] hover:!text-white !px-8 !py-3 !rounded-lg"
                         />
                     </Box>
                 </MotionBox>

@@ -6,9 +6,15 @@ import {
     Switch,
     Divider,
     Avatar,
+    Menu,
+    MenuItem,
+    ListItemIcon,
+    ListItemText
 } from "@mui/material";
 import { Edit, Delete, Visibility } from "@mui/icons-material";
 import { motion } from "framer-motion";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useState } from "react";
 
 const getInitials = (name = "") =>
     name
@@ -25,6 +31,20 @@ export default function StaffCard({
     onToggle,
     onView,
 }) {
+
+
+
+    const [anchorEl, setAnchorEl] = useState(null);
+    const openMenu = Boolean(anchorEl);
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -67,7 +87,7 @@ export default function StaffCard({
                         </Box>
                     </Box>
 
-                    <Chip
+                    {/* <Chip
                         size="small"
                         label={staff.isActive ? "Active" : "Inactive"}
                         sx={{
@@ -80,12 +100,77 @@ export default function StaffCard({
                                 ? "#2e7d32"
                                 : "#d32f2f",
                         }}
-                    />
+                    /> */}
+
+
+                    <Box>
+                        <IconButton
+                            size="small"
+                            onClick={handleMenuOpen}
+                            sx={{
+                                backgroundColor: "#f5f5f5",
+                                "&:hover": { backgroundColor: "#e0e0e0" },
+                            }}
+                        >
+                            <MoreVertIcon fontSize="small" />
+                        </IconButton>
+
+                        <Menu
+                            anchorEl={anchorEl}
+                            open={openMenu}
+                            onClose={handleMenuClose}
+                            anchorOrigin={{
+                                vertical: "bottom",
+                                horizontal: "right",
+                            }}
+                            transformOrigin={{
+                                vertical: "top",
+                                horizontal: "right",
+                            }}
+                        >
+                            <MenuItem
+                                onClick={() => {
+                                    onView(staff);
+                                    handleMenuClose();
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <Visibility fontSize="small" />
+                                </ListItemIcon>
+                                <ListItemText>View</ListItemText>
+                            </MenuItem>
+
+                            <MenuItem
+                                onClick={() => {
+                                    onEdit(staff);
+                                    handleMenuClose();
+                                }}
+                            >
+                                <ListItemIcon>
+                                    <Edit fontSize="small" />
+                                </ListItemIcon>
+                                <ListItemText>Edit</ListItemText>
+                            </MenuItem>
+
+                            <MenuItem
+                                onClick={() => {
+                                    onDelete(staff._id);
+                                    handleMenuClose();
+                                }}
+                                sx={{ color: "#d32f2f" }}
+                            >
+                                <ListItemIcon>
+                                    <Delete fontSize="small" sx={{ color: "#d32f2f" }} />
+                                </ListItemIcon>
+                                <ListItemText>Delete</ListItemText>
+                            </MenuItem>
+                        </Menu>
+                    </Box>
                 </Box>
 
                 <Box px={3} py={1.8}>
                     {/* INFO */}
-                    <Box className="grid grid-cols-2 gap-3 mt-1">
+                    <Box className="grid grid-cols-3 gap-3 mt-1">
                         <Box>
                             <Typography fontSize={12} color="text.secondary">
                                 Phone
@@ -107,6 +192,16 @@ export default function StaffCard({
                                 })}
                             </Typography>
                         </Box>
+
+
+                        <Box>
+                            <Typography fontSize={12} color="text.secondary">
+                                Status
+                            </Typography>
+                            <Typography fontWeight={600} color="#424242">
+                                {staff.isActive ? "Active" : "Inactive"}
+                            </Typography>
+                        </Box>
                     </Box>
 
                     <Divider sx={{ my: 1 }} />
@@ -119,41 +214,7 @@ export default function StaffCard({
                             onChange={() => onToggle(staff._id)}
                         />
 
-                        <Box className="flex gap-3">
-                            <IconButton
-                                size="small"
-                                onClick={() => onView(staff)}
-                                sx={{
-                                    backgroundColor: "#e3f2fd",
-                                    "&:hover": { backgroundColor: "#bbdefb" },
-                                }}
-                            >
-                                <Visibility fontSize="small" />
-                            </IconButton>
 
-                            <IconButton
-                                size="small"
-                                onClick={() => onEdit(staff)}
-                                sx={{
-                                    backgroundColor: "#fff3e0",
-                                    "&:hover": { backgroundColor: "#ffe0b2" },
-                                }}
-                            >
-                                <Edit fontSize="small" />
-                            </IconButton>
-
-                            <IconButton
-                                size="small"
-                                onClick={() => onDelete(staff._id)}
-                                sx={{
-                                    backgroundColor: "#ffebee",
-                                    color: "#d32f2f",
-                                    "&:hover": { backgroundColor: "#ffcdd2" },
-                                }}
-                            >
-                                <Delete fontSize="small" />
-                            </IconButton>
-                        </Box>
                     </Box>
                 </Box>
             </Box>

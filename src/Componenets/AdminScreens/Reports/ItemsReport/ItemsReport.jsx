@@ -138,7 +138,7 @@ const ItemsReport = () => {
 
   return (
     <div>
-      <Box className="min-h-screen p-4">
+      <Box className="min-h-screen p-2 lg:p-4 md:p-4">
         {/* Header */}
         <Box className="flex items-center justify-between mb-6">
           <Box>
@@ -256,25 +256,26 @@ const ItemsReport = () => {
             </Box>
 
             {/* RIGHT SIDE CTA */}
-            <Box>
-              <Button
-                variant="contained"
-                onClick={() => setShowReport(true)}
-                sx={{
-                  textTransform: "none",
-                  fontWeight: 600,
-                  borderRadius: 2,
-                  px: 4,
-                  py: 1.2,
-                  backgroundColor: "#0f172a",
-                  "&:hover": {
-                    backgroundColor: "#020617",
-                  },
-                }}
-              >
-                Get Report
-              </Button>
-            </Box>
+
+            <Button
+              fullWidth={isMobile}
+              variant="contained"
+              onClick={() => setShowReport(true)}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 4,
+                py: 1.2,
+                backgroundColor: "#0f172a",
+                "&:hover": {
+                  backgroundColor: "#020617",
+                },
+              }}
+            >
+              Get Report
+            </Button>
+
           </Box>
         </Paper>
 

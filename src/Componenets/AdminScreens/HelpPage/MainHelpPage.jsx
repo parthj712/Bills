@@ -11,6 +11,8 @@ import {
     Button,
     Divider,
     Chip,
+    useTheme,
+    useMediaQuery,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
@@ -21,6 +23,12 @@ import { useEffect, useState } from "react";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 export default function MainHelpPage() {
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+    const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+    const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
     const [subscription, setSubscription] = useState("");
 
     const fetchSubscription = async () => {
@@ -91,7 +99,7 @@ export default function MainHelpPage() {
     };
 
     return (
-        <Box p={2} bgcolor="#f9fafb" minHeight="100vh">
+        <Box p={isMobile ? 1 : 4} bgcolor="#f9fafb" minHeight="100vh">
             {/* PAGE HEADER */}
             <Typography
                 fontSize={28}
@@ -231,8 +239,9 @@ export default function MainHelpPage() {
             >
                 <Box
                     display="flex"
+                    flexDirection={isMobile ? "column" : "row"}
                     justifyContent="space-between"
-                    alignItems="center"
+                    alignItems={isMobile ? "stretch" : "center"}
                     flexWrap="wrap"
                     gap={2}
                 >

@@ -1,21 +1,28 @@
 "use client";
-const { Box, Typography } = require("@mui/material");
+const { Box, Typography, useTheme, useMediaQuery } = require("@mui/material");
 
 const InfoRow = ({ label, value, multiline }) => {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
   return (
     <Box
       sx={{
         display: "flex",
+        flexDirection: isMobile ? "column" : "row",
         justifyContent: "space-between",
-        alignItems: multiline ? "flex-start" : "center",
-        gap: 3,
+        alignItems: multiline ? "flex-start" : "flex-start",
+        gap: isMobile ? 1 : 3,
         py: 1,
       }}
     >
       {/* Label */}
       <Typography
         fontSize={14}
-        fontWeight={600}
+        fontWeight={500}
         color="text.secondary"
         sx={{ minWidth: "140px" }}
       >
@@ -24,13 +31,14 @@ const InfoRow = ({ label, value, multiline }) => {
 
       {/* Value */}
       <Typography
-        fontSize={15}
-        fontWeight={500}
+        fontSize={isMobile ? 17 : 15}
+        fontWeight={600}
         sx={{
           flex: 1,
           textAlign: "right",
           whiteSpace: multiline ? "normal" : "nowrap",
           wordBreak: "break-word",
+          textTransform : "capitalize",
         }}
       >
         {value || "—"}
