@@ -123,17 +123,17 @@ export default function LandingScreen() {
                     <Box
                         className="
               rounded-2xl
-              border border-white/10
+              
               bg-white/5
               backdrop-blur-xl
-              shadow-[0_10px_60px_rgba(0,0,0,0.6)]
+           
               overflow-hidden
             "
                     >
                         <Image
-                            src="/dashboard-preview.png"
+                            src="/mockup.png"
                             alt="POS Dashboard Preview"
-                            width={600}
+                            width={800}
                             height={400}
                             className="object-cover"
                         />
