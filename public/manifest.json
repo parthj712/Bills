@@ -6,7 +6,7 @@
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#111827",
-    "orientation": "landscape",
+
     "icons": [
         {
             "src": "/PWA/Logo.png",
