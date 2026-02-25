@@ -1,0 +1,35 @@
+{
+    "name": "BillFlow POS",
+    "short_name": "BillFlow",
+    "description": "Smart Restaurant POS Billing Software",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#111827",
+    "orientation": "landscape",
+    "icons": [
+        {
+            "src": "/PWA/Logo.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/PWA/LogoIcon.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/PWA/Admin.png",
+            "sizes": "1280x720",
+            "type": "image/png",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/PWA/Mobile.png",
+            "sizes": "720x1280",
+            "type": "image/png"
+        }
+    ]
+}
