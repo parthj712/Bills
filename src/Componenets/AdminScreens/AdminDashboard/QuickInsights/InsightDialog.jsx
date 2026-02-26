@@ -15,6 +15,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import OrdersBarChart from "./charts/OrdersBarChart";
 import PeakHoursLineChart from "./charts/PeakHoursLineChart";
 import RevenueDonutChart from "./charts/RevenueDonutGraph";
+import IncomeExpenseDonutGraph from "./charts/IncomeExpenseDonutGraph";
 
 export default function InsightDialog({ open, onClose, insight, bills }) {
   if (!insight) return null;
@@ -30,6 +31,9 @@ export default function InsightDialog({ open, onClose, insight, bills }) {
 
       case "donut":
         return <RevenueDonutChart bills={bills} />;
+
+      case "incomeExpense":
+        return <IncomeExpenseDonutGraph bills={bills} />;
 
       default:
         return (
