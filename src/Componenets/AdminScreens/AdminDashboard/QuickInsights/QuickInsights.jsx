@@ -9,6 +9,8 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -28,6 +30,14 @@ import InsightDialog from "./InsightDialog";
 import { getBills } from "@/service/billsService";
 
 export const QuickInsights = () => {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
+
+
   const [open, setOpen] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [bills, setBills] = useState([]);
@@ -83,7 +93,7 @@ export const QuickInsights = () => {
     //   color: "text-red-600",
     // },
     {
-      label: "Revenue Growth",
+      label: "Revenue Trend",
       icon: TrendingUp,
       chartType: "donut",
       bg: "bg-emerald-100/70",
@@ -139,7 +149,7 @@ export const QuickInsights = () => {
                     boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
                   },
                 }}
-                className="p-5 text-center cursor-pointer"
+                className="px-3 py-3.5 text-center cursor-pointer"
               >
                 {/* Icon */}
                 <Box
@@ -149,7 +159,7 @@ export const QuickInsights = () => {
                 </Box>
 
                 {/* Label */}
-                <Typography fontSize={15} fontWeight={600}>
+                <Typography fontSize={isMobile ?14 : 15} fontWeight={600}>
                   {item.label}
                 </Typography>
               </Card>

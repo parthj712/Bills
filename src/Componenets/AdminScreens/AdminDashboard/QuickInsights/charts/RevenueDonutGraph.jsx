@@ -55,15 +55,7 @@ export default function RevenueDonutChart({ bills }) {
   }
 
   return (
-    <Card
-      sx={{
-        borderRadius: 2,
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 8px 25px rgba(0,0,0,0.06)",
-        p: isMobile ? 2 : 3,
-        background: "linear-gradient(180deg,#ffffff,#fafafa)",
-      }}
-    >
+    <Box>
       {/* Header */}
       <Box mb={isMobile ? 1.5 : 2}>
         <Typography fontSize={isMobile ? 16 : 18} fontWeight={700}>
@@ -183,6 +175,6 @@ export default function RevenueDonutChart({ bills }) {
           </Box>
         </>
       )}
-    </Card>
+    </Box>
   );
 }

@@ -32,7 +32,7 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 const AddStaff = ({ open, onClose, onSuccess }) => {
 
   const showSnackbar = useAppSnackbar();
-  
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",

@@ -1,6 +1,15 @@
 "use client";
 
-import { Box, ToggleButton, ToggleButtonGroup, TextField } from "@mui/material";
+import {
+  Box,
+  ToggleButton,
+  ToggleButtonGroup,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+} from "@mui/material";
+import { useTheme, useMediaQuery } from "@mui/material";
 
 export default function DateRangeFilter({
   range,
@@ -10,44 +19,67 @@ export default function DateRangeFilter({
   customTo,
   setCustomTo,
 }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Box sx={{ textAlign: "center", mb: 3 }}>
-      {/* ✅ Toggle Buttons */}
-      <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-        <ToggleButtonGroup
-          value={range}
-          exclusive
-          onChange={(e, value) => value && setRange(value)}
-          sx={{
-            background: "#fff",
-            borderRadius: "14px",
-            border: "1px solid rgba(0,0,0,0.08)",
-            overflow: "hidden",
-            boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
-
-            "& .MuiToggleButton-root": {
-             
-              fontSize: 13,
+    <Box sx={{ textAlign: "left", mb: 3 }}>
+      {/* ================= MOBILE DROPDOWN ================= */}
+      {isMobile ? (
+        <FormControl size="small" >
+          <Select
+            value={range}
+            onChange={(e) => setRange(e.target.value)}
+            sx={{
+              borderRadius: "12px",
+              background: "#fff",
               fontWeight: 600,
-              textTransform: "none",
-              color: "#475569",
-              transition: "0.2s",
-            },
+              boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
+            }}
+          >
+            <MenuItem value="today">Today</MenuItem>
+            <MenuItem value="week">7 Days</MenuItem>
+            <MenuItem value="month">30 Days</MenuItem>
+            <MenuItem value="custom">Custom Range</MenuItem>
+          </Select>
+        </FormControl>
+      ) : (
+        /* ================= DESKTOP TOGGLES ================= */
+        <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
+          <ToggleButtonGroup
+            value={range}
+            exclusive
+            onChange={(e, value) => value && setRange(value)}
+            sx={{
+              background: "#fff",
+              borderRadius: "14px",
+              border: "1px solid rgba(0,0,0,0.08)",
+              overflow: "hidden",
+              boxShadow: "0 4px 14px rgba(0,0,0,0.05)",
 
-            "& .Mui-selected": {
-              background: "linear-gradient(90deg,#2563eb,#3b82f6)",
-              color: "white !important",
-            },
-          }}
-        >
-          <ToggleButton value="today">Today</ToggleButton>
-          <ToggleButton value="week">7 Days</ToggleButton>
-          <ToggleButton value="month">30 Days</ToggleButton>
-          <ToggleButton value="custom">Custom</ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
+              "& .MuiToggleButton-root": {
+                fontSize: 13,
+                fontWeight: 600,
+                textTransform: "none",
+                color: "#475569",
+                transition: "0.2s",
+              },
 
-      {/* ✅ Date Picker Appears Only for Custom */}
+              "& .Mui-selected": {
+                background: "linear-gradient(90deg,#2563eb,#3b82f6)",
+                color: "white !important",
+              },
+            }}
+          >
+            <ToggleButton value="today">Today</ToggleButton>
+            <ToggleButton value="week">7 Days</ToggleButton>
+            <ToggleButton value="month">30 Days</ToggleButton>
+            <ToggleButton value="custom">Custom</ToggleButton>
+          </ToggleButtonGroup>
+        </Box>
+      )}
+
+      {/* ================= CUSTOM DATE PICKER ================= */}
       {range === "custom" && (
         <Box
           sx={{
@@ -55,9 +87,9 @@ export default function DateRangeFilter({
             justifyContent: "center",
             gap: 2,
             flexWrap: "wrap",
+            mt: 2,
           }}
         >
-          {/* From Date */}
           <TextField
             type="date"
             size="small"
@@ -66,13 +98,12 @@ export default function DateRangeFilter({
             onChange={(e) => setCustomFrom(e.target.value)}
             InputLabelProps={{ shrink: true }}
             sx={{
-              width: 170,
+              width: isMobile ? "100%" : 170,
               background: "#fff",
               borderRadius: "12px",
             }}
           />
 
-          {/* To Date */}
           <TextField
             type="date"
             size="small"
@@ -81,7 +112,7 @@ export default function DateRangeFilter({
             onChange={(e) => setCustomTo(e.target.value)}
             InputLabelProps={{ shrink: true }}
             sx={{
-              width: 170,
+              width: isMobile ? "100%" : 170,
               background: "#fff",
               borderRadius: "12px",
             }}
