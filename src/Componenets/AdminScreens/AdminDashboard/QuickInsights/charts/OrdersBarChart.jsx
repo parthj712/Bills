@@ -28,15 +28,7 @@ export default function OrdersBarChart({ bills }) {
   const totalOrders = values.reduce((a, b) => a + b, 0);
 
   return (
-    <Card
-      sx={{
-        borderRadius: 2,
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
-        p: isMobile ? 2 : 3,
-        background: "linear-gradient(180deg,#fff,#fafafa)",
-      }}
-    >
+    <Box>
       {/* Header */}
       <Box mb={isMobile ? 1.5 : 2}>
         <Typography
@@ -130,7 +122,7 @@ export default function OrdersBarChart({ bills }) {
           }}
         />
       </Box>
-    </Card>
+    </Box>
   );
 }
 

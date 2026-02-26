@@ -26,14 +26,7 @@ export default function PeakHoursLineChart({ bills }) {
   }, [filteredBills]);
 
   return (
-    <Card
-      sx={{
-        borderRadius: 2,
-        p: isMobile ? 2 : 3,
-        border: "1px solid rgba(0,0,0,0.06)",
-        boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
-      }}
-    >
+    <Box>
       {/* Header */}
       <Box mb={isMobile ? 1.5 : 2}>
         <Typography
@@ -109,7 +102,7 @@ export default function PeakHoursLineChart({ bills }) {
           </Typography>
         </Box>
       )}
-    </Card>
+    </Box>
   );
 }
 

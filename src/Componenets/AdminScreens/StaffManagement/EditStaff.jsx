@@ -30,7 +30,7 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 
 const EditStaff = ({ open, onClose, staff, onSuccess }) => {
 
- const { showSnackbar } = useAppSnackbar();
+  const { showSnackbar } = useAppSnackbar();
 
   const [formData, setFormData] = useState({
     name: "",

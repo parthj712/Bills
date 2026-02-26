@@ -57,8 +57,8 @@ export default function InsightDialog({ open, onClose, insight, bills }) {
       {/* ================= HEADER ================= */}
       <Box
         sx={{
-          px: 3,
-          py: 2.2,
+          px: 2,
+          py: 2,
           background: "linear-gradient(90deg,#0f172a,#1e293b)",
           color: "white",
           display: "flex",
@@ -97,7 +97,7 @@ export default function InsightDialog({ open, onClose, insight, bills }) {
       {/* ================= CONTENT ================= */}
       <DialogContent
         sx={{
-          p: 3,
+          p: 2,
           background: "linear-gradient(180deg,#ffffff,#f8fafc)",
         }}
       >
