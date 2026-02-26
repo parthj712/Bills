@@ -26,8 +26,12 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import React, { useEffect, useMemo, useState } from "react";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { updateStaff } from "@/service/staffService";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const EditStaff = ({ open, onClose, staff, onSuccess }) => {
+
+ const { showSnackbar } = useAppSnackbar();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -104,7 +108,7 @@ const EditStaff = ({ open, onClose, staff, onSuccess }) => {
       }, 1200);
     } catch (err) {
       triggerShake(); // ❌ API error
-      alert(err?.response?.data?.message || "Update failed");
+      showSnackbar(err?.response?.data?.message || "Update failed");
     } finally {
       setLoading(false);
     }

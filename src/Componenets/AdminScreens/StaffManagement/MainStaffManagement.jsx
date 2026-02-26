@@ -135,7 +135,7 @@ const MainStaffManagement = () => {
       await deleteStaff(id);
       fetchStaff();
     } catch (error) {
-      alert("Failed to delete staff");
+      showSnackbar("Failed to delete staff");
     }
   };
 
@@ -144,7 +144,7 @@ const MainStaffManagement = () => {
       await toggleStaffStatus(id);
       fetchStaff();
     } catch (error) {
-      alert("Failed to update status");
+      showSnackbar("Failed to update status");
     }
   };
 
@@ -268,7 +268,7 @@ const MainStaffManagement = () => {
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
-      alert("Please upload a valid Excel file (.xlsx or .xls)");
+      showSnackbar("Please upload a valid Excel file (.xlsx or .xls)");
       return;
     }
 
@@ -278,7 +278,7 @@ const MainStaffManagement = () => {
   // Read & parse Excel file
   // const handleUploadExcel = async () => {
   //   if (!excelFile) {
-  //     alert("Please select an Excel file");
+  //     showSnackbar("Please select an Excel file");
   //     return;
   //   }
 

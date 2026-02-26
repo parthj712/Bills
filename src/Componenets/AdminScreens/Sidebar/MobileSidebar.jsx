@@ -20,6 +20,8 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { getShopInfo } from "@/service/shopService";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
+import LockIcon from "@mui/icons-material/Lock";
 
 const reportItems = [
   {
@@ -40,6 +42,17 @@ export default function MobileSidebar({ open, onClose }) {
   const [shopCategory, setShopCategory] = useState(null);
   const isDineIn = shopCategory === "DINE_IN";
 
+
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(true);
+
+  const allowedPlans = ["PREMIUM", "TRIAL"];
+
+  const hasAccess =
+    subscription?.status === "ACTIVE" &&
+    allowedPlans.includes(subscription?.planType);
+
+
   const mainItems = [
     {
       label: "Dashboard",
@@ -50,12 +63,12 @@ export default function MobileSidebar({ open, onClose }) {
     // Only restaurants should see tables
     ...(isDineIn
       ? [
-          {
-            label: "Table Management",
-            href: "/admin/tables",
-            icon: <TableBar fontSize="small" />,
-          },
-        ]
+        {
+          label: "Table Management",
+          href: "/admin/tables",
+          icon: <TableBar fontSize="small" />,
+        },
+      ]
       : []),
 
     // Dynamic naming
@@ -76,7 +89,7 @@ export default function MobileSidebar({ open, onClose }) {
       icon: <People fontSize="small" />,
     },
     {
-      label: "Expense Management",
+      label: " Expense Tracker",
       href: "/admin/expense",
       icon: <ReceiptLongIcon fontSize="small" />,
     },
@@ -86,6 +99,8 @@ export default function MobileSidebar({ open, onClose }) {
   useEffect(() => {
     onClose();
   }, [pathname]);
+
+
   useEffect(() => {
     const fetchShopInfo = async () => {
       try {
@@ -98,6 +113,24 @@ export default function MobileSidebar({ open, onClose }) {
 
     fetchShopInfo();
   }, []);
+
+
+  useEffect(() => {
+    const fetchSubscriptionExpiry = async () => {
+      try {
+        const res = await getSubscriptionExpiry();
+        setSubscription(res.data);
+      } catch (error) {
+        console.log(error?.message || error);
+      } finally {
+        setLoadingSub(false);
+      }
+    };
+
+    fetchSubscriptionExpiry();
+  }, []);
+
+
   return (
     <AnimatePresence>
       {open && (
@@ -148,22 +181,32 @@ export default function MobileSidebar({ open, onClose }) {
             </nav>
 
             {/* Reports */}
-            <div className="">
+            <div>
               <div
-                onClick={() => setOpenReports(!openReports)}
+                onClick={() => {
+                  if (!hasAccess) return;
+                  setOpenReports(!openReports);
+                }}
                 className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-black"
               >
-                <div className="flex items-center gap-3 text-black">
+                <div className="flex items-center gap-3">
                   <Assessment fontSize="small" />
                   <span className="text-[16px]">Reports</span>
                 </div>
-                <motion.span animate={{ rotate: openReports ? 180 : 0 }}>
-                  <ExpandMore fontSize="small" />
+
+                <motion.span
+                  animate={hasAccess ? { rotate: openReports ? 180 : 0 } : {}}
+                >
+                  {hasAccess ? (
+                    <ExpandMore fontSize="small" />
+                  ) : (
+                    <LockIcon fontSize="small" className="text-gray-400" />
+                  )}
                 </motion.span>
               </div>
 
               <AnimatePresence>
-                {openReports && (
+                {openReports && hasAccess && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -176,8 +219,10 @@ export default function MobileSidebar({ open, onClose }) {
                         <Link key={item.label} href={item.href}>
                           <div
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[14px]
-                            ${isActive ? "text-orange-600 font-semibold" : "text-black"}
-                            `}
+                ${isActive
+                                ? "text-orange-600 font-semibold"
+                                : "text-black"
+                              }`}
                           >
                             {item.icon}
                             {item.label}
@@ -195,11 +240,10 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/settings">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${
-        pathname === "/admin/settings"
-          ? "text-orange-600 font-semibold"
-          : "text-gray-800"
-      }
+      ${pathname === "/admin/settings"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
       `}
                 >
                   <Settings fontSize="small" />
@@ -210,11 +254,10 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/help">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${
-        pathname === "/admin/help"
-          ? "text-orange-600 font-semibold"
-          : "text-gray-800"
-      }
+      ${pathname === "/admin/help"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
       `}
                 >
                   <MenuBook fontSize="small" />
@@ -225,11 +268,10 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/incoming-changes">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${
-        pathname === "/admin/help"
-          ? "text-orange-600 font-semibold"
-          : "text-gray-800"
-      }
+      ${pathname === "/admin/help"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
       `}
                 >
                   <MenuBook fontSize="small" />
