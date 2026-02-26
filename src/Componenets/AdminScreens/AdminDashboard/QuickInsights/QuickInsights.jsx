@@ -17,6 +17,7 @@ import TrendingUp from "@mui/icons-material/TrendingUp";
 import ShoppingCart from "@mui/icons-material/ShoppingCart";
 import TableBar from "@mui/icons-material/TableBar";
 import AccessTime from "@mui/icons-material/AccessTime";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import Cancel from "@mui/icons-material/Cancel";
 import RestaurantMenu from "@mui/icons-material/RestaurantMenu";
 
@@ -88,6 +89,13 @@ export const QuickInsights = () => {
       chartType: "donut",
       bg: "bg-emerald-100/70",
       color: "text-emerald-600",
+    },
+    {
+      label: "Income vs Expense",
+      icon: AccountBalanceWalletIcon,
+      chartType: "incomeExpense",
+      bg: "bg-rose-100/70",
+      color: "text-rose-600",
     },
   ];
 
