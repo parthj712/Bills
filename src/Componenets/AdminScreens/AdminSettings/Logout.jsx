@@ -27,8 +27,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import InfoRow from "./InfoCard";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function Settings() {
+
+  const { showSnackbar } = useAppSnackbar();
   const router = useRouter();
 
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
@@ -91,7 +94,7 @@ export default function Settings() {
       await addTagline({
         tagline: shopData.tagline,
       });
-      alert("Tagline Updated Successfully ✅");
+      showSnackbar("Tagline Updated Successfully ✅");
     } catch (error) {
       console.log(error.message);
     }
@@ -104,10 +107,10 @@ export default function Settings() {
         website: shopData.website,
       });
 
-      alert("Website Updated Successfully ✅");
+      showSnackbar("Website Updated Successfully ✅");
     } catch (err) {
       console.log(err);
-      alert("Failed to update website ❌");
+      showSnackbar("Failed to update website ❌");
     }
   };
   console.log("shopdata", shopData);
@@ -139,7 +142,7 @@ export default function Settings() {
       // save real cloudinary url
       setLogoPreview(res.data.logo);
     } catch (err) {
-      alert("Logo upload failed");
+      showSnackbar("Logo upload failed");
       console.log(err);
     } finally {
       setLogoLoading(false);
@@ -160,7 +163,7 @@ export default function Settings() {
 
       setQrPreview(res.data.qr);
     } catch (err) {
-      alert("QR upload failed");
+      showSnackbar("QR upload failed");
       console.log(err);
     } finally {
       setQrLoading(false);
@@ -178,7 +181,7 @@ export default function Settings() {
         logo: { url: "", public_id: "" },
       }));
     } catch (err) {
-      alert("Failed to remove logo");
+      showSnackbar("Failed to remove logo");
     }
   };
 
@@ -193,7 +196,7 @@ export default function Settings() {
         upiQr: { url: "", public_id: "" },
       }));
     } catch (err) {
-      alert("Failed to remove QR");
+      showSnackbar("Failed to remove QR");
     }
   };
 

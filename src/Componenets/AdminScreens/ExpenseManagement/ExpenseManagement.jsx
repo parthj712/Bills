@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
-import { Add, Delete, Search, Download } from "@mui/icons-material";
+import { Add, Delete, Search } from "@mui/icons-material";
 import {
   Box,
   IconButton,
@@ -23,8 +23,7 @@ import {
 import { motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import DescriptionIcon from "@mui/icons-material/Description";
+import { Download, UploadFile, Description } from "@mui/icons-material";
 
 import AddExpense from "./AddExpense";
 
@@ -33,8 +32,13 @@ import {
   getExpense,
   uploadExcelFile,
 } from "@/service/expenseService";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const ExpenseManagement = () => {
+
+    const { showSnackbar } = useAppSnackbar();
+
+
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -91,37 +95,39 @@ const ExpenseManagement = () => {
       await deleteExpense(id);
       fetchExpenses();
     } catch (error) {
-      alert("Failed to delete expense");
+      showSnackbar("Failed to delete expense");
     }
   };
 
   // Excel Export
-  const handleDownloadExcel = () => {
-    if (!filteredExpenses.length) return;
+  // const handleDownloadExcel = () => {
+  //   if (!filteredExpenses.length) return;
 
-    const data = filteredExpenses.map((e) => ({
-      Note: e.note,
-      Category: e.categoryId?.name || "No Category",
-      Amount: e.amount,
-      Payment: e.paymentMode,
-      Date: new Date(e.date).toLocaleDateString("en-IN"),
-    }));
+  //   const data = filteredExpenses.map((e) => ({
+  //     Note: e.note,
+  //     Category: e.categoryId?.name || "No Category",
+  //     Amount: e.amount,
+  //     Payment: e.paymentMode,
+  //     Date: new Date(e.date).toLocaleDateString("en-IN"),
+  //   }));
 
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
+  //   const worksheet = XLSX.utils.json_to_sheet(data);
+  //   const workbook = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses");
 
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
+  //   const excelBuffer = XLSX.write(workbook, {
+  //     bookType: "xlsx",
+  //     type: "array",
+  //   });
 
-    const file = new Blob([excelBuffer], {
-      type: "application/octet-stream",
-    });
+  //   const file = new Blob([excelBuffer], {
+  //     type: "application/octet-stream",
+  //   });
 
-    saveAs(file, `Expenses-${Date.now()}.xlsx`);
-  };
+  //   saveAs(file, `Expenses-${Date.now()}.xlsx`);
+  // };
+
+
   const handleDownloadEmptyTemplate = () => {
     const headers = ["note", "categoryName", "amount", "paymentMode", "date"];
 
@@ -158,11 +164,11 @@ const ExpenseManagement = () => {
 
     const isExcel =
       file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
-      alert("Please upload a valid Excel file (.xlsx or .xls)");
+      showSnackbar("Please upload a valid Excel file (.xlsx or .xls)");
       return;
     }
 
@@ -175,7 +181,7 @@ const ExpenseManagement = () => {
     try {
       const res = await uploadExcelFile(excelFile);
 
-      alert(`Uploaded Successfully: ${res.data.inserted} expenses added`);
+      showSnackbar(`Uploaded Successfully: ${res.data.inserted} expenses added`);
 
       setExcelFile(null);
       fetchExpenses();
@@ -194,7 +200,7 @@ const ExpenseManagement = () => {
             fontWeight={700}
             className="text-[#000C5A]"
           >
-            Expense Management
+            Expense Tracker
           </Typography>
 
           {!isMobile && (
@@ -257,16 +263,19 @@ const ExpenseManagement = () => {
       {/* Excel Download */}
       <Box className="flex justify-end gap-2 flex-wrap">
         {/* Download Template */}
-        <Tooltip title="Download Template">
+
+        <Tooltip title="View File Template">
           <IconButton
             onClick={handleDownloadEmptyTemplate}
             sx={{
-              backgroundColor: "#fff3cd",
-              color: "#856404",
-              "&:hover": { backgroundColor: "#ffe8a1" },
+              backgroundColor: "#fff3e0",
+              color: "#ef6c00",
+              "&:hover": { backgroundColor: "#ffe0b2" },
+
+              // boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
             }}
           >
-            <DescriptionIcon />
+            <Description />
           </IconButton>
         </Tooltip>
 
@@ -280,7 +289,7 @@ const ExpenseManagement = () => {
               "&:hover": { backgroundColor: "#c8e6c9" },
             }}
           >
-            <UploadFileIcon />
+            <UploadFile />
             <input
               hidden
               type="file"
@@ -308,7 +317,7 @@ const ExpenseManagement = () => {
         )}
 
         {/* Download Existing Expenses */}
-        <Tooltip title="Download Excel">
+        {/* <Tooltip title="Download Excel">
           <IconButton
             onClick={handleDownloadExcel}
             sx={{
@@ -319,7 +328,7 @@ const ExpenseManagement = () => {
           >
             <Download />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
       </Box>
 
       {/* Desktop Table */}

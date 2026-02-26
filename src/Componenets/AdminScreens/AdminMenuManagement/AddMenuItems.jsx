@@ -25,10 +25,14 @@ import { addMenuItem, getCatgories } from "@/service/menuService";
 
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
 export default function AddMenuItems({ open, onClose, onSuccess }) {
+
+  const { showSnackbar } = useAppSnackbar();
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -182,14 +186,13 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       triggerShake();
 
       if (error?.response?.status === 403) {
-        alert(
-          error.response.data?.message ||
-            "Your subscription has expired. Please renew to add new menu items.",
-        );
+        
+        showSnackbar(error.response.data?.message ||
+          "Your subscription has expired. Please renew to add new menu items.");
         return;
       }
 
-      alert(error?.response?.data?.message || "Failed to add menu item");
+      showSnackbar(error.response.data?.message || "Failed to add menu item");
     } finally {
       setLoading(false);
     }
@@ -519,18 +522,18 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
                     {(form.subCategory === "Other" ||
                       form.category === "Other") && (
-                      <TextField
-                        label="New Sub Category"
-                        value={customSubCategory}
-                        onChange={(e) => setCustomSubCategory(e.target.value)}
-                        fullWidth
-                        sx={{
-                          backgroundColor: "white",
-                          borderRadius: 3,
-                          "& fieldset": { borderColor: "#e5e7eb" },
-                        }}
-                      />
-                    )}
+                        <TextField
+                          label="New Sub Category"
+                          value={customSubCategory}
+                          onChange={(e) => setCustomSubCategory(e.target.value)}
+                          fullWidth
+                          sx={{
+                            backgroundColor: "white",
+                            borderRadius: 3,
+                            "& fieldset": { borderColor: "#e5e7eb" },
+                          }}
+                        />
+                      )}
 
                     <TextField
                       label="Food Type"

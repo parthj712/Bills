@@ -22,12 +22,16 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useState } from "react";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const CATEGORIES = ["Main Course", "Chinese", "Snacks"];
 const SUB_CATEGORIES = ["Indian", "South Indian"];
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
 export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
+
+  const { showSnackbar } = useAppSnackbar();
+  
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -71,7 +75,7 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
     } catch (error) {
       // ❌ error → shake
       triggerShake();
-      alert("Failed to update menu item");
+      showSnackbar("Failed to update menu item");
     } finally {
       setLoading(false);
     }

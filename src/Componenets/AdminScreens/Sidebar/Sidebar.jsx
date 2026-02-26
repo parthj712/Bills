@@ -95,7 +95,7 @@ export default function Sidebar() {
   const [shopData, setShopData] = useState([]);
   const isDineIn = shopData?.businessCategory === "DINE_IN";
 
-  const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
+  const allowedPlans = ["PREMIUM", "TRIAL"];
 
   const mainItems = [
     {
@@ -107,12 +107,12 @@ export default function Sidebar() {
     // show only for restaurants
     ...(isDineIn
       ? [
-          {
-            label: "Table Management",
-            href: "/admin/tables",
-            icon: <TableBar fontSize="small" />,
-          },
-        ]
+        {
+          label: "Table Management",
+          href: "/admin/tables",
+          icon: <TableBar fontSize="small" />,
+        },
+      ]
       : []),
 
     // change label dynamically
@@ -134,7 +134,7 @@ export default function Sidebar() {
       icon: <People fontSize="small" />,
     },
     {
-      label: "Expense Management",
+      label: " Expense Tracker",
       href: "/admin/expense",
       icon: <ReceiptLongIcon fontSize="small" />,
     },
@@ -187,6 +187,7 @@ export default function Sidebar() {
           bg-white border-r
           px-4 py-6
           hidden lg:flex flex-col
+          overflow-hidden
         "
     >
       {/* Logo */}
@@ -242,7 +243,7 @@ export default function Sidebar() {
                 whileHover={{ x: 6 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 className={`relative flex items-center gap-3 px-3 py-2 rounded-lg
-              text-[17px] cursor-pointer
+              text-[15px] cursor-pointer
               ${isActive ? "font-semibold text-orange-600" : "text-black"}
             `}
               >
@@ -271,7 +272,7 @@ export default function Sidebar() {
             setOpenReports(!openReports);
           }}
           className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer
-                   text-[17px] font-medium text-black hover:bg-gray-50"
+                   text-[15px] font-medium text-black hover:bg-gray-50"
         >
           <div className="flex items-center gap-3">
             <Assessment fontSize="small" />
@@ -309,11 +310,10 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
                             text-[15px] cursor-pointer
-                            ${
-                              isActive
-                                ? "font-semibold text-orange-600"
-                                : "text-gray-700"
-                            }`}
+                            ${isActive
+                        ? "font-semibold text-orange-600"
+                        : "text-gray-700"
+                      }`}
                   >
                     {isActive && (
                       <motion.span
@@ -393,45 +393,45 @@ export default function Sidebar() {
               justifyContent="flex-start"
               className="relative z-10"
             >
-              <span className="text-[16px] font-semibold tracking-wide">
+              <span className="text-[15px] font-semibold tracking-wide">
                 {incomingChangesItem.label}
               </span>
             </Box>
           </motion.div>
         </Box>
 
-        <Link href={helpItem.href}>
-          <motion.div
-            whileHover={{ x: 6 }}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg
-      text-[17px] cursor-pointer
-      ${
-        pathname === helpItem.href
-          ? "font-semibold text-orange-600"
-          : "text-black"
-      }`}
-          >
-            {helpItem.icon}
-            {helpItem.label}
-          </motion.div>
-        </Link>
+        <Box display={"flex"} flexDirection={"row-reverse"} gap={2}>
+          <Link href={helpItem.href}>
+            <motion.div
+              whileHover={{ y: 4 }}
+              className={`bg-gray-100 flex items-center gap-3 px-3 py-2 rounded-lg
+      text-[14px] cursor-pointer
+      ${pathname === helpItem.href
+                  ? "font-semibold text-orange-600"
+                  : "text-black"
+                }`}
+            >
+              {helpItem.icon}
+              {helpItem.label}
+            </motion.div>
+          </Link>
 
-        <Link href={settingsItem.href}>
-          <motion.div
-            whileHover={{ x: 6 }}
-            className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
-          text-[17px] cursor-pointer
-          ${
-            pathname === settingsItem.href
-              ? "font-semibold text-orange-600"
-              : "text-black"
-          }
+          <Link href={settingsItem.href}>
+            <motion.div
+              whileHover={{ y: 4 }}
+              className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
+          text-[15px] cursor-pointer
+          ${pathname === settingsItem.href
+                  ? "font-semibold text-orange-600"
+                  : "text-black"
+                }
         `}
-          >
-            {settingsItem.icon}
-            {settingsItem.label}
-          </motion.div>
-        </Link>
+            >
+              {settingsItem.icon}
+              {/* {settingsItem.label} */}
+            </motion.div>
+          </Link>
+        </Box>
       </div>
 
       <Dialog

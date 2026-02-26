@@ -27,14 +27,19 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { addExpense, getExpenseCategories } from "@/service/expenseService";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const AddExpense = ({ open, onClose, onSuccess }) => {
+
+  
   const [formData, setFormData] = useState({
     categoryId: "",
     amount: "",
     paymentMode: "cash",
     note: "",
   });
+
+  const { showSnackbar } = useAppSnackbar();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -101,7 +106,7 @@ const AddExpense = ({ open, onClose, onSuccess }) => {
       }, 1000);
     } catch (error) {
       triggerShake();
-      alert(error?.response?.data?.message || "Failed to add expense");
+      showSnackbar(error?.response?.data?.message || "Failed to add expense");
     } finally {
       setLoading(false);
     }

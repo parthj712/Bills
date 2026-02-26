@@ -268,7 +268,7 @@ export default function MenuManagement() {
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
-      alert("Please upload a valid Excel file (.xlsx or .xls)");
+      showSnackbar("Please upload a valid Excel file (.xlsx or .xls)");
       return;
     }
 
@@ -281,14 +281,14 @@ export default function MenuManagement() {
     try {
       const res = await uploadExcelFile(excelFile);
 
-      alert(`Uploaded Successfully: ${res.data.inserted} items added`);
+      showSnackbar(`Uploaded Successfully: ${res.data.inserted} items added`);
 
       setOpenUpload(false);
       setExcelFile(null);
       handleFetchMenu();
     } catch (error) {
       console.error(error);
-      alert("Upload Failed");
+      showSnackbar("Upload Failed");
     }
   };
 

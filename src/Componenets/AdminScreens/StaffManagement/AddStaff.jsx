@@ -26,9 +26,12 @@ import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 
 const AddStaff = ({ open, onClose, onSuccess }) => {
+
+  showSnackbar = useAppSnackbar();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -116,7 +119,7 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
       }, 1200);
     } catch (error) {
       triggerShake(); // ❌ API error
-      alert(error?.response?.data?.message || "Failed to register staff");
+      showSnackbar(error?.response?.data?.message || "Failed to register staff");
     } finally {
       setLoading(false);
     }
