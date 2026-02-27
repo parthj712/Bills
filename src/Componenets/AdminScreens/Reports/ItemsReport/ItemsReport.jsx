@@ -195,7 +195,7 @@ const ItemsReport = () => {
               gap={4}
             >
               {/* Quick Date Shortcuts */}
-              <Box display="flex" gap={1} flexWrap="wrap">
+              <Box display="flex" justifyContent={isMobile || isTablet ? "space-between" : null} gap={2} flexWrap="wrap">
                 {quickRanges.map((range) => (
                   <Chip
                     key={range.label}
@@ -219,12 +219,7 @@ const ItemsReport = () => {
                       setActiveRange(range.label);
                       setShowReport(false);
                     }}
-                    sx={{
-                      fontSize: 14,
-                      px: 1.5,
-                      fontWeight: activeRange === range.label ? 600 : 500,
-                      borderRadius: 2
-                    }}
+                    sx={{ fontSize: 14, px: isMobile ? 0 : 0.5, py: isMobile ? 0 : 1.5, borderRadius: 2 }}
                   />
                 ))}
               </Box>
@@ -239,7 +234,7 @@ const ItemsReport = () => {
                       setFromDate(val);
                       setShowReport(false);
                     }}
-                    sx={{ minWidth: isMobile ? "100%" : 420 }}
+                     sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}
                   />
 
                   <DatePicker
@@ -249,7 +244,7 @@ const ItemsReport = () => {
                       setToDate(val);
                       setShowReport(false);
                     }}
-                    sx={{ minWidth: isMobile ? "100%" : 420 }}
+                     sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}
                   />
                 </LocalizationProvider>
               </Box>

@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { Assessment, ExpandMore } from "@mui/icons-material";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 
 import { useEffect, useState } from "react";
 import { getShopName } from "@/service/shopService";
@@ -51,7 +52,7 @@ const reportItems = [
   {
     label: "Expense Report",
     href: "/admin/reports/expensereport",
-    icon: <Inventory2Icon fontSize="small" />,
+    icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
   // {
   //   label: "GST Report",
@@ -136,7 +137,7 @@ export default function Sidebar() {
     {
       label: " Expense Tracker",
       href: "/admin/expense",
-      icon: <ReceiptLongIcon fontSize="small" />,
+      icon: <AccountBalanceWalletIcon fontSize="small" />,
     },
   ];
 
@@ -308,8 +309,8 @@ export default function Sidebar() {
                 <Link key={item.label} href={item.href}>
                   <motion.div
                     whileHover={{ x: 6 }}
-                    className={`relative flex items-center gap-3 px-3 py-2 ml-4 rounded-lg
-                            text-[15px] cursor-pointer
+                    className={`relative flex items-center gap-3 px-3 py-1.5 ml-4 rounded-lg
+                            text-[14px] cursor-pointer
                             ${isActive
                         ? "font-semibold text-orange-600"
                         : "text-gray-700"

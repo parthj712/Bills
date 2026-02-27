@@ -63,8 +63,8 @@ const ExpenseReport = () => {
         (!toDate || dayjs(exp.date).isBefore(toDate.endOf("day")));
       const categoryMatch = searchCategory
         ? exp.categoryId?.name
-            ?.toLowerCase()
-            .includes(searchCategory.toLowerCase())
+          ?.toLowerCase()
+          .includes(searchCategory.toLowerCase())
         : true;
       const paymentMatch = paymentMode
         ? exp.paymentMode?.toLowerCase() === paymentMode.toLowerCase()
@@ -146,7 +146,7 @@ const ExpenseReport = () => {
       >
         <Box
           display="flex"
-          flexDirection={isMobile ? "column" : "row"}
+          flexDirection={isMobile || isTablet ? "column" : "row"}
           gap={3}
           flexWrap="wrap"
           justifyContent="space-between"
@@ -155,7 +155,7 @@ const ExpenseReport = () => {
           {/* LEFT SIDE: Quick ranges + date pickers + Payment Mode */}
           <Box display="flex" flexDirection="column" gap={3} flex={1}>
             {/* Quick Ranges */}
-            <Box display="flex" gap={1} flexWrap="wrap">
+            <Box display="flex" justifyContent={isMobile || isTablet ? "space-between" : null} gap={2} flexWrap="wrap">
               {quickRanges.map((range) => (
                 <Chip
                   key={range.label}
@@ -173,7 +173,7 @@ const ExpenseReport = () => {
                     setActiveRange(range.label);
                     setShowReport(false);
                   }}
-                  sx={{ fontSize: 14, px: 1.5, borderRadius: 2 }}
+                  sx={{ fontSize: 14, px: isMobile ? 0 : 0.5, py: isMobile ? 0 : 1.5, borderRadius: 2 }}
                 />
               ))}
             </Box>
@@ -181,6 +181,22 @@ const ExpenseReport = () => {
             {/* Date Pickers */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <Box display="flex" gap={3} flexWrap="wrap">
+                {/* Payment Mode Filter */}
+                <FormControl sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}>
+                  <InputLabel id="payment-mode-label">Payment Mode</InputLabel>
+                  <Select
+                    labelId="payment-mode-label"
+                    value={paymentMode}
+                    label="Payment Mode"
+                    onChange={(e) => setPaymentMode(e.target.value)}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    <MenuItem value="Cash">Cash</MenuItem>
+                    <MenuItem value="Card">Card</MenuItem>
+                    <MenuItem value="UPI">UPI</MenuItem>
+                    <MenuItem value="Wallet">Wallet</MenuItem>
+                  </Select>
+                </FormControl>
                 <DatePicker
                   label="From Date"
                   value={fromDate}
@@ -188,7 +204,7 @@ const ExpenseReport = () => {
                     setFromDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: isMobile ? "100%" : 240 }}
+                  sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}
                 />
                 <DatePicker
                   label="To Date"
@@ -197,27 +213,12 @@ const ExpenseReport = () => {
                     setToDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: isMobile ? "100%" : 240 }}
+                  sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}
                 />
               </Box>
             </LocalizationProvider>
 
-            {/* Payment Mode Filter */}
-            <FormControl sx={{ minWidth: isMobile ? "100%" : 240 }}>
-              <InputLabel id="payment-mode-label">Payment Mode</InputLabel>
-              <Select
-                labelId="payment-mode-label"
-                value={paymentMode}
-                label="Payment Mode"
-                onChange={(e) => setPaymentMode(e.target.value)}
-              >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="Cash">Cash</MenuItem>
-                <MenuItem value="Card">Card</MenuItem>
-                <MenuItem value="UPI">UPI</MenuItem>
-                <MenuItem value="Wallet">Wallet</MenuItem>
-              </Select>
-            </FormControl>
+
           </Box>
 
           {/* RIGHT SIDE: Get Report Button */}
@@ -228,6 +229,7 @@ const ExpenseReport = () => {
             alignItems="center"
           >
             <Button
+              
               variant="contained"
               onClick={() => setShowReport(true)}
               sx={{
@@ -237,7 +239,7 @@ const ExpenseReport = () => {
                 px: 4,
                 py: 1.2,
                 minHeight: 40,
-                width: isMobile ? "100%" : "auto",
+                width: isMobile || isTablet ? "100%" :  "auto",
                 backgroundColor: "#0f172a",
                 "&:hover": { backgroundColor: "#020617" },
               }}

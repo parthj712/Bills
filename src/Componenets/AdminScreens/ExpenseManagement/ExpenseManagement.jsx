@@ -338,10 +338,10 @@ const ExpenseManagement = () => {
             <TableHead>
               <TableRow>
                 {[
-                  "Note",
+                  "Expenses Type",
                   "Category",
                   "Amount",
-                  "Payment",
+                  "Payment Mode",
                   "Date",
                   "Actions",
                 ].map((head) => (
@@ -352,6 +352,7 @@ const ExpenseManagement = () => {
                       color: "white",
                       fontWeight: 700,
                       textAlign: "center",
+                      textTransform: "capitalize",
                     }}
                   >
                     {head}
@@ -377,6 +378,7 @@ const ExpenseManagement = () => {
                   <TableRow
                     key={expense._id}
                     sx={{
+                      textTransform: "capitalize",
                       backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
                       "&:hover": { backgroundColor: "#eef6ff" },
                       textAlign: "center",

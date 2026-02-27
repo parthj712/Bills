@@ -209,7 +209,7 @@ export default function AdminDashboard() {
 
             {/* MAIL BUTTON */}
             <a
-              href="mailto:support@yourdomain.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
+              href="mailto:billflowpos37@gmail.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
               style={{ textDecoration: "none" }}
             >
               <Card
