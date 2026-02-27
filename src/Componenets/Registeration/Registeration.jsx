@@ -34,14 +34,11 @@ const businessCategories = [
   { value: "DINE_IN", label: "Restaurant (Dine-In)" },
   { value: "QUICK_SERVICE", label: "Fast Food / Snack Center" },
   { value: "CAFE", label: "Cafe / Coffee Shop" },
-  { value: "BAKERY", label: "Bakery / Sweet Shop" },
   { value: "RETAIL", label: "Retail Store / Kirana" },
   { value: "CLOUD_KITCHEN", label: "Cloud Kitchen" },
 ];
 export default function RegisterScreen() {
-
   const { showSnackbar } = useAppSnackbar();
-
 
   const router = useRouter();
   const theme = useTheme();
@@ -97,7 +94,6 @@ export default function RegisterScreen() {
       newErrors.email = "Enter valid email";
     if (form.password.length < 6)
       newErrors.password = "Min 6 characters required";
-    if (!form.gstNumber.trim()) newErrors.gstNumber = "GST Number required";
     if (!form.address.trim()) newErrors.address = "Address required";
 
     setErrors(newErrors);
@@ -127,13 +123,15 @@ export default function RegisterScreen() {
 
       setOtpDialogOpen(true); // 👈 OPEN DIALOG
 
-      showSnackbar(resendTimer > 0
-        ? "OTP resent successfully"
-        : "OTP sent to your email", "success");
+      showSnackbar(
+        resendTimer > 0 ? "OTP resent successfully" : "OTP sent to your email",
+        "success",
+      );
     } catch (err) {
-
-      showSnackbar(err.response?.data?.message || "Failed to send OTP. Try again", "error");
-
+      showSnackbar(
+        err.response?.data?.message || "Failed to send OTP. Try again",
+        "error",
+      );
     } finally {
       setOtpLoading(false);
     }
@@ -177,7 +175,10 @@ export default function RegisterScreen() {
     }
 
     if (!otpVerified) {
-      showSnackbar("Please verify your email before creating an account", "warning");
+      showSnackbar(
+        "Please verify your email before creating an account",
+        "warning",
+      );
       return;
     }
 
@@ -192,8 +193,10 @@ export default function RegisterScreen() {
 
       router.push("/login");
     } catch (err) {
-      showSnackbar(err.response?.data?.message ||
-        "Registration failed. Please try again ", "error");
+      showSnackbar(
+        err.response?.data?.message || "Registration failed. Please try again ",
+        "error",
+      );
     } finally {
       setLoading(false);
     }
@@ -359,11 +362,7 @@ export default function RegisterScreen() {
       >
         {/* Title */}
         <Box textAlign="center" mb={4}>
-          <Typography
-            fontSize={22}
-            fontWeight={600}
-            color="#0f172a"
-          >
+          <Typography fontSize={22} fontWeight={600} color="#0f172a">
             Begin Your Smart Business Journey 🚀
           </Typography>
 
@@ -468,8 +467,8 @@ export default function RegisterScreen() {
 
                 <Box display="flex" justifyContent="space-between" gap={4}>
                   <Button
-                  variant="outlined"
-                  fullWidth
+                    variant="outlined"
+                    fullWidth
                     onClick={() => setStep(0)}
                     sx={{ color: "#64748b" }}
                   >
@@ -553,8 +552,6 @@ export default function RegisterScreen() {
                   label="GST Number"
                   value={form.gstNumber}
                   onChange={handleChange("gstNumber")}
-                  error={!!errors.gstNumber}
-                  helperText={errors.gstNumber}
                 />
 
                 <TextField
@@ -577,19 +574,12 @@ export default function RegisterScreen() {
                 />
 
                 <Box display="flex" justifyContent="space-between" mt={3}>
-                  <Button
-                    onClick={() => setStep(1)}
-                    sx={{ color: "#64748b" }}
-                  >
-                   Back
+                  <Button onClick={() => setStep(1)} sx={{ color: "#64748b" }}>
+                    Back
                   </Button>
 
                   <AppButton
-                    label={
-                      loading
-                        ? "Creating Account..."
-                        : "Create Account"
-                    }
+                    label={loading ? "Creating Account..." : "Create Account"}
                     onClick={handleRegister}
                     disabled={loading}
                     className="
@@ -608,5 +598,4 @@ export default function RegisterScreen() {
       </MotionDiv>
     </Box>
   );
-
 }

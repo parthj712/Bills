@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  addOrUpdateGST,
   addTagline,
   addWebsite,
   getShopInfo,
@@ -30,7 +31,6 @@ import InfoRow from "./InfoCard";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function Settings() {
-
   const { showSnackbar } = useAppSnackbar();
   const router = useRouter();
 
@@ -39,6 +39,7 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [editWebsite, setEditWebsite] = useState(false);
   const [editTagline, setEditTagline] = useState(false);
+  const [editGST, setEditGST] = useState(false);
 
   const [logoPreview, setLogoPreview] = useState("");
   const [qrPreview, setQrPreview] = useState("");
@@ -199,7 +200,18 @@ export default function Settings() {
       showSnackbar("Failed to remove QR");
     }
   };
+  const handleSaveGST = async () => {
+    try {
+      await addOrUpdateGST({
+        gstNumber: shopData.gstNumber,
+      });
 
+      showSnackbar("GST Saved Successfully ✅");
+      setEditGST(false);
+    } catch (error) {
+      showSnackbar("Failed to save GST ❌");
+    }
+  };
   return (
     <Box className="min-h-screen p-1 lg:p-4 md:p-4 bg-[#f9fafb]">
       {/* PAGE TITLE */}
@@ -223,7 +235,71 @@ export default function Settings() {
           <InfoRow label="Address" value={shopData.address} multiline />
 
           {/* GST */}
-          <InfoRow label="GST Number" value={shopData.gstNumber} />
+          <Box
+            mb={2}
+            p={3}
+            sx={{
+              borderRadius: 2,
+              boxShadow: 1,
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            <Typography fontWeight={600} fontSize={14} mb={1}>
+              GST Number
+            </Typography>
+
+            {!shopData.gstNumber || editGST ? (
+              <Box>
+                <TextField
+                  value={shopData.gstNumber || ""}
+                  onChange={(e) =>
+                    setShopData({ ...shopData, gstNumber: e.target.value })
+                  }
+                  fullWidth
+                  size="small"
+                  autoFocus={editGST}
+                  placeholder="Enter GST Number"
+                />
+
+                {editGST && (
+                  <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => setEditGST(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleSaveGST}
+                      sx={{
+                        backgroundColor: "#0b3c5d",
+                        textTransform: "none",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            ) : (
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography sx={{ fontSize: 15, fontWeight: 600 }}>
+                  {shopData.gstNumber}
+                </Typography>
+
+                <Button
+                  size="small"
+                  onClick={() => setEditGST(true)}
+                  sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
+                >
+                  ✏️
+                </Button>
+              </Box>
+            )}
+          </Box>
         </SettingsCard>
 
         {/* WEBSITE & BRANDING SECTION */}

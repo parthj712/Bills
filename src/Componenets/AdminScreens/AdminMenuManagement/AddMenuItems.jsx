@@ -30,7 +30,6 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
 export default function AddMenuItems({ open, onClose, onSuccess }) {
-
   const { showSnackbar } = useAppSnackbar();
 
   const [form, setForm] = useState({
@@ -119,9 +118,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       e.category = "Enter new category name";
     }
 
-    if (form.subCategory === "Other" && !customSubCategory.trim()) {
-      e.subCategory = "Enter new sub category name";
-    }
+    // if (form.subCategory === "Other" && !customSubCategory.trim()) {
+    //   e.subCategory = "Enter new sub category name";
+    // }
 
     const half = Number(form.priceHalf);
     const full = Number(form.priceFull);
@@ -186,9 +185,10 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       triggerShake();
 
       if (error?.response?.status === 403) {
-        
-        showSnackbar(error.response.data?.message ||
-          "Your subscription has expired. Please renew to add new menu items.");
+        showSnackbar(
+          error.response.data?.message ||
+            "Your subscription has expired. Please renew to add new menu items.",
+        );
         return;
       }
 
@@ -505,12 +505,6 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                       }
                       fullWidth
                       disabled={!form.category}
-                      error={!!(touched.subCategory && errors.subCategory)}
-                      helperText={
-                        touched.subCategory && errors.subCategory
-                          ? errors.subCategory
-                          : " "
-                      }
                     >
                       {subCategories.map((sub) => (
                         <MenuItem key={sub} value={sub}>
@@ -522,18 +516,18 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
                     {(form.subCategory === "Other" ||
                       form.category === "Other") && (
-                        <TextField
-                          label="New Sub Category"
-                          value={customSubCategory}
-                          onChange={(e) => setCustomSubCategory(e.target.value)}
-                          fullWidth
-                          sx={{
-                            backgroundColor: "white",
-                            borderRadius: 3,
-                            "& fieldset": { borderColor: "#e5e7eb" },
-                          }}
-                        />
-                      )}
+                      <TextField
+                        label="New Sub Category"
+                        value={customSubCategory}
+                        onChange={(e) => setCustomSubCategory(e.target.value)}
+                        fullWidth
+                        sx={{
+                          backgroundColor: "white",
+                          borderRadius: 3,
+                          "& fieldset": { borderColor: "#e5e7eb" },
+                        }}
+                      />
+                    )}
 
                     <TextField
                       label="Food Type"
