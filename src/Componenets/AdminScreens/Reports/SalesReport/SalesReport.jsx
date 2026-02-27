@@ -275,7 +275,7 @@ export default function SalesReport() {
                     setFromDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: isMobile || isTablet ? "100%" : 420 }}
+                  sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}
                 />
 
                 <DatePicker
@@ -285,7 +285,7 @@ export default function SalesReport() {
                     setToDate(val);
                     setShowReport(false);
                   }}
-                  sx={{ minWidth: isMobile || isTablet ? "100%" : 420 }}
+                  sx={{ minWidth: isMobile ? "100%" : isTablet ? "100%" : 240 }}
                 />
               </LocalizationProvider>
             </Box>

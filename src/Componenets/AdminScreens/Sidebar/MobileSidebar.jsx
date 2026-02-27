@@ -22,6 +22,7 @@ import { useState, useEffect } from "react";
 import { getShopInfo } from "@/service/shopService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import LockIcon from "@mui/icons-material/Lock";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 
 const reportItems = [
   {
@@ -33,6 +34,11 @@ const reportItems = [
     label: "Item Report",
     href: "/admin/reports/itemsreport",
     icon: <Inventory2Icon fontSize="small" />,
+  },
+  {
+    label: "Expense Report",
+    href: "/admin/reports/expensereport",
+    icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
 ];
 

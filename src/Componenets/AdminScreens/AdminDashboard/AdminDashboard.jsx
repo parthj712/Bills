@@ -209,7 +209,7 @@ export default function AdminDashboard() {
 
             {/* MAIL BUTTON */}
             <a
-              href="mailto:support@yourdomain.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
+              href="mailto:billflowpos37@gmail.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
               style={{ textDecoration: "none" }}
             >
               <Card
@@ -333,7 +333,7 @@ export default function AdminDashboard() {
                 </Typography>
 
                 <a
-                  href="https://docs.google.com/forms/d/e/1FAIpQLSdwDSRksKCckmgx7rBBpkOtS421kYT4otRyo59dALSDCCEfQA/viewform"
+                  href="https://forms.gle/bxESuy45yUVKp67P9"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{ textDecoration: "none" }}

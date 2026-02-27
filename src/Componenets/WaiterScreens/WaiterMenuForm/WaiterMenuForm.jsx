@@ -14,7 +14,7 @@ import OrderCart from "./OrderCart";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 
-import FilterListIcon from "@mui/icons-material/FilterList";
+import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import { useSelector } from "react-redux";
 import { useMemo, useState } from "react";
 
@@ -88,16 +88,23 @@ export default function WaiterMenuForm() {
 
         {/* Floating Category Button */}
         <Fab
-          color="primary"
           onClick={() => setOpenCategoryDialog(true)}
           sx={{
             position: "fixed",
             bottom: 30,
             right: 30,
             zIndex: 1000,
+            background: "linear-gradient(135deg, #f97316, #ea580c)",
+            color: "#fff",
+            boxShadow: "0 8px 25px rgba(249,115,22,0.4)",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              background: "linear-gradient(135deg, #fb923c, #c2410c)",
+              boxShadow: "0 10px 30px rgba(249,115,22,0.6)",
+            },
           }}
         >
-          <FilterListIcon />
+          <RestaurantMenuIcon />
         </Fab>
 
 

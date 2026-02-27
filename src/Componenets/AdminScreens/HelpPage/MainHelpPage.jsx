@@ -13,6 +13,15 @@ import {
     Chip,
     useTheme,
     useMediaQuery,
+    Dialog,
+    DialogTitle,
+    TextField,
+    DialogActions,
+    DialogContent,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
@@ -21,6 +30,7 @@ import EmailIcon from "@mui/icons-material/Email";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function MainHelpPage() {
 
@@ -29,7 +39,20 @@ export default function MainHelpPage() {
     const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
     const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
+    const { showSnackbar } = useAppSnackbar();
+
     const [subscription, setSubscription] = useState("");
+    const [open, setOpen] = useState(false);
+    const [formData, setFormData] = useState({
+        name: "",
+        phone: "",
+        email: "",
+        category: "",
+        issue: "",
+        message: "",
+    });
+
+    const [errors, setErrors] = useState({});
 
     const fetchSubscription = async () => {
         try {
@@ -98,6 +121,87 @@ export default function MainHelpPage() {
         });
     };
 
+
+    const validateForm = () => {
+        let newErrors = {};
+
+        if (!formData.name.trim()) {
+            newErrors.name = "Name is required";
+        }
+
+        if (!formData.phone.trim()) {
+            newErrors.phone = "Phone number is required";
+        } else if (!/^[0-9]{10}$/.test(formData.phone)) {
+            newErrors.phone = "Enter valid 10-digit phone number";
+        }
+
+        if (!formData.email.trim()) {
+            newErrors.email = "Email is required";
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+            newErrors.email = "Enter valid email address";
+        }
+
+        if (!formData.issue.trim()) {
+            newErrors.issue = "Issue title is required";
+        }
+
+        if (!formData.message.trim()) {
+            newErrors.message = "Message cannot be empty";
+        }
+        if (!formData.category) {
+            newErrors.category = "Please select issue category";
+        }
+
+        if (!formData.issue) {
+            newErrors.issue = "Please select issue type";
+        }
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
+
+    const handleSubmit = () => {
+
+
+
+        if (!validateForm()) {
+            showSnackbar("Please fix the highlighted errors", "warning");
+            return;
+        }
+
+        const whatsappMessage = `
+            📩 *New Support Ticket - BillFlow POS*
+
+            👤 Name: ${formData.name}
+            📞 Phone: ${formData.phone}
+            📧 Email: ${formData.email}
+            🛠 Issue: ${formData.issue}
+            📝 Message: ${formData.message}
+            🗂 Category: ${formData.category}
+                    🛠 Issue: ${formData.issue}
+            `;
+
+        const encodedMessage = encodeURIComponent(whatsappMessage);
+
+        window.open(
+            `https://wa.me/919545934174?text=${encodedMessage}`,
+            "_blank"
+        );
+
+        setOpen(false);
+
+        setFormData({
+            name: "",
+            phone: "",
+            email: "",
+            issue: "",
+            message: "",
+        });
+    };
+
+
     return (
         <Box p={isMobile ? 1 : 4} bgcolor="#f9fafb" minHeight="100vh">
             {/* PAGE HEADER */}
@@ -131,14 +235,20 @@ export default function MainHelpPage() {
                         action: () =>
                             window.open("https://wa.me/919545934174", "_blank"),
                     },
+                    // {
+                    //     title: "Email Support",
+                    //     icon: <EmailIcon />,
+                    //     desc: "Send us your query anytime.",
+                    //     action: () =>
+                    //         window.open(
+                    //             "mailto:billflowpos37@gmail.com?subject=BillFlow POS Support Request"
+                    //         ),
+                    // },
                     {
-                        title: "Email Support",
-                        icon: <EmailIcon />,
-                        desc: "Send us your query anytime.",
-                        action: () =>
-                            window.open(
-                                "mailto:billflowpos37@gmail.com?subject=BillFlow POS Support Request"
-                            ),
+                        title: "Raise Ticket",
+                        icon: <SupportAgentIcon />,
+                        desc: "Create a support request via WhatsApp",
+                        action: () => setOpen(true),
                     },
                 ].map((item) => (
                     <motion.div key={item.title} whileHover={{ y: -5 }}>
@@ -226,7 +336,7 @@ export default function MainHelpPage() {
             {/* SUBSCRIPTION INFO */}
             <Typography fontSize={22} fontWeight={600} mb={2} color="black">
                 Subscription Status
-            </Typography>
+            </Typography>x
 
             <Paper
                 elevation={0}
@@ -282,6 +392,174 @@ export default function MainHelpPage() {
                     System Status: <b>Operational</b> | Version: v1.2.4
                 </Typography>
             </Box>
+
+
+
+            <Dialog
+                open={open}
+                onClose={() => setOpen(false)}
+                fullWidth
+                maxWidth="sm"
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        p: 1,
+                    },
+                }}
+            >
+                <DialogTitle
+                    sx={{
+                        fontWeight: 700,
+                        fontSize: 22,
+                        color: "#0f172a",
+                        pb: 0,
+                    }}
+                >
+                    Raise Support Ticket
+                </DialogTitle>
+
+                <DialogContent sx={{ pt: 2 }}>
+                    <TextField
+                        fullWidth
+                        label="Full Name"
+                        margin="normal"
+                        value={formData.name}
+                        onChange={(e) =>
+                            setFormData({ ...formData, name: e.target.value })
+                        }
+                        error={!!errors.name}
+                        helperText={errors.name}
+                    />
+
+                    <TextField
+                        fullWidth
+                        label="Phone Number"
+                        margin="normal"
+                        value={formData.phone}
+                        onChange={(e) =>
+                            setFormData({ ...formData, phone: e.target.value })
+                        }
+                        error={!!errors.phone}
+                        helperText={errors.phone}
+                    />
+
+                    <TextField
+                        fullWidth
+                        label="Email Address"
+                        margin="normal"
+                        value={formData.email}
+                        onChange={(e) =>
+                            setFormData({ ...formData, email: e.target.value })
+                        }
+                        error={!!errors.email}
+                        helperText={errors.email}
+                    />
+
+                    <FormControl
+                        fullWidth
+                        margin="normal"
+                        error={!!errors.category}
+                    >
+                        <InputLabel>Issue Category</InputLabel>
+                        <Select
+                            value={formData.category}
+                            label="Issue Category"
+                            onChange={(e) =>
+                                setFormData({ ...formData, category: e.target.value })
+                            }
+                        >
+                            <MenuItem value="Billing Problem">Billing Problem</MenuItem>
+                            <MenuItem value="Subscription Issue">Subscription Issue</MenuItem>
+                            <MenuItem value="Login Issue">Login Issue</MenuItem>
+                            <MenuItem value="Printer Not Working">Printer Not Working</MenuItem>
+                            <MenuItem value="Feature Request">Feature Request</MenuItem>
+                            <MenuItem value="Other">Other</MenuItem>
+                        </Select>
+                        {errors.category && (
+                            <Typography color="error" fontSize={12} mt={0.5}>
+                                {errors.category}
+                            </Typography>
+                        )}
+                    </FormControl>
+
+
+                    <FormControl
+                        fullWidth
+                        margin="normal"
+                        error={!!errors.issue}
+                    >
+                        <InputLabel>Issue Type</InputLabel>
+                        <Select
+                            value={formData.issue}
+                            label="Issue Type"
+                            onChange={(e) =>
+                                setFormData({ ...formData, issue: e.target.value })
+                            }
+                        >
+                            <MenuItem value="Unable to create bill">Unable to create bill</MenuItem>
+                            <MenuItem value="Payment failed">Payment failed</MenuItem>
+                            <MenuItem value="Report not generating">Report not generating</MenuItem>
+                            <MenuItem value="System slow">System slow</MenuItem>
+                            <MenuItem value="Other">Other</MenuItem>
+                        </Select>
+                        {errors.issue && (
+                            <Typography color="error" fontSize={12} mt={0.5}>
+                                {errors.issue}
+                            </Typography>
+                        )}
+                    </FormControl>
+
+                    <TextField
+                        fullWidth
+                        label="Describe your issue"
+                        margin="normal"
+                        multiline
+                        rows={5}
+                        value={formData.message}
+                        onChange={(e) =>
+                            setFormData({ ...formData, message: e.target.value })
+                        }
+                        error={!!errors.message}
+                        helperText={errors.message}
+                    />
+                </DialogContent>
+
+                <DialogActions
+                    sx={{
+                        px: 3,
+                        pb: 2,
+                        display: "flex",
+                        justifyContent: "space-between",
+                    }}
+                >
+                    <Button
+                        onClick={() => setOpen(false)}
+                        sx={{
+                            textTransform: "none",
+                            fontWeight: 500,
+                        }}
+                    >
+                        Cancel
+                    </Button>
+
+                    <Button
+                        variant="contained"
+                        onClick={handleSubmit}
+                        sx={{
+                            bgcolor: "#ea580c",
+                            px: 3,
+                            textTransform: "none",
+                            fontWeight: 600,
+                            borderRadius: 2,
+                            "&:hover": {
+                                bgcolor: "#c2410c",
+                            },
+                        }}
+                    >
+                        Submit Ticket
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 }
