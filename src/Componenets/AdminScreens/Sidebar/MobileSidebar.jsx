@@ -23,6 +23,8 @@ import { getShopInfo } from "@/service/shopService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import LockIcon from "@mui/icons-material/Lock";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
+import { Box, Typography } from "@mui/material";
+import NewReleasesIcon from "@mui/icons-material/NewReleases";
 
 const reportItems = [
   {
@@ -51,6 +53,8 @@ export default function MobileSidebar({ open, onClose }) {
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
+
+  const [shopData, setShopData] = useState([]);
 
   const allowedPlans = ["PREMIUM", "TRIAL"];
 
@@ -120,6 +124,20 @@ export default function MobileSidebar({ open, onClose }) {
     fetchShopInfo();
   }, []);
 
+  const fetchShopInfo = async () => {
+    try {
+      const res = await getShopInfo();
+      setShopData(res.data?.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  useEffect(() => {
+    fetchShopInfo();
+    // fetchSubscriptionExpiry();
+  }, []);
+  console.log("shopinfo", shopData);
 
   useEffect(() => {
     const fetchSubscriptionExpiry = async () => {
@@ -166,6 +184,44 @@ export default function MobileSidebar({ open, onClose }) {
                 className="cursor-pointer text-gray-600"
               />
             </div>
+
+
+            <Box className="mb-4 px-2">
+              <motion.div className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-2 text-center shadow-sm">
+                {/* ✨ SHIMMER / MIRROR REFLECTION */}
+                <motion.span
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "120%" }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 1.5,
+                    ease: "linear",
+                  }}
+                  className="
+                          pointer-events-none
+                          absolute top-0 left-0
+                          h-full w-1/3
+                          bg-gradient-to-r
+                          from-transparent
+                          via-white/60
+                          to-transparent
+                          rotate-6
+                        "
+                />
+
+                {/* CONTENT */}
+                <Typography fontSize={14} color="black">
+                  Logged in Shop
+                </Typography>
+
+                <Typography
+                  fontWeight={600}
+                  className="text-lg font-semibold text-orange-600 mt-1 truncate"
+                >
+                  {shopData?.shopName || "Loading..."}
+                </Typography>
+              </motion.div>
+            </Box>
 
             {/* Main Nav */}
             <nav className="space-y-2">
@@ -280,7 +336,7 @@ export default function MobileSidebar({ open, onClose }) {
                     }
       `}
                 >
-                  <MenuBook fontSize="small" />
+                  <NewReleasesIcon fontSize="small" />
                   Incoming Features
                 </div>
               </Link>

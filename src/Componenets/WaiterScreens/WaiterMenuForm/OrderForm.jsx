@@ -109,6 +109,14 @@ export default function OrderForm({ category }) {
         },
       ];
     });
+
+
+    // ✅ Clear search field after selecting item
+    setSearch("");
+
+
+    // ✅ Focus back to search input for fast billing
+    searchRef.current?.focus();
   };
 
   const updateQty = (tempId, newQty) => {

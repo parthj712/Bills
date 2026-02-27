@@ -231,6 +231,7 @@ export default function Login() {
             error={!!errors.email}
             helperText={errors.email}
             sx={{
+              textTransform : "lowercase",
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
                 backgroundColor: "#f8fafc",
