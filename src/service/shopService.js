@@ -47,3 +47,7 @@ export const removeShopLogo = async () => {
 export const removeShopQR = async () => {
   return await API.delete("/shops/qr");
 };
+
+export const addOrUpdateGST = async (payload) => {
+  return await API.post("/shops/gst-number", payload);
+};

@@ -37,10 +37,7 @@ import BillPreviewKOT from "./BillPreviewKOT";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function OrderCart() {
-
-
-    const { showSnackbar } = useAppSnackbar();
-
+  const { showSnackbar } = useAppSnackbar();
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -52,8 +49,6 @@ export default function OrderCart() {
   const [shopInfo, setShopInfo] = useState([]);
   const [orderId, setOrderId] = useState(null);
 
-
-
   // ✅ cartKey: tableId for DINE-IN, else orderType
   const cartKey = isDineIn ? tableId : orderType;
 
@@ -62,7 +57,6 @@ export default function OrderCart() {
   const [customerName, setCustomerName] = useState("");
 
   const [openKOT, setOpenKOT] = useState(false);
-
 
   const currentDate = new Date().toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -84,7 +78,9 @@ export default function OrderCart() {
     [cartItems],
   );
 
-  const tax = subtotal * 0.05;
+  const hasGST = !!shopInfo?.gstNumber;
+
+  const tax = hasGST ? subtotal * 0.05 : 0;
   const grandTotal = subtotal + tax;
 
   const handleFecthShopInfo = async () => {
@@ -171,7 +167,6 @@ export default function OrderCart() {
     setOpenConfirm(true);
   };
 
-
   const formatBillForPrint = () => {
     return `
     <div class="center bold" style="font-size:18px;">
@@ -195,8 +190,8 @@ export default function OrderCart() {
     <div class="divider"></div>
 
     ${cartItems
-        .map(
-          (item) => `
+      .map(
+        (item) => `
         <div>
           <div class="bold">${item.name}</div>
           <div class="row">
@@ -204,9 +199,9 @@ export default function OrderCart() {
             <span>₹${(item.qty * item.price).toFixed(2)}</span>
           </div>
         </div>
-      `
-        )
-        .join("")}
+      `,
+      )
+      .join("")}
 
     <div class="divider"></div>
 
@@ -215,10 +210,17 @@ export default function OrderCart() {
       <span>₹${subtotal.toFixed(2)}</span>
     </div>
 
-    <div class="row">
-      <span>Tax</span>
-      <span>₹${tax.toFixed(2)}</span>
-    </div>
+  ${
+    hasGST
+      ? `
+<div class="row">
+  <span>GST (5%)</span>
+  <span>₹${tax.toFixed(2)}</span>
+</div>
+`
+      : ""
+  }
+)}
 
     <div class="divider"></div>
 
@@ -234,7 +236,6 @@ export default function OrderCart() {
     </div>
   `;
   };
-
 
   const formatKOTForPrint = () => {
     return `
@@ -264,14 +265,16 @@ export default function OrderCart() {
     <div class="divider"></div>
 
     ${cartItems
-        .filter(item => !item.kotPrinted && item.qty > 0)  // only new items
-        .map(item => `
+      .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
+      .map(
+        (item) => `
         <div style="margin-bottom:6px;">
           <div class="bold">${item.name} (${item.portion})</div>
           <div>Qty: ${item.qty}</div>
         </div>
-      `)
-        .join("")}
+      `,
+      )
+      .join("")}
 
     <div class="divider"></div>
 
@@ -280,7 +283,6 @@ export default function OrderCart() {
     </div>
   `;
   };
-
 
   const printThermalKOT = () => {
     const printWindow = window.open("", "_blank", "width=400,height=600");
@@ -331,9 +333,6 @@ export default function OrderCart() {
       printWindow.close();
     };
   };
-
-
-
 
   const printThermalBill = () => {
     const billElement = document.getElementById("print-bill");
@@ -399,20 +398,13 @@ export default function OrderCart() {
     };
   };
 
-
-
-
   const handleConfirmBilling = async () => {
     if (!cartItems.length) {
-
-
       showSnackbar("No items to bill", "warning");
       return;
     }
 
     setLoading(true);
-
-
 
     showSnackbar("Processing billing...", "info");
 
@@ -423,7 +415,6 @@ export default function OrderCart() {
         await updateTableStatus(tableId, "AVAILABLE");
       }
 
-
       showSnackbar("Billing completed successfully!l", "success");
 
       setOpenConfirm(false);
@@ -431,19 +422,17 @@ export default function OrderCart() {
       setTimeout(() => {
         printThermalBill();
       }, 300);
-
     } catch (error) {
       console.error("Billing failed", error);
 
-
-      showSnackbar(error?.response?.data?.message ||
-        "Billing failed. Please try again.", "error");
-
+      showSnackbar(
+        error?.response?.data?.message || "Billing failed. Please try again.",
+        "error",
+      );
     } finally {
       setLoading(false);
     }
   };
-
 
   const downloadBillPDF = async () => {
     if (typeof window === "undefined") return;
@@ -467,18 +456,15 @@ export default function OrderCart() {
 
   const handlePrintKOT = async () => {
     try {
-      await printKot(tableId);  // backend update
+      await printKot(tableId); // backend update
 
-      printThermalKOT();        // frontend thermal print
+      printThermalKOT(); // frontend thermal print
 
       showSnackbar("KOT Printed", "success");
-
     } catch (err) {
       showSnackbar(err?.response?.data?.message || "KOT Failed", "error");
     }
   };
-
-
 
   const printedItems = cartItems.filter((item) => item.kotPrinted);
 
@@ -524,10 +510,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-              ...item,
-              kotPrinted: true,
-              kotNumber: kotNumber,
-            },
+                ...item,
+                kotPrinted: true,
+                kotNumber: kotNumber,
+              },
         ),
       );
     };
@@ -634,10 +620,12 @@ export default function OrderCart() {
             <span>₹ {subtotal.toFixed(2)}</span>
           </div>
 
-          <div className="flex justify-between">
-            <span>Tax (approx)</span>
-            <span>₹ {tax.toFixed(2)}</span>
-          </div>
+          {hasGST && (
+            <div className="flex justify-between">
+              <span>GST (5%)</span>
+              <span>₹ {tax.toFixed(2)}</span>
+            </div>
+          )}
 
           <Divider />
 
@@ -655,10 +643,12 @@ export default function OrderCart() {
               <Typography>₹ {subtotal.toFixed(2)}</Typography>
             </Box>
 
-            <Box display="flex" justifyContent="space-between" mb={2}>
-              <Typography color="text.secondary">Tax (approx)</Typography>
-              <Typography>₹ {tax.toFixed(2)}</Typography>
-            </Box>
+            {hasGST && (
+              <Box display="flex" justifyContent="space-between" mb={2}>
+                <Typography color="text.secondary">GST (5%)</Typography>
+                <Typography>₹ {tax.toFixed(2)}</Typography>
+              </Box>
+            )}
 
             <Divider sx={{ mb: 2 }} />
 
@@ -694,7 +684,6 @@ export default function OrderCart() {
               }}
               onClick={handlePrintKOT}
             />
-
           ) : (
             <AppButton
               label="Cancel"
@@ -748,10 +737,6 @@ export default function OrderCart() {
           customerName={customerName}
         />
       </div>
-
-
-
-
 
       <Dialog
         open={openKOT}
@@ -870,15 +855,15 @@ export default function OrderCart() {
         </DialogActions>
       </Dialog>
 
-
-
       <Dialog
         open={openConfirm}
         onClose={() => setOpenConfirm(false)}
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle sx={{ fontWeight: 700, backgroundColor: "#0F172A", color: "white" }}>
+        <DialogTitle
+          sx={{ fontWeight: 700, backgroundColor: "#0F172A", color: "white" }}
+        >
           Confirm Billing
         </DialogTitle>
 
@@ -888,18 +873,14 @@ export default function OrderCart() {
               Are you sure you want to finalize this bill?
             </Typography>
 
-
             <Typography fontWeight={600}>
               Grand Total: ₹ {grandTotal.toFixed(2)}
             </Typography>
-
           </DialogContent>
         </Box>
 
         <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)}>
-            Cancel
-          </Button>
+          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
 
           <Button
             variant="contained"
@@ -921,7 +902,6 @@ export default function OrderCart() {
           </Button>
         </DialogActions>
       </Dialog>
-
     </Suspense>
   );
 }
