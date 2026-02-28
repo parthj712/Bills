@@ -121,7 +121,7 @@ export default function AdminDashboard() {
   } else {
     performanceIcon = <TrendingFlatIcon fontSize="large" />;
   }
-
+  console.log(summary);
   const stats = [
     {
       title: "Total Sales",

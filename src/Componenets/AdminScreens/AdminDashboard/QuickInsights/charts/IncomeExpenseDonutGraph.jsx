@@ -39,6 +39,7 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
   useEffect(() => {
     fetchExpense();
   }, []);
+  console.log("bills", bills);
 
   // ================= FILTERED BILLS =================
   const filteredBills = useMemo(() => {

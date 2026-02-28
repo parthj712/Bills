@@ -42,6 +42,11 @@ const reportItems = [
     href: "/admin/reports/expensereport",
     icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
+  {
+    label: "Gst Report",
+    href: "/admin/reports/gstreport",
+    icon: <AccountBalanceWalletIcon fontSize="small" />,
+  },
 ];
 
 export default function MobileSidebar({ open, onClose }) {
@@ -49,7 +54,6 @@ export default function MobileSidebar({ open, onClose }) {
   const [openReports, setOpenReports] = useState(false);
   const [shopCategory, setShopCategory] = useState(null);
   const isDineIn = shopCategory === "DINE_IN";
-
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
@@ -62,7 +66,6 @@ export default function MobileSidebar({ open, onClose }) {
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription?.planType);
 
-
   const mainItems = [
     {
       label: "Dashboard",
@@ -73,12 +76,12 @@ export default function MobileSidebar({ open, onClose }) {
     // Only restaurants should see tables
     ...(isDineIn
       ? [
-        {
-          label: "Table Management",
-          href: "/admin/tables",
-          icon: <TableBar fontSize="small" />,
-        },
-      ]
+          {
+            label: "Table Management",
+            href: "/admin/tables",
+            icon: <TableBar fontSize="small" />,
+          },
+        ]
       : []),
 
     // Dynamic naming
@@ -110,7 +113,6 @@ export default function MobileSidebar({ open, onClose }) {
     onClose();
   }, [pathname]);
 
-
   useEffect(() => {
     const fetchShopInfo = async () => {
       try {
@@ -123,21 +125,6 @@ export default function MobileSidebar({ open, onClose }) {
 
     fetchShopInfo();
   }, []);
-
-  const fetchShopInfo = async () => {
-    try {
-      const res = await getShopInfo();
-      setShopData(res.data?.data);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  useEffect(() => {
-    fetchShopInfo();
-    // fetchSubscriptionExpiry();
-  }, []);
-  console.log("shopinfo", shopData);
 
   useEffect(() => {
     const fetchSubscriptionExpiry = async () => {
@@ -153,7 +140,6 @@ export default function MobileSidebar({ open, onClose }) {
 
     fetchSubscriptionExpiry();
   }, []);
-
 
   return (
     <AnimatePresence>
@@ -281,10 +267,7 @@ export default function MobileSidebar({ open, onClose }) {
                         <Link key={item.label} href={item.href}>
                           <div
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[14px]
-                ${isActive
-                                ? "text-orange-600 font-semibold"
-                                : "text-black"
-                              }`}
+                ${isActive ? "text-orange-600 font-semibold" : "text-black"}`}
                           >
                             {item.icon}
                             {item.label}
@@ -302,10 +285,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/settings">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${pathname === "/admin/settings"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/settings"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <Settings fontSize="small" />
@@ -316,10 +300,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/help">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${pathname === "/admin/help"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/help"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <MenuBook fontSize="small" />
@@ -330,10 +315,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/incoming-changes">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${pathname === "/admin/help"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/help"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <NewReleasesIcon fontSize="small" />
