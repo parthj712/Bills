@@ -124,8 +124,8 @@ export default function AdminDashboard() {
   console.log(summary);
   const stats = [
     {
-      title: "Monthly Sales",
-      value: `₹${summary.monthlyRevenue}`,
+      title: "Total Sales",
+      value: `₹${summary.totalRevenue}`,
       icon: <HomeWork fontSize="large" />,
       bg: "bg-orange-100",
       iconColor: "text-orange-600",

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { Box, Typography, FormControl, Select, MenuItem } from "@mui/material";
+import { Box, Typography, FormControl, Select, MenuItem, Divider } from "@mui/material";
 import dayjs from "dayjs";
 import { getExpense } from "@/service/expenseService";
 
@@ -64,7 +64,8 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
   // ================= TOTAL INCOME =================
   const totalIncome = useMemo(() => {
     return (
-      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) || 0
+      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) ||
+      0
     );
   }, [filteredBills]);
 
@@ -136,18 +137,20 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
         }}
       />
 
+      <Divider sx={{ my: 2 }} />
+
       {/* ================= SUMMARY ================= */}
-      <Box mt={2}>
-        <Typography fontSize={14}>
+      <Box display={"flex"} justifyContent={"space-between"} mt={2}>
+        <Typography fontSize={16}>
           💰 Income: ₹ {totalIncome.toLocaleString()}
         </Typography>
-        <Typography fontSize={14}>
+        <Typography fontSize={16}>
           💸 Expense: ₹ {totalExpense.toLocaleString()}
         </Typography>
         <Typography
-          fontSize={14}
+          fontSize={16}
           fontWeight={600}
-          mt={1}
+          
           color={profit >= 0 ? "success.main" : "error.main"}
         >
           📊 Profit: ₹ {profit.toLocaleString()}

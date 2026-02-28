@@ -116,12 +116,13 @@ const AddExpense = ({ open, onClose, onSuccess }) => {
     <AnimatePresence>
       {open && (
         <Dialog
+        sx={{borderRadius : 2}}
           open={open}
           onClose={loading ? undefined : onClose}
           fullWidth
           maxWidth="sm"
         >
-          ```
+        
           {/* Header */}
           <Box
             sx={{
@@ -134,14 +135,14 @@ const AddExpense = ({ open, onClose, onSuccess }) => {
             <Box className="flex items-center justify-between">
               <Box className="flex items-center gap-2">
                 <ReceiptLongIcon sx={{ color: "white" }} />
-                <DialogTitle sx={{ p: 0, color: "white", fontWeight: 900 }}>
+                <DialogTitle sx={{ p: 0, color: "white", fontWeight: 700 }}>
                   Add Expense
                 </DialogTitle>
               </Box>
-
+{/* 
               <IconButton onClick={onClose} sx={{ color: "white" }}>
                 <CloseRoundedIcon />
-              </IconButton>
+              </IconButton> */}
             </Box>
           </Box>
           <DialogContent sx={{ p: 2.5, backgroundColor: "#fbfdff" }}>
