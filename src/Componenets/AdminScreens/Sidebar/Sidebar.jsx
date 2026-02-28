@@ -54,6 +54,11 @@ const reportItems = [
     href: "/admin/reports/expensereport",
     icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
+  {
+    label: "Gst Report",
+    href: "/admin/reports/gstreport",
+    icon: <AccountBalanceWalletIcon fontSize="small" />,
+  },
   // {
   //   label: "GST Report",
   //   href: "/admin/reports/gst",
@@ -108,12 +113,12 @@ export default function Sidebar() {
     // show only for restaurants
     ...(isDineIn
       ? [
-        {
-          label: "Table Management",
-          href: "/admin/tables",
-          icon: <TableBar fontSize="small" />,
-        },
-      ]
+          {
+            label: "Table Management",
+            href: "/admin/tables",
+            icon: <TableBar fontSize="small" />,
+          },
+        ]
       : []),
 
     // change label dynamically
@@ -311,10 +316,11 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-1.5 ml-4 rounded-lg
                             text-[14px] cursor-pointer
-                            ${isActive
-                        ? "font-semibold text-orange-600"
-                        : "text-gray-700"
-                      }`}
+                            ${
+                              isActive
+                                ? "font-semibold text-orange-600"
+                                : "text-gray-700"
+                            }`}
                   >
                     {isActive && (
                       <motion.span
@@ -407,10 +413,11 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 flex items-center gap-3 px-3 py-2 rounded-lg
       text-[14px] cursor-pointer
-      ${pathname === helpItem.href
-                  ? "font-semibold text-orange-600"
-                  : "text-black"
-                }`}
+      ${
+        pathname === helpItem.href
+          ? "font-semibold text-orange-600"
+          : "text-black"
+      }`}
             >
               {helpItem.icon}
               {helpItem.label}
@@ -422,10 +429,11 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[15px] cursor-pointer
-          ${pathname === settingsItem.href
-                  ? "font-semibold text-orange-600"
-                  : "text-black"
-                }
+          ${
+            pathname === settingsItem.href
+              ? "font-semibold text-orange-600"
+              : "text-black"
+          }
         `}
             >
               {settingsItem.icon}

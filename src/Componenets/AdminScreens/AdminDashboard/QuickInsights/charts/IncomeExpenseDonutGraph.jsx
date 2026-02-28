@@ -39,6 +39,7 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
   useEffect(() => {
     fetchExpense();
   }, []);
+  console.log("bills", bills);
 
   // ================= FILTERED BILLS =================
   const filteredBills = useMemo(() => {
@@ -63,8 +64,7 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
   // ================= TOTAL INCOME =================
   const totalIncome = useMemo(() => {
     return (
-      filteredBills?.reduce((sum, bill) => sum + (bill.totalAmount || 0), 0) ||
-      0
+      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) || 0
     );
   }, [filteredBills]);
 
