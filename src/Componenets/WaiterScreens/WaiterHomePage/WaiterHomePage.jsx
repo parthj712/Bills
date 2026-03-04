@@ -64,8 +64,6 @@ export default function WaiterHomePage() {
   const [billsLoaded, setBillsLoaded] = useState(false);
   const [billsCache, setBillsCache] = useState(null);
 
-
-
   // keyboard states
   const [keyBuffer, setKeyBuffer] = useState("");
   const [highlightTableNo, setHighlightTableNo] = useState(null);
@@ -93,7 +91,9 @@ export default function WaiterHomePage() {
       setBillsLoading(true);
 
       const res = await getRecentBills();
+
       const data = res.data?.data || [];
+      console.log(data);
 
       setRecentBills(data);
       setBillsCache(data); // 🔥 cache it
@@ -108,8 +108,6 @@ export default function WaiterHomePage() {
       setBillsLoading(false);
     }
   };
-
-
 
   const handleGetTables = async () => {
     try {
@@ -284,8 +282,6 @@ export default function WaiterHomePage() {
                 </div>
               </div>
 
-
-
               <motion.div
                 layout
                 className="flex flex-col gap-3 overflow-hidden"
@@ -305,8 +301,6 @@ export default function WaiterHomePage() {
 
                 {billsLoaded &&
                   recentBills.slice(0, visibleCount).map((bill) => (
-
-
                     <div
                       key={bill._id}
                       className="flex justify-between items-center bg-gray-50 p-3 rounded-xl hover:bg-gray-100 transition"
@@ -377,29 +371,29 @@ export default function WaiterHomePage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
                   {loading
                     ? Array.from({ length: 9 }).map((_, index) => (
-                      <Skeleton
-                        key={index}
-                        variant="rounded"
-                        height={110}
-                        className="!rounded-2xl"
-                      />
-                    ))
+                        <Skeleton
+                          key={index}
+                          variant="rounded"
+                          height={110}
+                          className="!rounded-2xl"
+                        />
+                      ))
                     : tables.map((table) => (
-                      <Tooltip
-                        key={table._id}
-                        title={
-                          table.status === "OCCUPIED"
-                            ? "Active table"
-                            : "Add order"
-                        }
-                        arrow
-                        placement="bottom"
-                      >
-                        <div
-                          onClick={() =>
-                            handleTableClick(table._id, table.tableNo)
+                        <Tooltip
+                          key={table._id}
+                          title={
+                            table.status === "OCCUPIED"
+                              ? "Active table"
+                              : "Add order"
                           }
-                          className={`
+                          arrow
+                          placement="bottom"
+                        >
+                          <div
+                            onClick={() =>
+                              handleTableClick(table._id, table.tableNo)
+                            }
+                            className={`
                           relative
                           h-28 w-full
                           rounded-xl
@@ -413,53 +407,55 @@ export default function WaiterHomePage() {
                           transition-all duration-300
                           hover:shadow-lg hover:scale-[1.03]
                           ${tableStyles[table.status]}
-                          ${highlightTableNo === table.tableNo
+                          ${
+                            highlightTableNo === table.tableNo
                               ? table.status === "OCCUPIED"
                                 ? "ring-4 ring-red-500 ring-offset-2"
                                 : "ring-4 ring-green-500 ring-offset-2"
                               : ""
-                            }
+                          }
                         `}
-                        >
-                          {/* ✅ Table Number */}
-                          <Typography
-                            fontSize={22}
-                            fontWeight={600}
-                            className={
-                              table.status === "OCCUPIED"
-                                ? "text-red-800"
-                                : "text-green-600"
-                            }
                           >
-                            {table.tableNo}
-                          </Typography>
-
-                          {/* ✅ Status Badge */}
-                          <Typography
-                            fontSize={table.status === "OCCUPIED" ? 12 : 13}
-                            fontWeight={
-                              table.status === "OCCUPIED" ? 700 : 600
-                            }
-                            className={`px-2 py-[2px] rounded-full
-                          ${table.status === "OCCUPIED"
-                                ? "bg-red-100 text-red-700 border border-red-500"
-                                : "bg-green-100 text-green-700 border border-green-500"
+                            {/* ✅ Table Number */}
+                            <Typography
+                              fontSize={22}
+                              fontWeight={600}
+                              className={
+                                table.status === "OCCUPIED"
+                                  ? "text-red-800"
+                                  : "text-green-600"
                               }
-                          `}
-                          >
-                            {table.status}
-                          </Typography>
+                            >
+                              {table.tableNo}
+                            </Typography>
 
-                          {/* ✅ Time (only if occupied) */}
-                          {table.status === "OCCUPIED" &&
-                            table.occupiedAt && (
-                              <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
-                                {getRunningTime(table.occupiedAt)}
-                              </div>
-                            )}
-                        </div>
-                      </Tooltip>
-                    ))}
+                            {/* ✅ Status Badge */}
+                            <Typography
+                              fontSize={table.status === "OCCUPIED" ? 12 : 13}
+                              fontWeight={
+                                table.status === "OCCUPIED" ? 700 : 600
+                              }
+                              className={`px-2 py-[2px] rounded-full
+                          ${
+                            table.status === "OCCUPIED"
+                              ? "bg-red-100 text-red-700 border border-red-500"
+                              : "bg-green-100 text-green-700 border border-green-500"
+                          }
+                          `}
+                            >
+                              {table.status}
+                            </Typography>
+
+                            {/* ✅ Time (only if occupied) */}
+                            {table.status === "OCCUPIED" &&
+                              table.occupiedAt && (
+                                <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                                  {getRunningTime(table.occupiedAt)}
+                                </div>
+                              )}
+                          </div>
+                        </Tooltip>
+                      ))}
                 </div>
               </Card>
             )}

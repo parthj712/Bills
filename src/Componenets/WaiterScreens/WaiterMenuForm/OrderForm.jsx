@@ -25,7 +25,6 @@ import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function OrderForm({ category }) {
-
   const { showSnackbar } = useAppSnackbar();
 
   const searchRef = useRef(null);
@@ -64,7 +63,6 @@ export default function OrderForm({ category }) {
     const byCategory = category
       ? items.menu?.filter((i) => i.categoryName === category)
       : items.menu;
-
 
     const q = search.trim().toLowerCase();
     if (!q) return byCategory;
@@ -145,8 +143,6 @@ export default function OrderForm({ category }) {
       if (!customerName.trim()) {
         setNameError("Customer name is required");
 
-
-
         showSnackbar("Please add customer name first", "error");
 
         document.querySelector("input[label='Customer Name']")?.focus();
@@ -154,8 +150,6 @@ export default function OrderForm({ category }) {
       }
 
       if (nameError) {
-
-
         showSnackbar("Customer name is invalid", "error");
 
         return;
@@ -204,7 +198,6 @@ export default function OrderForm({ category }) {
       // }
     } catch (err) {
       console.error("Add item failed", err);
-
 
       showSnackbar("Failed to add order. Please try again.", "error");
     }
@@ -313,9 +306,10 @@ export default function OrderForm({ category }) {
                           onClick={() => handleSelectItem(item)}
                           className={`
                             p-3 cursor-pointer border  transition-all duration-150
-                            ${isItemSelected(item._id)
-                              ? "border-slate-800 bg-slate-50 shadow-sm"
-                              : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
+                            ${
+                              isItemSelected(item._id)
+                                ? "border-slate-800 bg-slate-50 shadow-sm"
+                                : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
                             }
 
 `}

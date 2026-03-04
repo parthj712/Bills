@@ -16,7 +16,7 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
-import { useDispatch } from "react-redux";
+
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -39,7 +39,6 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 export default function OrderCart() {
   const { showSnackbar } = useAppSnackbar();
 
-  const dispatch = useDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [openConfirm, setOpenConfirm] = useState(false);
