@@ -29,6 +29,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import InfoRow from "./InfoCard";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import FeedbackQRSection from "./FeedbackQRSection";
 
 export default function Settings() {
   const { showSnackbar } = useAppSnackbar();
@@ -55,8 +56,6 @@ export default function Settings() {
     const fetchInfo = async () => {
       try {
         const res = await getShopInfo();
-
-        console.log("res", res.data?.data);
 
         setShopData(res.data?.data);
 
@@ -114,7 +113,6 @@ export default function Settings() {
       showSnackbar("Failed to update website ❌");
     }
   };
-  console.log("shopdata", shopData);
 
   // ❌ DO NOT TOUCH SIGN OUT LOGIC
   const handleLogout = () => {
@@ -593,6 +591,11 @@ export default function Settings() {
               </Button>
             </Box>
           </Box>
+        </SettingsCard>
+
+        {/* FEEDBACK QR SECTION */}
+        <SettingsCard title="Customer Feedback QR">
+          <FeedbackQRSection />
         </SettingsCard>
 
         {/* SIGN OUT */}

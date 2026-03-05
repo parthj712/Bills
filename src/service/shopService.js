@@ -51,3 +51,11 @@ export const removeShopQR = async () => {
 export const addOrUpdateGST = async (payload) => {
   return await API.post("/shops/gst-number", payload);
 };
+
+export const generateFeedbackLink = async () => {
+  return API.post("/shops/generate-feedback-slug");
+};
+
+export const getFeedbackLink = async () => {
+  return API.get("/shops/feedback-link");
+};

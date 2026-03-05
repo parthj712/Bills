@@ -1,9 +1,10 @@
-import { Box, TextField } from "@mui/material";
+import { Box, TextField, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useRef } from "react";
 
 const OtpBoxes = ({ otp, setOtp, onComplete }) => {
   const inputsRef = useRef([]);
-
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   // ✅ Auto Focus First Input When Component Loads
   useEffect(() => {
     inputsRef.current[0]?.focus();
@@ -70,14 +71,14 @@ const OtpBoxes = ({ otp, setOtp, onComplete }) => {
             inputMode: "numeric",
             style: {
               textAlign: "center",
-              fontSize: 20,
+              fontSize: isMobile ? 15 : 20,
               fontWeight: 700,
             },
           }}
           sx={{
             width: 55,
             "& input": {
-              padding: "14px",
+              padding: isMobile ? "10px" : "14px",
             },
           }}
         />
