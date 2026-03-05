@@ -16,6 +16,7 @@ import OrdersBarChart from "./charts/OrdersBarChart";
 import PeakHoursLineChart from "./charts/PeakHoursLineChart";
 import RevenueDonutChart from "./charts/RevenueDonutGraph";
 import IncomeExpenseDonutGraph from "./charts/IncomeExpenseDonutGraph";
+import RatingsDonutChart from "./charts/RatingDonutChart";
 
 export default function InsightDialog({ open, onClose, insight, bills }) {
   if (!insight) return null;
@@ -34,6 +35,9 @@ export default function InsightDialog({ open, onClose, insight, bills }) {
 
       case "incomeExpense":
         return <IncomeExpenseDonutGraph bills={bills} />;
+
+      case "ratings":
+        return <RatingsDonutChart />;
 
       default:
         return (
