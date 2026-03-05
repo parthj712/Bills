@@ -134,106 +134,152 @@ const GstReport = () => {
   const hasGST = Boolean(shopData?.gstNumber);
 
   return (
-    <Box className="min-h-screen p-2 lg:p-4 md:p-4">
-      <Box display={"flex"} alignItems={"center"} gap={1} mb={2}>
-        <AssessmentIcon color="primary" />
+    <Box className="min-h-screen p-3 md:p-5 bg-[#f5f7fb]">
+
+      {/* PAGE HEADER */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mb: 3,
+        }}
+      >
+        <AssessmentIcon sx={{ color: "#0b3c5d" }} />
         <Typography
           fontSize={isMobile ? 24 : 30}
-          fontWeight={isMobile ? 600 : 700}
-          className="text-[#000C5A]"
+          fontWeight={700}
+          color="#0b3c5d"
         >
           GST Summary Report
         </Typography>
       </Box>
 
-      {/* shop header */}
+      {/* SHOP INFO CARD */}
       {shopData && (
-        <Box>
-          <Typography fontSize={18} fontWeight={600} color="text.secondary">
-            {shopData.shopName}
-          </Typography>
-          <Typography fontSize={16} fontWeight={500} color="text.secondary">
-            GSTIN:{shopData.gstNumber || "Not Aavailable"}
-          </Typography>
-          <Typography fontSize={16} fontWeight={500} color="text.secondary">
-            {shopData.address}
-          </Typography>
-        </Box>
+        <Card
+          elevation={3}
+          sx={{
+            borderRadius: 3,
+            mb: 3,
+          }}
+        >
+          <CardContent>
+            <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"space-between"}>
+              <Typography fontSize={18} fontWeight={700}>
+                {shopData.shopName}
+              </Typography>
+
+              <Typography fontSize={14} fontWeight={600}>
+                GSTIN: {shopData.gstNumber || "Not Available"}
+              </Typography>
+            </Box>
+
+            <Typography fontSize={14} color="text.secondary">
+             Address: {shopData.address}
+            </Typography>
+          </CardContent>
+        </Card>
       )}
+
       {!hasGST && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          {" "}
           GST Number is not added in shop profile. Please add GSTIN to generate
           GST report.
         </Alert>
       )}
-      <Divider sx={{ mb: 3 }} />
 
-      <Box display={"flex"} gap={2} mb={3} flexWrap={"wrap"}>
-        <TextField
-          type="date"
-          label="From"
-          InputLabelProps={{ shrink: true }}
-          value={fromDate}
-          onChange={(e) => setFromDate(e.target.value)}
-          size="small"
-        />
-
-        <TextField
-          type="date"
-          label="To"
-          InputLabelProps={{ shrink: true }}
-          value={toDate}
-          onChange={(e) => setToDate(e.target.value)}
-          size="small"
-        />
-
-        <Button
-          variant="contained"
-          onClick={fetchReport}
-          disabled={!hasGST}
-          sx={{ borderRadius: 2 }}
-          size="small"
+      {/* DATE FILTER CARD */}
+      <Card
+        elevation={2}
+        sx={{
+          borderRadius: 3,
+          mb: 3,
+        }}
+      >
+        <CardContent
+          sx={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            justifyContent: "space-between",
+            // flexWrap: "wrap",
+            gap: 4,
+            alignItems: "center",
+          }}
         >
-          Generate Report
-        </Button>
+          <TextField
+          fullWidth
+            type="date"
+            label="From Date"
+            InputLabelProps={{ shrink: true }}
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            size="small"
+          />
 
-        {data && hasGST && (
-          <>
-            <Button
-              variant="contained"
-              startIcon={<TableViewIcon />}
-              onClick={downloadExcel}
-              sx={{
-                backgroundColor: "#1D6F42",
-                "&:hover": { backgroundColor: "#155a34" },
-                borderRadius: 2,
-              }}
-            >
-              Excel
-            </Button>
+          <TextField
+          fullWidth
+            type="date"
+            label="To Date"
+            InputLabelProps={{ shrink: true }}
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            size="small"
+          />
 
-            <Button
-              variant="contained"
-              startIcon={<PictureAsPdfIcon />}
-              onClick={downloadPdf}
-              sx={{
-                backgroundColor: "#B00020",
-                "&:hover": { backgroundColor: "#8e0019" },
-                borderRadius: 2,
-              }}
-            >
-              PDF
-            </Button>
-          </>
-        )}
-      </Box>
+          <Button
+            variant="contained"
+            onClick={fetchReport}
+            disabled={!hasGST}
+            sx={{
+              alignItems : "flex-end",
+              backgroundColor: "#0b3c5d",
+              "&:hover": { backgroundColor: "#092c45" },
+              borderRadius: 2,
+              px: 16,
+              fontSize: 14,
+            }}
+          >
+            Generate
+          </Button>
 
-      {/* Table */}
+          {data && hasGST && (
+            <>
+              <Button
+                variant="contained"
+                startIcon={<TableViewIcon />}
+                onClick={downloadExcel}
+                sx={{
+                  backgroundColor: "#1D6F42",
+                  "&:hover": { backgroundColor: "#155a34" },
+                  borderRadius: 2,
+                }}
+              >
+                Excel
+              </Button>
+
+              <Button
+                variant="contained"
+                startIcon={<PictureAsPdfIcon />}
+                onClick={downloadPdf}
+                sx={{
+                  backgroundColor: "#B00020",
+                  "&:hover": { backgroundColor: "#8e0019" },
+                  borderRadius: 2,
+                }}
+              >
+                PDF
+              </Button>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* TABLE */}
       {data && (
         <>
           <Paper
-            elevation={4}
+            elevation={3}
             sx={{
               borderRadius: 3,
               overflow: "hidden",
@@ -242,10 +288,11 @@ const GstReport = () => {
           >
             <Box sx={{ overflowX: "auto" }}>
               <Table>
+
                 <TableHead>
                   <TableRow
                     sx={{
-                      backgroundColor: "#0B1C3F",
+                      backgroundColor: "#0b3c5d",
                     }}
                   >
                     {[
@@ -261,9 +308,9 @@ const GstReport = () => {
                         key={head}
                         sx={{
                           color: "#fff",
-                          fontWeight: 600,
-                          fontSize: 14,
+                          fontWeight: 700,
                           textAlign: "center",
+                          fontSize: 14,
                         }}
                       >
                         {head}
@@ -278,12 +325,13 @@ const GstReport = () => {
                       key={index}
                       sx={{
                         backgroundColor:
-                          index % 2 === 0 ? "#f9fafc" : "#ffffff",
+                          index % 2 === 0 ? "#f9fafb" : "#ffffff",
+                        "&:hover": {
+                          backgroundColor: "#eef5ff",
+                        },
                       }}
                     >
-                      <TableCell sx={{ fontWeight: 500 }} align="center">
-                        {slab._id}%
-                      </TableCell>
+                      <TableCell align="center">{slab._id}%</TableCell>
 
                       <TableCell align="center">
                         ₹{slab.taxable.toFixed(2)}
@@ -308,8 +356,8 @@ const GstReport = () => {
                       <TableCell
                         align="center"
                         sx={{
-                          fontWeight: 600,
-                          color: "#0B1C3F",
+                          fontWeight: 700,
+                          color: "#0b3c5d",
                         }}
                       >
                         ₹{slab.grandTotal.toFixed(2)}
@@ -317,27 +365,33 @@ const GstReport = () => {
                     </TableRow>
                   ))}
                 </TableBody>
+
               </Table>
             </Box>
           </Paper>
 
-          {/* Overall Summary */}
+          {/* SUMMARY */}
           <Card
             elevation={3}
             sx={{
               borderRadius: 3,
               p: 3,
-              background: "linear-gradient(135deg, #f5f7fa 0%, #e4ecf7 100%)",
+              background: "linear-gradient(135deg,#eef3ff,#f7f9ff)",
             }}
           >
-            <Typography variant="h6" fontWeight={700} mb={2} color="#0B1C3F">
+            <Typography
+              fontSize={20}
+              fontWeight={700}
+              mb={2}
+              color="#0b3c5d"
+            >
               Overall Summary
             </Typography>
 
             <Box
               display="grid"
               gridTemplateColumns={
-                isMobile ? "1fr" : "repeat(auto-fit, minmax(200px, 1fr))"
+                isMobile ? "1fr" : "repeat(auto-fit, minmax(180px, 1fr))"
               }
               gap={2}
             >
@@ -351,21 +405,21 @@ const GstReport = () => {
                 <Box
                   key={item.label}
                   sx={{
-                    backgroundColor: "#ffffff",
+                    backgroundColor: "#fff",
                     p: 2,
                     borderRadius: 2,
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    boxShadow: "0 3px 10px rgba(0,0,0,0.06)",
                   }}
                 >
-                  <Typography
-                    fontSize={13}
-                    color="text.secondary"
-                    fontWeight={500}
-                  >
+                  <Typography fontSize={13} color="text.secondary">
                     {item.label}
                   </Typography>
 
-                  <Typography fontSize={18} fontWeight={700} color="#0B1C3F">
+                  <Typography
+                    fontSize={18}
+                    fontWeight={700}
+                    color="#0b3c5d"
+                  >
                     ₹{item.value.toFixed(2)}
                   </Typography>
                 </Box>

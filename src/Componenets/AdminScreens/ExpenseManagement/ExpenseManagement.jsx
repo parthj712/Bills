@@ -33,10 +33,11 @@ import {
   uploadExcelFile,
 } from "@/service/expenseService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import ExpenseCard from "./ExpenseCard";
 
 const ExpenseManagement = () => {
 
-    const { showSnackbar } = useAppSnackbar();
+  const { showSnackbar } = useAppSnackbar();
 
 
   const theme = useTheme();
@@ -435,6 +436,19 @@ const ExpenseManagement = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      )}
+
+
+      {!isDesktop && (
+        <Box className="flex flex-col gap-4">
+          {filteredExpenses.map((expense) => (
+            <ExpenseCard
+              key={expense._id}
+              expense={expense}
+              onDelete={handleDelete}
+            />
+          ))}
+        </Box>
       )}
 
       {/* Mobile FAB */}
