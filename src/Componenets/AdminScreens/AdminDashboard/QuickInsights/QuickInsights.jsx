@@ -31,13 +31,10 @@ import InsightDialog from "./InsightDialog";
 import { getBills } from "@/service/billsService";
 
 export const QuickInsights = () => {
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
-
-
 
   const [open, setOpen] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState(null);
@@ -107,6 +104,13 @@ export const QuickInsights = () => {
       bg: "bg-rose-100/70",
       color: "text-rose-600",
     },
+    {
+      label: "Customer Ratings",
+      icon: RestaurantMenu,
+      chartType: "ratings",
+      bg: "bg-yellow-100/70",
+      color: "text-yellow-600",
+    },
   ];
 
   /* Handle Click */
@@ -167,7 +171,7 @@ export const QuickInsights = () => {
                 </Box>
 
                 {/* Label */}
-                <Typography fontSize={isMobile ?14 : 15} fontWeight={600}>
+                <Typography fontSize={isMobile ? 14 : 15} fontWeight={600}>
                   {item.label}
                 </Typography>
               </Card>

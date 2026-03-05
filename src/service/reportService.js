@@ -6,3 +6,7 @@ export const gstSummary = async (fromDate, toDate) => {
     params: { fromDate, toDate },
   });
 };
+
+export const getRatingsSummary = async () => {
+  return await API.get("/feedback/feedback-summary");
+};

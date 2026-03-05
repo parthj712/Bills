@@ -11,6 +11,7 @@ import {
   Assessment,
   MenuBook,
 } from "@mui/icons-material";
+import FeedbackIcon from "@mui/icons-material/Feedback";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import CloseIcon from "@mui/icons-material/Close";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -105,6 +106,11 @@ export default function MobileSidebar({ open, onClose }) {
       label: " Expense Tracker",
       href: "/admin/expense",
       icon: <ReceiptLongIcon fontSize="small" />,
+    },
+    {
+      label: "Customer Feedbacks",
+      href: "/admin/feedbacks",
+      icon: <FeedbackIcon fontSize="small" />,
     },
   ];
 

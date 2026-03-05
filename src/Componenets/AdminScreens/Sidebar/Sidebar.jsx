@@ -10,7 +10,7 @@ import {
   Settings,
   MenuBook,
 } from "@mui/icons-material";
-
+import FeedbackIcon from "@mui/icons-material/Feedback";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -143,6 +143,11 @@ export default function Sidebar() {
       label: " Expense Tracker",
       href: "/admin/expense",
       icon: <AccountBalanceWalletIcon fontSize="small" />,
+    },
+    {
+      label: "Customer Feedbacks",
+      href: "/admin/feedbacks",
+      icon: <FeedbackIcon fontSize="small" />,
     },
   ];
 
