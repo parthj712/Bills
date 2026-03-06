@@ -2,9 +2,19 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { PieChart } from "@mui/x-charts/PieChart";
-import { Box, Typography, FormControl, Select, MenuItem, Divider } from "@mui/material";
+import {
+  Box,
+  Typography,
+  FormControl,
+  Select,
+  MenuItem,
+  Divider,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import dayjs from "dayjs";
 import { getExpense } from "@/service/expenseService";
+import { wrap } from "framer-motion";
 
 const months = [
   { label: "All", value: "all" },
@@ -23,6 +33,8 @@ const months = [
 ];
 
 const IncomeExpenseDonutGraph = ({ bills }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [expenseList, setExpenseList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("all");
 
@@ -64,8 +76,7 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
   // ================= TOTAL INCOME =================
   const totalIncome = useMemo(() => {
     return (
-      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) ||
-      0
+      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) || 0
     );
   }, [filteredBills]);
 
@@ -107,12 +118,12 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
 
       {/* ================= DONUT ================= */}
       <PieChart
-        height={300}
         series={[
           {
-            innerRadius: 70,
-            outerRadius: 110,
-            paddingAngle: 4,
+            innerRadius: isMobile ? 60 : 90,
+            outerRadius: isMobile ? 90 : 120,
+            paddingAngle: 3,
+            cornerRadius: 6,
             data: [
               {
                 id: 0,
@@ -129,6 +140,8 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
             ],
           },
         ]}
+        width={isMobile ? 260 : 320}
+        height={isMobile ? 240 : 280}
         slotProps={{
           legend: {
             direction: "row",
@@ -140,21 +153,45 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
       <Divider sx={{ my: 2 }} />
 
       {/* ================= SUMMARY ================= */}
-      <Box display={"flex"} justifyContent={"space-between"} mt={2}>
-        <Typography fontSize={16}>
-          💰 Income: ₹ {totalIncome.toLocaleString()}
-        </Typography>
-        <Typography fontSize={16}>
-          💸 Expense: ₹ {totalExpense.toLocaleString()}
-        </Typography>
-        <Typography
-          fontSize={16}
-          fontWeight={600}
-          
-          color={profit >= 0 ? "success.main" : "error.main"}
-        >
-          📊 Profit: ₹ {profit.toLocaleString()}
-        </Typography>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mt={2}
+        p={isMobile ? 1.5 : 2}
+      >
+        {/* Income */}
+        <Box flex={1} textAlign="center">
+          <Typography fontSize={isMobile ? 11 : 13} color="text.secondary">
+            💰 Income
+          </Typography>
+          <Typography fontWeight={600} fontSize={isMobile ? 13 : 16}>
+            ₹ {totalIncome.toLocaleString()}
+          </Typography>
+        </Box>
+        {/* Expense */}
+        <Box flex={1} textAlign="center">
+          <Typography fontSize={isMobile ? 11 : 13} color="text.secondary">
+            💸 Expense
+          </Typography>
+          <Typography fontWeight={600} fontSize={isMobile ? 13 : 16}>
+            ₹ {totalExpense.toLocaleString()}
+          </Typography>
+        </Box>
+
+        {/* Profit */}
+        <Box flex={1} textAlign="center">
+          <Typography fontSize={isMobile ? 11 : 13} color="text.secondary">
+            📊 Profit
+          </Typography>
+          <Typography
+            fontWeight={700}
+            fontSize={isMobile ? 13 : 16}
+            color={profit >= 0 ? "success.main" : "error.main"}
+          >
+            ₹ {profit.toLocaleString()}
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

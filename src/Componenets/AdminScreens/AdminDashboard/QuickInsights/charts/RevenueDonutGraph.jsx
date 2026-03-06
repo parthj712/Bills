@@ -83,15 +83,15 @@ export default function RevenueDonutChart({ bills }) {
         <PieChart
           series={[
             {
-              innerRadius: isMobile ? 55 : 75,
-              outerRadius: isMobile ? 85 : 115,
+              innerRadius: isMobile ? 60 : 90,
+              outerRadius: isMobile ? 90 : 120,
               paddingAngle: 3,
               cornerRadius: 8,
               data,
             },
           ]}
           width={isMobile ? 260 : 360}
-          height={isMobile ? 240 : 300}
+          height={isMobile ? 240 : 280}
           slotProps={{
             legend: {
               direction: "row",
@@ -99,7 +99,6 @@ export default function RevenueDonutChart({ bills }) {
                 vertical: "bottom",
                 horizontal: "middle",
               },
-              padding: 5,
             },
           }}
         />
@@ -115,11 +114,11 @@ export default function RevenueDonutChart({ bills }) {
             pointerEvents: "none",
           }}
         >
-          <Typography fontSize={isMobile ? 11 : 13} sx={{ opacity: 0.6 }}>
+          <Typography fontSize={isMobile ? 12 : 12} sx={{ opacity: 0.6 }}>
             Total Revenue
           </Typography>
 
-          <Typography fontSize={isMobile ? 18 : 22} fontWeight={800}>
+          <Typography fontSize={isMobile ? 14 : 22} fontWeight={800}>
             ₹{totalRevenue.toLocaleString("en-IN")}
           </Typography>
         </Box>

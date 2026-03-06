@@ -1,11 +1,18 @@
 "use client";
 
 import {
-  Box, IconButton, Select, MenuItem, Typography, Fab,
+  Box,
+  IconButton,
+  Select,
+  MenuItem,
+  Typography,
+  Fab,
   Dialog,
   DialogTitle,
   DialogContent,
   Chip,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import OrderForm from "./OrderForm";
@@ -19,21 +26,20 @@ import { useSelector } from "react-redux";
 import { useMemo, useState } from "react";
 
 export default function WaiterMenuForm() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const router = useRouter();
   const searchParams = useSearchParams();
   const tableNo = searchParams.get("tableNo");
   const orderType = searchParams.get("orderType") || "DINE-IN";
-
+  const section = searchParams.get("section");
   const [category, setCategory] = useState("");
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
 
-
   const { items = [] } = useSelector((state) => state.menu);
-
+  console.log(section);
   const categories = useMemo(() => {
-    return [
-      ...new Set(items.menu?.map((i) => i.categoryName).filter(Boolean)),
-    ];
+    return [...new Set(items.menu?.map((i) => i.categoryName).filter(Boolean))];
   }, [items]);
 
   const isDineIn = orderType === "DINE-IN";
@@ -61,9 +67,22 @@ export default function WaiterMenuForm() {
           </IconButton>
 
           {isDineIn ? (
-            <Typography fontSize={28} fontWeight={"bold"} color="black">
-              Table Number : {tableNo}
-            </Typography>
+            <>
+              <Typography
+                fontSize={isMobile ? 20 : 28}
+                fontWeight={"bold"}
+                color="black"
+              >
+                {section}
+              </Typography>
+              <Typography
+                fontSize={isMobile ? 20 : 28}
+                fontWeight={"bold"}
+                color="black"
+              >
+                Table Number : {tableNo}
+              </Typography>
+            </>
           ) : (
             <Typography fontSize={24} fontWeight={"bold"} color="black">
               {orderType} ORDER
@@ -75,7 +94,6 @@ export default function WaiterMenuForm() {
           {/* LEFT */}
           <div className="col-span-12 lg:col-span-7">
             <OrderForm category={category} />
-
           </div>
 
           {/* RIGHT */}
@@ -83,8 +101,6 @@ export default function WaiterMenuForm() {
             <OrderCart />
           </div>
         </div>
-
-
 
         {/* Floating Category Button */}
         <Fab
@@ -106,7 +122,6 @@ export default function WaiterMenuForm() {
         >
           <RestaurantMenuIcon />
         </Fab>
-
 
         <Dialog
           open={openCategoryDialog}
@@ -147,7 +162,6 @@ export default function WaiterMenuForm() {
             ))}
           </DialogContent>
         </Dialog>
-
       </Box>
     </Suspense>
   );

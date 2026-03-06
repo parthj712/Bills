@@ -113,6 +113,7 @@ export default function WaiterHomePage() {
     try {
       setLoading(true);
       const res = await getTables();
+      console.log(res);
       setTables(res);
     } catch (error) {
       console.log("failed to get tables", error);
@@ -145,8 +146,10 @@ export default function WaiterHomePage() {
 
   //   // clear auth
 
-  const handleTableClick = (tableId, tableNo) => {
-    router.push(`/waiter/order?tableId=${tableId}&tableNo=${tableNo}`);
+  const handleTableClick = (tableId, tableNo, section) => {
+    router.push(
+      `/waiter/order?tableId=${tableId}&tableNo=${tableNo}&section=${section}`,
+    );
   };
 
   const totalActiveTables = tables.reduce((acc, table) => {
@@ -198,7 +201,7 @@ export default function WaiterHomePage() {
         setHighlightTableNo(table.tableNo);
 
         setTimeout(() => {
-          handleTableClick(table._id, table.tableNo);
+          handleTableClick(table._id, table.tableNo, table.sectionId?.name);
           setHighlightTableNo(null);
         }, 300);
       }
@@ -216,13 +219,6 @@ export default function WaiterHomePage() {
     router.push(`/waiter/order?orderType=${orderType}`);
   };
 
-  // const topProducts = [
-  //   { name: "Paneer Butter Masala", percent: 72 },
-  //   { name: "Veg Biryani", percent: 65 },
-  //   { name: "Butter Naan", percent: 54 },
-  //   { name: "Cold Coffee", percent: 41 },
-  // ];
-
   const getRunningTime = (occupiedAt) => {
     if (!occupiedAt) return "";
 
@@ -235,7 +231,17 @@ export default function WaiterHomePage() {
     if (mins < 60) return `${mins} min`;
     return `${Math.floor(mins / 60)} hr ${mins % 60} min`;
   };
+  const groupedTables = tables.reduce((acc, table) => {
+    const section = table.sectionId?.name || "Default";
 
+    if (!acc[section]) {
+      acc[section] = [];
+    }
+
+    acc[section].push(table);
+
+    return acc;
+  }, {});
   return (
     <Box className="min-h-screen bg-gray-50">
       {/* Top Buttons */}
@@ -368,94 +374,120 @@ export default function WaiterHomePage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
-                  {loading
-                    ? Array.from({ length: 9 }).map((_, index) => (
+                <div className="max-h-[520px] overflow-y-auto pr-1">
+                  {loading ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
+                      {Array.from({ length: 9 }).map((_, index) => (
                         <Skeleton
                           key={index}
                           variant="rounded"
                           height={110}
                           className="!rounded-2xl"
                         />
-                      ))
-                    : tables.map((table) => (
-                        <Tooltip
-                          key={table._id}
-                          title={
-                            table.status === "OCCUPIED"
-                              ? "Active table"
-                              : "Add order"
-                          }
-                          arrow
-                          placement="bottom"
-                        >
-                          <div
-                            onClick={() =>
-                              handleTableClick(table._id, table.tableNo)
-                            }
-                            className={`
-                          relative
-                          h-28 w-full
-                          rounded-xl
-                          cursor-pointer
-                          flex flex-col
-                          items-center
-                          justify-center
-                          gap-2
-                          px-4 py-3
-                          
-                          transition-all duration-300
-                          hover:shadow-lg hover:scale-[1.03]
-                          ${tableStyles[table.status]}
-                          ${
-                            highlightTableNo === table.tableNo
-                              ? table.status === "OCCUPIED"
-                                ? "ring-4 ring-red-500 ring-offset-2"
-                                : "ring-4 ring-green-500 ring-offset-2"
-                              : ""
-                          }
-                        `}
-                          >
-                            {/* ✅ Table Number */}
-                            <Typography
-                              fontSize={22}
-                              fontWeight={600}
-                              className={
-                                table.status === "OCCUPIED"
-                                  ? "text-red-800"
-                                  : "text-green-600"
-                              }
-                            >
-                              {table.tableNo}
-                            </Typography>
-
-                            {/* ✅ Status Badge */}
-                            <Typography
-                              fontSize={table.status === "OCCUPIED" ? 12 : 13}
-                              fontWeight={
-                                table.status === "OCCUPIED" ? 700 : 600
-                              }
-                              className={`px-2 py-[2px] rounded-full
-                          ${
-                            table.status === "OCCUPIED"
-                              ? "bg-red-100 text-red-700 border border-red-500"
-                              : "bg-green-100 text-green-700 border border-green-500"
-                          }
-                          `}
-                            >
-                              {table.status}
-                            </Typography>
-
-                            {/* ✅ Time (only if occupied) */}
-                            {table.status === "OCCUPIED" &&
-                              table.occupiedAt && (
-                                <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
-                                  {getRunningTime(table.occupiedAt)}
-                                </div>
-                              )}
-                          </div>
-                        </Tooltip>
                       ))}
+                    </div>
+                  ) : (
+                    Object.entries(groupedTables).map(
+                      ([sectionName, sectionTables]) => (
+                        <div key={sectionName} className="mb-6">
+                          {/* Section Title */}
+                          <Typography
+                            fontSize={16}
+                            fontWeight={600}
+                            className="mb-3 text-gray-700"
+                          >
+                            {sectionName}
+                          </Typography>
+
+                          {/* Tables Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
+                            {sectionTables.map((table) => (
+                              <Tooltip
+                                key={table._id}
+                                title={
+                                  table.status === "OCCUPIED"
+                                    ? "Active table"
+                                    : "Add order"
+                                }
+                                arrow
+                                placement="bottom"
+                              >
+                                <div
+                                  onClick={() =>
+                                    handleTableClick(
+                                      table._id,
+                                      table.tableNo,
+                                      table.sectionId?.name,
+                                    )
+                                  }
+                                  className={`
+                  relative
+                  h-28 w-full
+                  rounded-xl
+                  cursor-pointer
+                  flex flex-col
+                  items-center
+                  justify-center
+                  gap-2
+                  px-4 py-3
+                  transition-all duration-300
+                  hover:shadow-lg hover:scale-[1.03]
+                  ${tableStyles[table.status]}
+                  ${
+                    highlightTableNo === table.tableNo
+                      ? table.status === "OCCUPIED"
+                        ? "ring-4 ring-red-500 ring-offset-2"
+                        : "ring-4 ring-green-500 ring-offset-2"
+                      : ""
+                  }
+                `}
+                                >
+                                  {/* Table Number */}
+                                  <Typography
+                                    fontSize={22}
+                                    fontWeight={600}
+                                    className={
+                                      table.status === "OCCUPIED"
+                                        ? "text-red-800"
+                                        : "text-green-600"
+                                    }
+                                  >
+                                    {table.tableNo}
+                                  </Typography>
+
+                                  {/* Status Badge */}
+                                  <Typography
+                                    fontSize={
+                                      table.status === "OCCUPIED" ? 12 : 13
+                                    }
+                                    fontWeight={
+                                      table.status === "OCCUPIED" ? 700 : 600
+                                    }
+                                    className={`px-2 py-[2px] rounded-full
+                    ${
+                      table.status === "OCCUPIED"
+                        ? "bg-red-100 text-red-700 border border-red-500"
+                        : "bg-green-100 text-green-700 border border-green-500"
+                    }`}
+                                  >
+                                    {table.status}
+                                  </Typography>
+
+                                  {/* Running Time */}
+                                  {table.status === "OCCUPIED" &&
+                                    table.occupiedAt && (
+                                      <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                                        {getRunningTime(table.occupiedAt)}
+                                      </div>
+                                    )}
+                                </div>
+                              </Tooltip>
+                            ))}
+                          </div>
+                        </div>
+                      ),
+                    )
+                  )}
                 </div>
               </Card>
             )}

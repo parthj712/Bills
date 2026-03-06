@@ -1,8 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
-import { createNewTable } from "@/service/tableService";
+import {
+  createNewTable,
+  createSection,
+  getTableSection,
+} from "@/service/tableService";
 
 import {
   Dialog,
@@ -13,200 +17,195 @@ import {
   Typography,
   Divider,
   InputAdornment,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
+
 import { Box } from "@mui/system";
 import TableRestaurantIcon from "@mui/icons-material/TableRestaurant";
+import AddIcon from "@mui/icons-material/Add";
+import CategoryIcon from "@mui/icons-material/Category";
 import { motion, AnimatePresence } from "framer-motion";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { useAnimation } from "framer-motion";
-
 
 const AddTable = ({ open, onClose, onSuccess }) => {
   const [tableNo, setTableNo] = useState("");
+  const [sections, setSections] = useState([]);
+  const [sectionId, setSectionId] = useState("");
+
+  const [showAddSection, setShowAddSection] = useState(false);
+  const [newSectionName, setNewSectionName] = useState("");
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
 
-
-
-  const handleAdd = async () => {
-    if (!tableNo) {
-      setError("Table number is required");
-      return;
+  // fetch sections
+  const fetchSections = async () => {
+    try {
+      const res = await getTableSection();
+      setSections(res.data);
+    } catch (err) {
+      console.error(err);
     }
+  };
+
+  useEffect(() => {
+    if (open) fetchSections();
+  }, [open]);
+
+  // create section
+  const handleCreateSection = async () => {
+    if (!newSectionName) return;
 
     try {
+      const res = await createSection({ name: newSectionName });
+
+      const newSection = res.data;
+
+      setSections((prev) => [...prev, newSection]);
+
+      setSectionId(newSection._id);
+
+      setNewSectionName("");
+      setShowAddSection(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // create table
+  const handleAddTable = async () => {
+    try {
       setLoading(true);
-      setError("");
 
       const newTable = await createNewTable({
         tableNo: Number(tableNo),
+        sectionId,
       });
 
       onSuccess(newTable);
-      setSuccess(true);
 
-      setTimeout(() => {
-        setSuccess(false);
-        setTableNo("");
-        onClose();
-      }, 1200);
+      setTableNo("");
+      setSectionId("");
+
+      onClose();
     } catch (err) {
-      setError("Table with this number already exists");
-      triggerShake();
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-
-  const MotionPaper = motion.div;
-
-  const controls = useAnimation();
-
-  const dialogVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.95,
-      y: 20,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.35,
-        ease: [0.16, 1, 0.3, 1], // premium easing
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.96,
-      y: 20,
-      transition: {
-        duration: 0.25,
-        ease: "easeInOut",
-      },
-    },
-  };
-
-
-  const triggerShake = () => {
-    controls.start({
-      x: [0, -8, 8, -6, 6, 0],
-      transition: { duration: 0.4 },
-    });
-  };
-
-
-
   return (
     <AnimatePresence>
       {open && (
-        <Dialog
-          open={open}
-          onClose={onClose}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            component: MotionPaper,
-            variants: dialogVariants,
-            initial: "hidden",
-            animate: "visible",
-            exit: "exit",
-            sx: {
-              borderRadius: 8,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
-            },
-          }}
-        >
-          {/* Header */}
-          <DialogTitle sx={{ pb: 2 }}>
-            <Box className="flex items-center gap-3">
-              <Box className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center">
-                <TableRestaurantIcon className="text-green-600" />
-              </Box>
-
-              <Box>
-                <Typography fontSize={18} fontWeight={700}>
-                  Add New Table
-                </Typography>
-                <Typography fontSize={13} className="text-gray-500">
-                  Create a unique table for your restaurant
-                </Typography>
-              </Box>
+        <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+          <DialogTitle>
+            <Box display="flex" alignItems="center" gap={2}>
+              <TableRestaurantIcon />
+              <Typography fontWeight={700}>Add Table</Typography>
             </Box>
           </DialogTitle>
 
           <Divider />
 
-          {/* Content */}
-          <DialogContent sx={{ pt: 4 }}>
-            <motion.div animate={controls}>
-              <TextField
-                label="Table Number"
-                type="number"
-                value={tableNo}
-                onChange={(e) => setTableNo(e.target.value)}
-                fullWidth
-                autoFocus
-                error={Boolean(error)}
-                helperText={error || "Use a unique table number"}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <TableRestaurantIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
+          <DialogContent sx={{ mt: 2 }}>
+            {/* SECTION DROPDOWN */}
+            <FormControl fullWidth sx={{ mb: 3 }}>
+              <InputLabel>Section</InputLabel>
+
+              <Select
+                value={sectionId}
+                label="Section"
+                onChange={(e) => {
+                  if (e.target.value === "ADD_NEW") {
+                    setShowAddSection(true);
+                  } else {
+                    setSectionId(e.target.value);
+                  }
                 }}
-              />
-            </motion.div>
-
-
-            {success && (
-              <motion.div
-                initial={{ scale: 0.6, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="flex flex-col items-center justify-center py-8"
               >
-                <CheckCircleIcon className="text-green-500" sx={{ fontSize: 56 }} />
-                <Typography fontWeight={600} mt={2}>
-                  Table added successfully
-                </Typography>
+                {sections.map((section) => (
+                  <MenuItem key={section._id} value={section._id}>
+                    {section.name}
+                  </MenuItem>
+                ))}
+
+                <Divider />
+
+                <MenuItem value="ADD_NEW">
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <AddIcon fontSize="small" />
+                    Add New Section
+                  </Box>
+                </MenuItem>
+              </Select>
+            </FormControl>
+
+            {/* ADD SECTION INLINE */}
+            {showAddSection && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 2,
+                    mb: 3,
+                    alignItems: "center",
+                  }}
+                >
+                  <TextField
+                    fullWidth
+                    size="small"
+                    label="New Section"
+                    value={newSectionName}
+                    onChange={(e) => setNewSectionName(e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <CategoryIcon fontSize="small" />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+
+                  <AppButton
+                    label="Add"
+                    onClick={handleCreateSection}
+                    className="!bg-blue-500 !text-white"
+                  />
+                </Box>
               </motion.div>
             )}
 
-          </DialogContent>
-
-          {/* Footer */}
-          <DialogActions
-            sx={{
-              px: 3,
-              py: 2,
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <AppButton
-              label="Cancel"
-              variant="outlined"
-              onClick={onClose}
-              disabled={loading}
-              sx={{
-                borderRadius: 3,
-                textTransform: "none",
-                fontWeight: 800,
-                px: 2,
+            {/* TABLE NUMBER */}
+            <TextField
+              label="Table Number"
+              type="number"
+              fullWidth
+              value={tableNo}
+              onChange={(e) => setTableNo(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <TableRestaurantIcon fontSize="small" />
+                  </InputAdornment>
+                ),
               }}
             />
+          </DialogContent>
+
+          <DialogActions sx={{ p: 3 }}>
+            <AppButton label="Cancel" variant="outlined" onClick={onClose} />
 
             <AppButton
               label="Add Table"
               loading={loading}
-              disabled={!tableNo || loading}
-              onClick={handleAdd}
-              className="!bg-green-500 !text-white px-8 hover:!bg-green-600"
+              disabled={!tableNo || !sectionId}
+              onClick={handleAddTable}
+              className="!bg-green-500 !text-white"
             />
           </DialogActions>
         </Dialog>

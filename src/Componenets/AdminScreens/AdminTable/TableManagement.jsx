@@ -56,7 +56,6 @@ export const STATUS_CONFIG = {
 };
 
 export default function TableManagement() {
-
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
 
@@ -66,8 +65,7 @@ export default function TableManagement() {
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
 
-      const { showSnackbar } = useAppSnackbar();
-
+  const { showSnackbar } = useAppSnackbar();
 
   const fetchSubscriptionExpiry = async () => {
     try {
@@ -79,7 +77,6 @@ export default function TableManagement() {
       setLoadingSub(false); // ✅ stop loading
     }
   };
-
 
   const theme = useTheme();
 
@@ -99,6 +96,17 @@ export default function TableManagement() {
   const [loading, setLoading] = useState(true);
   console.log(tables);
   const [openAddDialog, setOpenAddDialog] = useState(false);
+
+  const groupedTables = tables.reduce((acc, table) => {
+    const sectionName = table.sectionId?.name || "No Section";
+
+    if (!acc[sectionName]) {
+      acc[sectionName] = [];
+    }
+
+    acc[sectionName].push(table);
+    return acc;
+  }, {});
 
   // Fetch tables
   const handleGetTables = async () => {
@@ -196,13 +204,15 @@ export default function TableManagement() {
                 startIcon={<Add />}
                 onClick={() => {
                   if (!hasAccess) {
-                    showSnackbar("Upgrade to Premium to add more tables 🚀", "warning");
+                    showSnackbar(
+                      "Upgrade to Premium to add more tables 🚀",
+                      "warning",
+                    );
                     return;
                   }
 
                   setOpenAddDialog(true);
                 }}
-
                 sx={{
                   backgroundColor: "#0b3c5d",
                   color: "#fff",
@@ -213,58 +223,47 @@ export default function TableManagement() {
                   fontWeight: 800,
                 }}
               />
-
             )}
           </Box>
         </Box>
       </Box>
 
       {/* Tables Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-        {loading
-          ? Array.from({ length: 10 }).map((_, index) => (
-            <Skeleton
-              key={index}
-              variant="rounded"
-              height={112}
-              sx={{ borderRadius: "12px" }}
-            />
-          ))
-          : tables.map((table) => (
-            <motion.div
-              key={table._id}
-              whileHover={{ y: -4, scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              onClick={() => handleTableClick(table)}
-              className={`
-                  relative
-                  h-28 w-full
-                  rounded-2xl
-                  border
-                  cursor-pointer
-                  flex flex-col
-                  items-center
-                  justify-center
-                  gap-1
-                  text-black
-                  shadow-sm
-                  hover:shadow-lg
-                  transition-all
-                 ${STATUS_CONFIG[table.status?.toUpperCase()]?.bg} ${STATUS_CONFIG[table.status?.toUpperCase()]?.border}
+      {Object.entries(groupedTables).map(([section, tables]) => (
+        <Box key={section} mb={5}>
+          {/* Section Title */}
+          <Typography
+            fontSize={18}
+            fontWeight={700}
+            mb={2}
+            className="text-[#0b3c5d]"
+          >
+            {section}
+          </Typography>
 
-                `}
-            >
-              {/* Table number */}
-              <span className="text-2xl font-bold">{table.tableNo}</span>
+          {/* Tables Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+            {tables.map((table) => (
+              <motion.div
+                key={table._id}
+                whileHover={{ y: -4, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                onClick={() => handleTableClick(table)}
+                className={`relative h-28 w-full rounded-2xl border cursor-pointer flex flex-col items-center justify-center gap-1 text-black shadow-sm hover:shadow-lg transition-all
+          ${STATUS_CONFIG[table.status?.toUpperCase()]?.bg}
+          ${STATUS_CONFIG[table.status?.toUpperCase()]?.border}`}
+              >
+                <span className="text-2xl font-bold">{table.tableNo}</span>
 
-              {/* Status label */}
-              <span className="text-xs font-medium tracking-wide uppercase text-black/60">
-                {table.status || "Available"}
-              </span>
-            </motion.div>
-          ))}
-      </div>
+                <span className="text-xs font-medium tracking-wide uppercase text-black/60">
+                  {table.status || "Available"}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+        </Box>
+      ))}
 
       <AddTable
         open={openAddDialog}
