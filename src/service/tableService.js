@@ -18,6 +18,13 @@ export const deleteTable = async (id) => {
   return await API.delete(`/tables/${id}`);
 };
 
-export const updateTableStatus = (tableId, status) => {
-  return API.patch(`/tables/${tableId}/status`, { status });
+export const updateTableStatus = async (tableId, status) => {
+  return await API.patch(`/tables/${tableId}/status`, { status });
+};
+
+export const createSection = async (payload) => {
+  return await API.post("/section", payload);
+};
+export const getTableSection = async () => {
+  return await API.get("/section");
 };
