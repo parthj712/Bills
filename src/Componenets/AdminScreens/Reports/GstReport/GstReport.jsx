@@ -167,7 +167,13 @@ const GstReport = () => {
           }}
         >
           <CardContent>
-            <Box display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"space-between"}>
+            <Box
+              display="flex"
+              flexDirection={isMobile ? "column" : "row"}
+              alignItems={isMobile ? "flex-start" : "center"}
+              justifyContent="space-between"
+              gap={isMobile ? 0.5 : 0}
+            >
               <Typography fontSize={18} fontWeight={700}>
                 {shopData.shopName}
               </Typography>
@@ -206,13 +212,13 @@ const GstReport = () => {
             justifyContent: "space-between",
             // flexWrap: "wrap",
             gap: isMobile ? 2 : 4,
-            alignItems: isMobile ? "stretch" : "center",
+            alignItems: isMobile ? "stretch" : "center"
           }}
         >
           <TextField
-            fullWidth
             type="date"
             label="From Date"
+            fullWidth={isMobile}
             InputLabelProps={{ shrink: true }}
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
@@ -220,9 +226,9 @@ const GstReport = () => {
           />
 
           <TextField
-            fullWidth
             type="date"
             label="To Date"
+            fullWidth={isMobile}
             InputLabelProps={{ shrink: true }}
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}
@@ -238,7 +244,7 @@ const GstReport = () => {
               backgroundColor: "#0b3c5d",
               "&:hover": { backgroundColor: "#092c45" },
               borderRadius: 2,
-              px: 16,
+              px: isMobile ? 2 : 16,
               fontSize: 14,
             }}
           >
