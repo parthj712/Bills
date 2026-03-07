@@ -34,6 +34,8 @@ const GstReport = () => {
   const [toDate, setToDate] = useState("");
   const [data, setData] = useState(null);
   const [shopData, setShopData] = useState(null);
+
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -134,7 +136,7 @@ const GstReport = () => {
   const hasGST = Boolean(shopData?.gstNumber);
 
   return (
-    <Box className="min-h-screen p-3 md:p-5 bg-[#f5f7fb]">
+    <Box className="min-h-screen p-2 md:p-5 bg-[#f5f7fb]">
 
       {/* PAGE HEADER */}
       <Box
@@ -176,7 +178,7 @@ const GstReport = () => {
             </Box>
 
             <Typography fontSize={14} color="text.secondary">
-             Address: {shopData.address}
+              Address: {shopData.address}
             </Typography>
           </CardContent>
         </Card>
@@ -203,12 +205,12 @@ const GstReport = () => {
             flexDirection: isMobile ? "column" : "row",
             justifyContent: "space-between",
             // flexWrap: "wrap",
-            gap: 4,
-            alignItems: "center",
+            gap: isMobile ? 2 : 4,
+            alignItems: isMobile ? "stretch" : "center",
           }}
         >
           <TextField
-          fullWidth
+            fullWidth
             type="date"
             label="From Date"
             InputLabelProps={{ shrink: true }}
@@ -218,7 +220,7 @@ const GstReport = () => {
           />
 
           <TextField
-          fullWidth
+            fullWidth
             type="date"
             label="To Date"
             InputLabelProps={{ shrink: true }}
@@ -232,7 +234,7 @@ const GstReport = () => {
             onClick={fetchReport}
             disabled={!hasGST}
             sx={{
-              alignItems : "flex-end",
+              alignItems: "flex-end",
               backgroundColor: "#0b3c5d",
               "&:hover": { backgroundColor: "#092c45" },
               borderRadius: 2,
@@ -277,7 +279,62 @@ const GstReport = () => {
 
       {/* TABLE */}
       {data && (
-        <>
+        <>{isMobile ? (
+          <Box>
+            {data.slabs.map((slab, index) => (
+              <Card
+                key={index}
+                sx={{
+                  mb: 2,
+                  borderRadius: 3,
+                  boxShadow: 2,
+                }}
+              >
+                <CardContent>
+                  <Typography fontWeight={700} color="#0b3c5d" mb={1}>
+                    GST {slab._id}%
+                  </Typography>
+
+                  <Divider sx={{ mb: 1 }} />
+
+                  <Box display="flex" justifyContent="space-between" mb={0.5}>
+                    <Typography variant="body2">Taxable</Typography>
+                    <Typography>₹{slab.taxable.toFixed(2)}</Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between" mb={0.5}>
+                    <Typography variant="body2">CGST</Typography>
+                    <Typography>₹{slab.cgst.toFixed(2)}</Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between" mb={0.5}>
+                    <Typography variant="body2">SGST</Typography>
+                    <Typography>₹{slab.sgst.toFixed(2)}</Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between" mb={0.5}>
+                    <Typography variant="body2">IGST</Typography>
+                    <Typography>₹{slab.igst.toFixed(2)}</Typography>
+                  </Box>
+
+                  <Box display="flex" justifyContent="space-between" mb={0.5}>
+                    <Typography variant="body2">Total GST</Typography>
+                    <Typography>₹{slab.totalGST.toFixed(2)}</Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 1 }} />
+
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography fontWeight={700}>Total Sales</Typography>
+                    <Typography fontWeight={700} color="#0b3c5d">
+                      ₹{slab.grandTotal.toFixed(2)}
+                    </Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        ) : (
           <Paper
             elevation={3}
             sx={{
@@ -287,6 +344,7 @@ const GstReport = () => {
             }}
           >
             <Box sx={{ overflowX: "auto" }}>
+
               <Table>
 
                 <TableHead>
@@ -369,6 +427,7 @@ const GstReport = () => {
               </Table>
             </Box>
           </Paper>
+        )}
 
           {/* SUMMARY */}
           <Card
