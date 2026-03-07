@@ -16,6 +16,9 @@ import {
   Tooltip,
   Skeleton,
   Button,
+  FormControl,
+  InputLabel,
+  Select,
 } from "@mui/material";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -59,6 +62,8 @@ export default function WaiterHomePage() {
   const [expanded, setExpanded] = useState(false);
 
   const [shopData, setShopData] = useState(null);
+
+  const [selectedSection, setSelectedSection] = useState("Foor 1");
 
   const [billsLoading, setBillsLoading] = useState(false);
   const [billsLoaded, setBillsLoaded] = useState(false);
@@ -242,6 +247,8 @@ export default function WaiterHomePage() {
 
     return acc;
   }, {});
+
+  const sectionList = Object.keys(groupedTables);
   return (
     <Box className="min-h-screen bg-gray-50">
       {/* Top Buttons */}
@@ -353,6 +360,7 @@ export default function WaiterHomePage() {
             {isDineIn && (
               <Card className="p-7 shadow-md ">
                 <div className="flex items-center justify-between  mb-4">
+
                   <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
                     Dine-In Orders
                   </Typography>
@@ -374,6 +382,24 @@ export default function WaiterHomePage() {
                   </span>
                 </div>
 
+                <FormControl size="small" sx={{ minWidth:"100%", mb: 3 }}>
+                  <InputLabel>Section</InputLabel>
+
+                  <Select
+                    value={selectedSection}
+                    label="Section"
+                    onChange={(e) => setSelectedSection(e.target.value)}
+                  >
+         
+
+                    {sectionList.map((section) => (
+                      <MenuItem key={section} value={section}>
+                        {section}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
                 <div className="max-h-[520px] overflow-y-auto pr-1">
                   {loading ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
@@ -387,40 +413,48 @@ export default function WaiterHomePage() {
                       ))}
                     </div>
                   ) : (
-                    Object.entries(groupedTables).map(
-                      ([sectionName, sectionTables]) => (
-                        <div key={sectionName} className="mb-6">
-                          {/* Section Title */}
-                          <Typography
-                            fontSize={16}
-                            fontWeight={600}
-                            className="mb-3 text-gray-700"
-                          >
-                            {sectionName}
-                          </Typography>
+                    Object.entries(groupedTables)
+                      .filter(([sectionName]) =>
+                        selectedSection === "ALL" ? true : sectionName === selectedSection
+                      )
+                      .map(
 
-                          {/* Tables Grid */}
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-2">
-                            {sectionTables.map((table) => (
-                              <Tooltip
-                                key={table._id}
-                                title={
-                                  table.status === "OCCUPIED"
-                                    ? "Active table"
-                                    : "Add order"
-                                }
-                                arrow
-                                placement="bottom"
-                              >
-                                <div
-                                  onClick={() =>
-                                    handleTableClick(
-                                      table._id,
-                                      table.tableNo,
-                                      table.sectionId?.name,
-                                    )
+                        // const sectionList = Object.keys(groupedTables);
+
+                        ([sectionName, sectionTables]) => (
+                          <div key={sectionName} className="mb-6 ">
+                            {/* Section Title */}
+                            <Typography
+                              fontSize={16}
+                              fontWeight={600}
+                              gutterBottom
+                              className="mb-3 text-gray-700"
+                            >
+                              {sectionName}
+                            </Typography>
+
+                            {/* Tables Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 ">
+                              {sectionTables.map((table) => (
+                                <Tooltip
+                                  key={table._id}
+                                  title={
+                                    table.status === "OCCUPIED"
+                                      ? "Active table"
+                                      : "Add order"
                                   }
-                                  className={`
+                                  arrow
+                                  placement="bottom"
+                                >
+                                  <div
+                                    onClick={() =>
+                                      handleTableClick(
+                                        table._id,
+                                        table.tableNo,
+                                        table.sectionId?.name,
+                                      )
+                                    }
+                                    className={`
                   relative
                   h-28 w-full
                   rounded-xl
@@ -431,62 +465,60 @@ export default function WaiterHomePage() {
                   gap-2
                   px-4 py-3
                   transition-all duration-300
-                  hover:shadow-lg hover:scale-[1.03]
+                  hover:shadow-lg hover:scale-[1.0]
                   ${tableStyles[table.status]}
-                  ${
-                    highlightTableNo === table.tableNo
-                      ? table.status === "OCCUPIED"
-                        ? "ring-4 ring-red-500 ring-offset-2"
-                        : "ring-4 ring-green-500 ring-offset-2"
-                      : ""
-                  }
+                  ${highlightTableNo === table.tableNo
+                                        ? table.status === "OCCUPIED"
+                                          ? "ring-4 ring-red-500 ring-offset-2"
+                                          : "ring-4 ring-green-500 ring-offset-2"
+                                        : ""
+                                      }
                 `}
-                                >
-                                  {/* Table Number */}
-                                  <Typography
-                                    fontSize={22}
-                                    fontWeight={600}
-                                    className={
-                                      table.status === "OCCUPIED"
-                                        ? "text-red-800"
-                                        : "text-green-600"
-                                    }
                                   >
-                                    {table.tableNo}
-                                  </Typography>
+                                    {/* Table Number */}
+                                    <Typography
+                                      fontSize={22}
+                                      fontWeight={600}
+                                      className={
+                                        table.status === "OCCUPIED"
+                                          ? "text-red-800"
+                                          : "text-green-600"
+                                      }
+                                    >
+                                      {table.tableNo}
+                                    </Typography>
 
-                                  {/* Status Badge */}
-                                  <Typography
-                                    fontSize={
-                                      table.status === "OCCUPIED" ? 12 : 13
-                                    }
-                                    fontWeight={
-                                      table.status === "OCCUPIED" ? 700 : 600
-                                    }
-                                    className={`px-2 py-[2px] rounded-full
-                    ${
-                      table.status === "OCCUPIED"
-                        ? "bg-red-100 text-red-700 border border-red-500"
-                        : "bg-green-100 text-green-700 border border-green-500"
-                    }`}
-                                  >
-                                    {table.status}
-                                  </Typography>
+                                    {/* Status Badge */}
+                                    <Typography
+                                      fontSize={
+                                        table.status === "OCCUPIED" ? 12 : 13
+                                      }
+                                      fontWeight={
+                                        table.status === "OCCUPIED" ? 700 : 600
+                                      }
+                                      className={`px-2 py-[2px] rounded-full
+                    ${table.status === "OCCUPIED"
+                                          ? "bg-red-100 text-red-700 border border-red-500"
+                                          : "bg-green-100 text-green-700 border border-green-500"
+                                        }`}
+                                    >
+                                      {table.status}
+                                    </Typography>
 
-                                  {/* Running Time */}
-                                  {table.status === "OCCUPIED" &&
-                                    table.occupiedAt && (
-                                      <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
-                                        {getRunningTime(table.occupiedAt)}
-                                      </div>
-                                    )}
-                                </div>
-                              </Tooltip>
-                            ))}
+                                    {/* Running Time */}
+                                    {table.status === "OCCUPIED" &&
+                                      table.occupiedAt && (
+                                        <div className="text-xs font-semibold text-red-700 bg-red-100 px-3 py-[2px] rounded-full">
+                                          {getRunningTime(table.occupiedAt)}
+                                        </div>
+                                      )}
+                                  </div>
+                                </Tooltip>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ),
-                    )
+                        ),
+                      )
                   )}
                 </div>
               </Card>
