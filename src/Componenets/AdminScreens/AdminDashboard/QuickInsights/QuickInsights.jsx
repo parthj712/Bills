@@ -39,6 +39,21 @@ export const QuickInsights = () => {
   const [open, setOpen] = useState(false);
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [bills, setBills] = useState([]);
+  const [shopCategory, setShopCategory] = useState(null);
+  const isDineIn = shopCategory === "DINE_IN";
+
+  useEffect(() => {
+    const fetchShopInfo = async () => {
+      try {
+        const res = await getShopInfo();
+        setShopCategory(res.data?.data?.businessCategory);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    fetchShopInfo();
+  }, []);
 
   const getData = async () => {
     try {
@@ -62,13 +77,17 @@ export const QuickInsights = () => {
       bg: "bg-blue-100/70",
       color: "text-blue-600",
     },
-    {
-      label: "Active Tables",
-      icon: TableBar,
-      chartType: "none",
-      bg: "bg-green-100/70",
-      color: "text-green-600",
-    },
+    ...(isDineIn
+      ? [
+          {
+            label: "Active Tables",
+            icon: TableBar,
+            chartType: "none",
+            bg: "bg-green-100/70",
+            color: "text-green-600",
+          },
+        ]
+      : []),
     {
       label: "Peak Hours",
       icon: AccessTime,
