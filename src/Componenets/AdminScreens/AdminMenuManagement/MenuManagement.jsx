@@ -145,7 +145,8 @@ export default function MenuManagement() {
 
     return menuItems.filter((m) => {
       const blob =
-        `${m.itemCode || ""} ${m.name || ""} ${m.description || ""} ${m.categoryName || ""} ${m.price?.half || ""} ${m.price?.full || ""}`
+        `${m.itemCode || ""} ${m.name || ""} ${m.description || ""} ${m.categoryName || ""} ${m.price?.half || ""} ${m.price?.full || ""} 
+${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
           .toLowerCase()
           .trim();
       return blob.includes(q);
@@ -169,21 +170,41 @@ export default function MenuManagement() {
       "Item Name",
       "Description",
       "Category",
+      "Variant",
+      "Price",
       "Half Price",
       "Full Price",
       "Availability",
     ];
 
     // 2️⃣ Map table data
-    const data = filteredMenu.map((item) => ({
-      "Item Code": item.itemCode || "",
-      "Item Name": item.name || "",
-      Description: item.description || "",
-      Category: item.categoryName || "",
-      "Half Price": item.price?.half ?? 0,
-      "Full Price": item.price?.full ?? 0,
-      Availability: item.isAvailable ? "Available" : "Unavailable",
-    }));
+    const data = [];
+
+    filteredMenu.forEach((item) => {
+      if (item.priceType === "VARIANT" && item.variants?.length) {
+        item.variants.forEach((v) => {
+          data.push({
+            "Item Code": item.itemCode || "",
+            "Item Name": item.name || "",
+            Description: item.description || "",
+            Category: item.categoryName || "",
+            Variant: v.name,
+            Price: v.price,
+            Availability: item.isAvailable ? "Available" : "Unavailable",
+          });
+        });
+      } else {
+        data.push({
+          "Item Code": item.itemCode || "",
+          "Item Name": item.name || "",
+          Description: item.description || "",
+          Category: item.categoryName || "",
+          "Half Price": item.price?.half ?? 0,
+          "Full Price": item.price?.full ?? 0,
+          Availability: item.isAvailable ? "Available" : "Unavailable",
+        });
+      }
+    });
 
     // 3️⃣ Create worksheet
     const worksheet = XLSX.utils.json_to_sheet(data, {
@@ -216,8 +237,11 @@ export default function MenuManagement() {
       "subCategory",
       "foodType",
       "itemCode",
-      "priceFull",
+      "priceType",
       "priceHalf",
+      "priceFull",
+      "variantName",
+      "variantPrice",
       "description",
     ];
 
@@ -458,7 +482,8 @@ export default function MenuManagement() {
                   "Item Code",
                   "Item",
                   "Category",
-                  "Price (Half/Full)",
+                  "Variant",
+                  "Price",
                   "Status",
                   "Actions",
                 ].map((head) => (
@@ -496,6 +521,9 @@ export default function MenuManagement() {
                     key={item._id}
                     sx={{
                       backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
+                      "& td": {
+                        py: 2,
+                      },
                       "&:hover": { backgroundColor: "#eef6ff" },
                       transition: "0.2s",
                     }}
@@ -532,9 +560,52 @@ export default function MenuManagement() {
                         }}
                       />
                     </TableCell>
+                    <TableCell>
+                      {item.priceType === "VARIANT" ? (
+                        <Box
+                          sx={{ display: "flex", flexWrap: "wrap", gap: 0.7 }}
+                        >
+                          {item.variants?.map((v, i) => (
+                            <Chip
+                              key={i}
+                              size="small"
+                              label={v.name}
+                              sx={{
+                                fontSize: 12,
+                                fontWeight: 500,
+                                backgroundColor: "#f1f5f9",
+                                border: "1px solid #e2e8f0",
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
 
-                    <TableCell sx={{ fontWeight: 300 }}>
-                      ₹ {item?.price?.half ?? 0} / {item?.price?.full ?? 0}
+                    <TableCell>
+                      {item.priceType === "VARIANT" ? (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.3,
+                          }}
+                        >
+                          {item.variants?.map((v, i) => (
+                            <Typography key={i} fontSize={13}>
+                              ₹{v.price}
+                            </Typography>
+                          ))}
+                        </Box>
+                      ) : item.priceType === "HALF_FULL" ? (
+                        <Typography>
+                          ₹ {item?.price?.half ?? 0} / {item?.price?.full ?? 0}
+                        </Typography>
+                      ) : (
+                        <Typography>₹ {item?.price?.full ?? 0}</Typography>
+                      )}
                     </TableCell>
 
                     <TableCell>

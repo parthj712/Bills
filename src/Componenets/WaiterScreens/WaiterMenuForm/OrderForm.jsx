@@ -78,42 +78,103 @@ export default function OrderForm({ category }) {
     setActiveIndex(0);
   }, [filteredItems]);
 
-  const getUnitPrice = (item, portion) => {
-    if (!item?.price) return 0;
-    if (portion === "half" && item.price.half) return item.price.half;
-    return item.price.full || 0;
+  const getUnitPrice = (item, portion, variantPrice) => {
+    if (item.priceType === "VARIANT") {
+      return variantPrice || 0;
+    }
+
+    if (item.priceType === "HALF_FULL") {
+      if (portion === "half" && item.price?.half) return item.price.half;
+      return item.price?.full || 0;
+    }
+
+    return item.price?.full || 0;
   };
 
   // Add "full" by default. If same item+portion already selected, increase qty.
   const handleSelectItem = (item) => {
-    setSelectedItems((prev) => {
-      const existing = prev.find(
-        (x) => x.item?._id === item._id && x.portion === "full",
-      );
+    // VARIANT ITEM
+    if (item.priceType === "VARIANT" && item.variants?.length) {
+      const firstVariant = item.variants[0];
 
-      if (existing) {
-        return prev.map((x) =>
-          x.tempId === existing.tempId ? { ...x, qty: x.qty + 1 } : x,
+      setSelectedItems((prev) => {
+        const existing = prev.find(
+          (x) => x.item._id === item._id && x.variantName === firstVariant.name,
         );
-      }
 
-      return [
-        ...prev,
-        {
-          tempId: nanoid(),
-          item,
-          portion: "full",
-          qty: 1,
-        },
-      ];
-    });
+        if (existing) {
+          return prev.map((x) =>
+            x.tempId === existing.tempId ? { ...x, qty: x.qty + 1 } : x,
+          );
+        }
 
+        return [
+          ...prev,
+          {
+            tempId: nanoid(),
+            item,
+            variantName: firstVariant.name,
+            variantPrice: firstVariant.price,
+            portion: null,
+            qty: 1,
+          },
+        ];
+      });
+    }
 
-    // ✅ Clear search field after selecting item
+    // HALF FULL ITEM
+    else if (item.priceType === "HALF_FULL") {
+      setSelectedItems((prev) => {
+        const existing = prev.find(
+          (x) => x.item._id === item._id && x.portion === "full",
+        );
+
+        if (existing) {
+          return prev.map((x) =>
+            x.tempId === existing.tempId ? { ...x, qty: x.qty + 1 } : x,
+          );
+        }
+
+        return [
+          ...prev,
+          {
+            tempId: nanoid(),
+            item,
+            portion: "full",
+            variantName: null,
+            variantPrice: null,
+            qty: 1,
+          },
+        ];
+      });
+    }
+
+    // SINGLE PRICE
+    else {
+      setSelectedItems((prev) => {
+        const existing = prev.find((x) => x.item._id === item._id);
+
+        if (existing) {
+          return prev.map((x) =>
+            x.tempId === existing.tempId ? { ...x, qty: x.qty + 1 } : x,
+          );
+        }
+
+        return [
+          ...prev,
+          {
+            tempId: nanoid(),
+            item,
+            portion: null,
+            variantName: null,
+            variantPrice: item.price?.full,
+            qty: 1,
+          },
+        ];
+      });
+    }
+
     setSearch("");
-
-
-    // ✅ Focus back to search input for fast billing
     searchRef.current?.focus();
   };
 
@@ -137,7 +198,7 @@ export default function OrderForm({ category }) {
 
   const totalAmount = useMemo(() => {
     return selectedItems.reduce((sum, x) => {
-      const price = getUnitPrice(x.item, x.portion);
+      const price = getUnitPrice(x.item, x.portion, x.variantPrice);
       return sum + price * x.qty;
     }, 0);
   }, [selectedItems]);
@@ -173,10 +234,11 @@ export default function OrderForm({ category }) {
           menuItemId: x.item._id,
           name: x.item.name,
           category: x.item.categoryName,
-          price: getUnitPrice(x.item, x.portion),
+          price: getUnitPrice(x.item, x.portion, x.variantPrice),
           qty: x.qty,
           itemCode: x.item.itemCode,
           portion: x.portion,
+          variantName: x.variantName,
         })),
       };
       console.log(payload);
@@ -312,27 +374,59 @@ export default function OrderForm({ category }) {
                           key={item._id}
                           elevation={0}
                           onClick={() => handleSelectItem(item)}
-                          className={`
-                            p-3 cursor-pointer border  transition-all duration-150
-                            ${
-                              isItemSelected(item._id)
-                                ? "border-slate-800 bg-slate-50 shadow-sm"
-                                : "border-gray-200 hover:border-slate-300 hover:shadow-sm"
-                            }
-
-`}
+                          sx={{
+                            p: 2,
+                            borderRadius: 3,
+                            cursor: "pointer",
+                            border: "1px solid #E5E7EB",
+                            transition: "all 0.15s ease",
+                            "&:hover": {
+                              borderColor: "#334155",
+                              boxShadow: "0 4px 10px rgba(0,0,0,0.06)",
+                            },
+                          }}
                         >
-                          <Typography fontWeight={600}>{item.name}</Typography>
-                          <Typography
-                            fontSize={14}
-                            fontWeight={600}
-                            color="text.secondary"
-                          >
-                            ₹ {item?.price?.full ?? 0}
-                            {item?.price?.half
-                              ? ` (Half ₹${item.price.half})`
-                              : ""}
+                          <Typography fontWeight={700} fontSize={15}>
+                            {item.name}
                           </Typography>
+
+                          {/* PRICE DISPLAY */}
+                          {item.priceType === "VARIANT" ? (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {item.variants?.map((v) => (
+                                <Chip
+                                  key={v.name}
+                                  size="small"
+                                  label={`${v.name} ₹${v.price}`}
+                                  sx={{
+                                    fontSize: 12,
+                                    backgroundColor: "#F1F5F9",
+                                    color: "#334155",
+                                    fontWeight: 600,
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          ) : item.priceType === "HALF_FULL" ? (
+                            <Typography
+                              fontSize={13}
+                              color="text.secondary"
+                              mt={0.5}
+                            >
+                              {item.price?.full !== undefined &&
+                                `Full ₹${item.price.full ?? 0}`}
+                              {item.price?.half !== undefined &&
+                                ` • Half ₹${item.price.half ?? 0}`}
+                            </Typography>
+                          ) : (
+                            <Typography
+                              fontSize={13}
+                              color="text.secondary"
+                              mt={0.5}
+                            >
+                              ₹ {item.price?.full ?? 0}
+                            </Typography>
+                          )}
                         </Card>
                       ))}
                     </div>
@@ -353,7 +447,11 @@ export default function OrderForm({ category }) {
 
                 <div className="flex flex-col gap-3">
                   {selectedItems.map((x) => {
-                    const price = getUnitPrice(x.item, x.portion);
+                    const price = getUnitPrice(
+                      x.item,
+                      x.portion,
+                      x.variantPrice,
+                    );
                     return (
                       <Card
                         key={x.tempId}
@@ -370,46 +468,73 @@ export default function OrderForm({ category }) {
                               {x.item.name}
                             </Typography>
                             <Typography fontSize={16} color="text.secondary">
-                              ₹ {price} / {x.portion}
+                              ₹ {price}{" "}
+                              {x.variantName
+                                ? `(${x.variantName})`
+                                : x.portion
+                                  ? `(${x.portion})`
+                                  : ""}
                             </Typography>
                           </div>
 
                           {/* Portion */}
-                          <div className="flex gap-2 flex-wrap">
-                            {x.item?.price?.full && (
+                          {x.item.priceType === "VARIANT" && (
+                            <div className="flex gap-2 flex-wrap">
+                              {x.item.variants.map((v) => (
+                                <Chip
+                                  key={v.name}
+                                  label={`${v.name} ₹${v.price}`}
+                                  sx={{
+                                    fontWeight: 600,
+                                    backgroundColor:
+                                      x.variantName === v.name
+                                        ? "#334155"
+                                        : "#F1F5F9",
+                                    color:
+                                      x.variantName === v.name
+                                        ? "#fff"
+                                        : "#475569",
+                                  }}
+                                  onClick={() =>
+                                    setSelectedItems((prev) =>
+                                      prev.map((item) =>
+                                        item.tempId === x.tempId
+                                          ? {
+                                              ...item,
+                                              variantName: v.name,
+                                              variantPrice: v.price,
+                                            }
+                                          : item,
+                                      ),
+                                    )
+                                  }
+                                />
+                              ))}
+                            </div>
+                          )}
+                          {x.item.priceType === "HALF_FULL" && (
+                            <div className="flex gap-2 flex-wrap">
                               <Chip
                                 label={`Full ₹${x.item.price.full}`}
-                                sx={{
-                                  fontWeight: 600,
-                                  borderRadius: 2,
-                                  backgroundColor:
-                                    x.portion === "full"
-                                      ? "#334155"
-                                      : "#F1F5F9",
-                                  color:
-                                    x.portion === "full" ? "#fff" : "#475569",
-                                  "&:hover": {
-                                    backgroundColor:
-                                      x.portion === "full"
-                                        ? "#1E293B"
-                                        : "#E2E8F0",
-                                  },
-                                }}
+                                color={
+                                  x.portion === "full" ? "primary" : "default"
+                                }
                                 onClick={() => updatePortion(x.tempId, "full")}
                               />
-                            )}
 
-                            {x.item?.price?.half && (
-                              <Chip
-                                sx={{ fontWeight: 600 }}
-                                label={`Half ₹${x.item.price.half}`}
-                                color={
-                                  x.portion === "half" ? "primary" : "default"
-                                }
-                                onClick={() => updatePortion(x.tempId, "half")}
-                              />
-                            )}
-                          </div>
+                              {x.item.price.half && (
+                                <Chip
+                                  label={`Half ₹${x.item.price.half || 0}`}
+                                  color={
+                                    x.portion === "half" ? "primary" : "default"
+                                  }
+                                  onClick={() =>
+                                    updatePortion(x.tempId, "half")
+                                  }
+                                />
+                              )}
+                            </div>
+                          )}
 
                           {/* Qty */}
                           <div className="flex items-center gap-3">
