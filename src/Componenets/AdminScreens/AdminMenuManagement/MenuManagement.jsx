@@ -137,7 +137,7 @@ export default function MenuManagement() {
       console.log(error?.response?.data?.message || error?.message || error);
     }
   };
-
+  console.log("selectedItems", selectedMenu);
   // ---------- premium: filter + stats ----------
   const filteredMenu = useMemo(() => {
     const q = search.trim().toLowerCase();

@@ -114,50 +114,63 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
   const errors = useMemo(() => {
     const e = {};
+
     if (!form.name.trim()) e.name = "Item name is required";
     if (!form.category) e.category = "Category is required";
     if (!form.foodType) e.foodType = "Food type is required";
     if (!form.itemCode.trim()) e.itemCode = "Item code is required";
+
     if (form.category === "Other" && !customCategory.trim()) {
       e.category = "Enter new category name";
     }
 
-    // if (form.subCategory === "Other" && !customSubCategory.trim()) {
-    //   e.subCategory = "Enter new sub category name";
-    // }
-
     const half = Number(form.priceHalf);
     const full = Number(form.priceFull);
-    // if (form.priceHalf === "" || !Number.isFinite(half) || half < 0)
-    //   e.priceHalf = "Enter valid half price";
-    if (form.priceFull === "" || !Number.isFinite(full) || full < 0)
-      e.priceFull = "Enter valid full price";
-    if (
-      Number.isFinite(half) &&
-      Number.isFinite(full) &&
-      full > 0 &&
-      half > full
-    )
-      e.priceHalf = "Half price can’t be more than full";
+
+    // ✅ SINGLE PRICE VALIDATION
+    if (form.priceType === "SINGLE") {
+      if (form.priceFull === "" || !Number.isFinite(full) || full < 0) {
+        e.priceFull = "Enter valid price";
+      }
+    }
+
+    // ✅ HALF FULL VALIDATION
+    if (form.priceType === "HALF_FULL") {
+      if (form.priceFull === "" || !Number.isFinite(full) || full < 0) {
+        e.priceFull = "Enter valid full price";
+      }
+
+      if (
+        form.priceHalf !== "" &&
+        (!Number.isFinite(half) || half < 0 || half > full)
+      ) {
+        e.priceHalf = "Half price can't be more than full";
+      }
+    }
+
+    // ✅ VARIANT VALIDATION
+    if (form.priceType === "VARIANT") {
+      if (!form.variants || form.variants.length === 0) {
+        e.variants = "Add at least one variant";
+      } else {
+        const validVariant = form.variants.some(
+          (v) => v.name?.trim() && v.price !== "",
+        );
+
+        if (!validVariant) {
+          e.variants = "Enter variant name and price";
+        }
+      }
+    }
+
     return e;
-  }, [form]);
+  }, [form, customCategory]);
 
   const canSubmit = useMemo(() => Object.keys(errors).length === 0, [errors]);
 
   const handleSubmit = async () => {
-    // ❌ VALIDATION FAIL → SHAKE
     if (!canSubmit) {
       triggerShake();
-      setTouched({
-        name: true,
-        category: true,
-        subCategory: true,
-        foodType: true,
-        priceHalf: true,
-        priceFull: true,
-        itemCode: true,
-        description: true,
-      });
       return;
     }
 
@@ -165,48 +178,58 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
       setLoading(true);
 
       const payload = {
-        ...form,
-        category: form.category === "Other" ? customCategory : form.category,
+        name: form.name.trim(),
+        description: form.description?.trim(),
+        itemCode: form.itemCode.trim(),
+
+        categoryName:
+          form.category === "Other" ? customCategory.trim() : form.category,
+
         subCategory:
-          form.subCategory === "Other" ? customSubCategory : form.subCategory,
+          form.subCategory === "Other"
+            ? customSubCategory.trim()
+            : form.subCategory,
+
+        foodType: form.foodType,
+        priceType: form.priceType,
       };
 
-      if (form.priceType === "VARIANT") {
-        payload.priceHalf = undefined;
-        payload.priceFull = undefined;
+      if (form.priceType === "SINGLE") {
+        payload.priceFull = Number(form.priceFull);
       }
-      console.log(payload);
+
+      if (form.priceType === "HALF_FULL") {
+        payload.priceFull = Number(form.priceFull);
+        payload.priceHalf = form.priceHalf ? Number(form.priceHalf) : 0;
+      }
+
+      if (form.priceType === "VARIANT") {
+        payload.variants = form.variants
+          .filter((v) => v.name?.trim() && v.price !== "")
+          .map((v) => ({
+            name: v.name.trim(),
+            price: Number(v.price),
+          }));
+      }
+
+      console.log("FINAL PAYLOAD:", payload);
 
       await addMenuItem(payload);
 
-      // ✅ SUCCESS ANIMATION
       setSuccess(true);
       onSuccess?.();
 
-      // auto close after animation
       setTimeout(() => {
         setSuccess(false);
         onClose?.();
       }, 1200);
     } catch (error) {
-      // ❌ API ERROR → SHAKE
-
+      console.error("API ERROR:", error?.response?.data);
       triggerShake();
-
-      if (error?.response?.status === 403) {
-        showSnackbar(
-          error.response.data?.message ||
-            "Your subscription has expired. Please renew to add new menu items.",
-        );
-        return;
-      }
-
-      showSnackbar(error.response.data?.message || "Failed to add menu item");
     } finally {
       setLoading(false);
     }
   };
-
   const MotionPaper = motion.div;
 
   const dialogVariants = {
