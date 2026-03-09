@@ -91,9 +91,9 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
         price:
           form.priceType === "HALF_FULL"
             ? {
-                half: form.priceHalf,
-                full: form.priceFull,
-              }
+              half: form.priceHalf,
+              full: form.priceFull,
+            }
             : form.priceType === "SINGLE"
               ? { full: form.priceFull }
               : undefined,
@@ -401,13 +401,11 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                           </Button>
                         </Box>
                       ))}
-                      <Button
-                        variant="contained"
+                      <AppButton
+                        label="Add Variant"
                         onClick={addVariant}
-                        sx={{ alignSelf: "flex-start", mt: 1 }}
-                      >
-                        Add Variant
-                      </Button>
+                        x={{ alignSelf: "flex-start", mt: 1 }}
+                      />
                     </Box>
                   )}
 

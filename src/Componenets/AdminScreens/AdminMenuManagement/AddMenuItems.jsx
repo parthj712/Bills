@@ -26,6 +26,7 @@ import { addMenuItem, getCatgories } from "@/service/menuService";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const FOOD_TYPES = ["Veg", "Non-Veg"];
 
@@ -264,7 +265,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
         <Dialog
           open={open}
           onClose={loading ? undefined : onClose}
-          maxWidth="sm"
+          maxWidth="lg"
           fullWidth
           PaperProps={{
             component: MotionPaper,
@@ -462,7 +463,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                     />
                   </Box>
 
-                  <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Box className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                     <TextField
                       label="Item Code"
                       name="itemCode"
@@ -548,18 +549,18 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
                     {(form.subCategory === "Other" ||
                       form.category === "Other") && (
-                      <TextField
-                        label="New Sub Category"
-                        value={customSubCategory}
-                        onChange={(e) => setCustomSubCategory(e.target.value)}
-                        fullWidth
-                        sx={{
-                          backgroundColor: "white",
-                          borderRadius: 3,
-                          "& fieldset": { borderColor: "#e5e7eb" },
-                        }}
-                      />
-                    )}
+                        <TextField
+                          label="New Sub Category"
+                          value={customSubCategory}
+                          onChange={(e) => setCustomSubCategory(e.target.value)}
+                          fullWidth
+                          sx={{
+                            backgroundColor: "white",
+                            borderRadius: 3,
+                            "& fieldset": { borderColor: "#e5e7eb" },
+                          }}
+                        />
+                      )}
 
                     <TextField
                       label="Food Type"
@@ -630,59 +631,66 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                         onChange={handleChange}
                       />
                     )}
-
-                    {form.priceType === "VARIANT" && (
-                      <Box className="flex flex-col gap-3">
-                        {form.variants?.map((variant, index) => (
-                          <Box key={index} className="flex gap-2">
-                            <TextField
-                              label="Variant Name"
-                              value={variant.name}
-                              onChange={(e) => {
-                                const updated = [...form.variants];
-                                updated[index].name = e.target.value;
-                                setForm({ ...form, variants: updated });
-                              }}
-                            />
-
-                            <TextField
-                              label="Price"
-                              type="number"
-                              value={variant.price}
-                              onChange={(e) => {
-                                const updated = [...form.variants];
-                                updated[index].price = e.target.value;
-                                setForm({ ...form, variants: updated });
-                              }}
-                            />
-
-                            <AppButton
-                              label="Remove"
-                              onClick={() => {
-                                const updated = form.variants.filter(
-                                  (_, i) => i !== index,
-                                );
-                                setForm({ ...form, variants: updated });
-                              }}
-                            />
-                          </Box>
-                        ))}
-
-                        <AppButton
-                          label="Add Variant"
-                          onClick={() =>
-                            setForm({
-                              ...form,
-                              variants: [
-                                ...(form.variants || []),
-                                { name: "", price: "" },
-                              ],
-                            })
-                          }
-                        />
-                      </Box>
-                    )}
                   </Box>
+
+
+                  {form.priceType === "VARIANT" && (
+                    <Box className="flex flex-col gap-3 mt-3">
+                      {form.variants?.map((variant, index) => (
+                        <Box key={index} className="flex gap-6">
+                          <TextField
+                            fullWidth
+                            label="Variant Name"
+                            value={variant.name}
+                            onChange={(e) => {
+                              const updated = [...form.variants];
+                              updated[index].name = e.target.value;
+                              setForm({ ...form, variants: updated });
+                            }}
+                          />
+
+                          <TextField
+                            fullWidth
+                            label="Price"
+                            type="number"
+                            value={variant.price}
+                            onChange={(e) => {
+                              const updated = [...form.variants];
+                              updated[index].price = e.target.value;
+                              setForm({ ...form, variants: updated });
+                            }}
+                          />
+                          <AppButton
+                            startIcon={<DeleteIcon />}
+                            sx={{
+                              backgroundColor: "#ff4d4f",
+                              color: "#fff",
+                              "&:hover": {
+                                backgroundColor: "#d9363e",
+                              },
+                            }}
+                            onClick={() => {
+                              const updated = form.variants.filter((_, i) => i !== index);
+                              setForm({ ...form, variants: updated });
+                            }}
+                          />
+                        </Box>
+                      ))}
+
+                      <AppButton
+                        label="Add Variant"
+                        onClick={() =>
+                          setForm({
+                            ...form,
+                            variants: [
+                              ...(form.variants || []),
+                              { name: "", price: "" },
+                            ],
+                          })
+                        }
+                      />
+                    </Box>
+                  )}
                 </Box>
 
                 <Divider sx={{ mt: 1.5 }} />

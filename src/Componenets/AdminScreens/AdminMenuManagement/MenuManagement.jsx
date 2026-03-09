@@ -288,7 +288,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
     const isExcel =
       file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -572,7 +572,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
                               label={v.name}
                               sx={{
                                 fontSize: 12,
-                                fontWeight: 500,
+                                fontWeight: 600,
                                 backgroundColor: "#f1f5f9",
                                 border: "1px solid #e2e8f0",
                               }}
@@ -589,14 +589,23 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
                         <Box
                           sx={{
                             display: "flex",
-                            flexDirection: "column",
-                            gap: 0.3,
+                            flexDirection: "row",
+                            gap: 0.6,
                           }}
                         >
                           {item.variants?.map((v, i) => (
-                            <Typography key={i} fontSize={13}>
-                              ₹{v.price}
-                            </Typography>
+
+                            <Chip
+                              key={i}
+                              size="small"
+                              label={`₹${v.price}`}
+                              sx={{
+                                fontSize: 12,
+                                fontWeight: 600,
+                                backgroundColor: "#f1f5f9",
+                                border: "1px solid #e2e8f0",
+                              }}
+                            />
                           ))}
                         </Box>
                       ) : item.priceType === "HALF_FULL" ? (
@@ -723,7 +732,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => {}}
+        onSubmit={(data) => { }}
         onSuccess={handleFetchMenu}
       />
 
