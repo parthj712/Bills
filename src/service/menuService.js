@@ -1,17 +1,7 @@
 import API from "./api";
 
-export const addMenuItem = async (form) => {
-  const payload = {
-    name: form.name,
-    categoryName: form.category, // ✅ FIXED
-    subCategory: form.subCategory,
-    foodType: form.foodType,
-    itemCode: form.itemCode,
-    description: form.description,
-    priceHalf: Number(form.priceHalf),
-    priceFull: Number(form.priceFull),
-  };
-  const data = await API.post("/menu", payload);
+export const addMenuItem = async (payload) => {
+  const { data } = await API.post("/menu", payload);
   return data;
 };
 
@@ -25,6 +15,7 @@ export const deleteMenuItem = async (id) => {
 };
 
 export const updateMenuItem = async (id, data) => {
+  // Build payload according to priceType
   const payload = {
     name: data.name,
     categoryName: data.category,
@@ -32,8 +23,15 @@ export const updateMenuItem = async (id, data) => {
     foodType: data.foodType,
     itemCode: data.itemCode,
     description: data.description,
-    priceHalf: Number(data.priceHalf),
-    priceFull: Number(data.priceFull),
+    price:
+      data.priceType === "HALF_FULL"
+        ? {
+            half: Number(data.priceHalf) || 0,
+            full: Number(data.priceFull) || 0,
+          }
+        : undefined,
+    variants: data.priceType === "VARIANT" ? data.variants : undefined,
+    priceType: data.priceType,
   };
 
   const res = await API.put(`/menu/${id}`, payload);

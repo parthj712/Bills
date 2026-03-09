@@ -10,15 +10,14 @@ import {
   Box,
   Typography,
   IconButton,
-  Divider,
   InputAdornment,
+  Button,
 } from "@mui/material";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import CurrencyRupeeRoundedIcon from "@mui/icons-material/CurrencyRupeeRounded";
 import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-
 
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useState } from "react";
@@ -27,17 +26,18 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 const CATEGORIES = ["Main Course", "Chinese", "Snacks"];
 const SUB_CATEGORIES = ["Indian", "South Indian"];
 const FOOD_TYPES = ["Veg", "Non-Veg"];
+const PRICE_TYPES = ["SINGLE", "HALF_FULL", "VARIANT"];
 
 export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
-
   const { showSnackbar } = useAppSnackbar();
-  
+
   const [form, setForm] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const MotionPaper = motion.div;
   const controls = useAnimation();
+  console.log("menu", menu);
 
   useEffect(() => {
     if (menu) {
@@ -47,8 +47,10 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
         category: menu.categoryName || "",
         subCategory: menu.subCategory || "",
         foodType: menu.foodType || "",
+        priceType: menu.priceType || "SINGLE",
         priceHalf: menu.price?.half || "",
         priceFull: menu.price?.full || "",
+        variants: menu.variants || [],
       });
     }
   }, [menu]);
@@ -59,59 +61,76 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleVariantChange = (index, field, value) => {
+    const updatedVariants = [...form.variants];
+    updatedVariants[index][field] = value;
+    setForm((prev) => ({ ...prev, variants: updatedVariants }));
+  };
+
+  const addVariant = () => {
+    setForm((prev) => ({
+      ...prev,
+      variants: [...prev.variants, { name: "", price: "" }],
+    }));
+  };
+
+  const removeVariant = (index) => {
+    const updatedVariants = [...form.variants];
+    updatedVariants.splice(index, 1);
+    setForm((prev) => ({ ...prev, variants: updatedVariants }));
+  };
+
   const handleSubmit = async () => {
     try {
       setLoading(true);
 
-      await onUpdate(menu._id, form);
+      const payload = {
+        ...form,
+        categoryName: form.category,
+        subCategory: form.subCategory,
+        price:
+          form.priceType === "HALF_FULL"
+            ? {
+                half: form.priceHalf,
+                full: form.priceFull,
+              }
+            : form.priceType === "SINGLE"
+              ? { full: form.priceFull }
+              : undefined,
+        variants: form.priceType === "VARIANT" ? form.variants : undefined,
+      };
 
-      // ✅ success animation
+      await onUpdate(menu._id, payload);
+
       setSuccess(true);
-
       setTimeout(() => {
         setSuccess(false);
         onClose();
       }, 1200);
     } catch (error) {
-      // ❌ error → shake
       triggerShake();
       showSnackbar("Failed to update menu item");
     } finally {
       setLoading(false);
     }
   };
-  ;
-
-
 
   const dialogVariants = {
     hidden: { opacity: 0, scale: 0.95, y: 20 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.96,
-      y: 20,
-      transition: { duration: 0.25 },
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35 } },
+    exit: { opacity: 0, scale: 0.96, y: 20, transition: { duration: 0.25 } },
   };
-
-
-
-
 
   const triggerShake = () => {
-    controls.start({
-      x: [0, -8, 8, -6, 6, 0],
-      transition: { duration: 0.4 },
-    });
+    controls.start({ x: [0, -8, 8, -6, 6, 0], transition: { duration: 0.4 } });
   };
+  const categoryOptions = form
+    ? Array.from(new Set([...CATEGORIES, form.category])) // add current category
+    : CATEGORIES;
 
-
+  const subCategoryOptions = form
+    ? Array.from(new Set([...SUB_CATEGORIES, form.subCategory])) // add current subCategory
+    : SUB_CATEGORIES;
   return (
     <AnimatePresence>
       {open && (
@@ -133,7 +152,6 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
             },
           }}
         >
-
           {/* Header */}
           <Box
             sx={{
@@ -164,7 +182,9 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                   >
                     Edit Menu Item
                   </DialogTitle>
-                  <Typography sx={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}>
+                  <Typography
+                    sx={{ color: "rgba(255,255,255,0.8)", fontSize: 12 }}
+                  >
                     Update menu details carefully
                   </Typography>
                 </Box>
@@ -202,8 +222,6 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
               </motion.div>
             ) : (
               <motion.div animate={controls}>
-                {/* 👇 KEEP YOUR EXISTING FORM CONTENT HERE */}
-
                 <Typography fontWeight={900} mb={1} className="text-[#7c2d12]">
                   Item Information
                 </Typography>
@@ -212,6 +230,7 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                 </Typography>
 
                 <Box className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  {/* Basic Fields */}
                   <TextField
                     label="Item Name"
                     name="name"
@@ -220,8 +239,7 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                     fullWidth
                     sx={fieldStyle}
                   />
-
-                  <TextField
+                  {/* <TextField
                     label="Category"
                     name="category"
                     select
@@ -229,7 +247,7 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                     onChange={handleChange}
                     sx={fieldStyle}
                   >
-                    {CATEGORIES.map((c) => (
+                    {categoryOptions.map((c) => (
                       <MenuItem key={c} value={c}>
                         {c}
                       </MenuItem>
@@ -244,13 +262,12 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                     onChange={handleChange}
                     sx={fieldStyle}
                   >
-                    {SUB_CATEGORIES.map((s) => (
+                    {subCategoryOptions.map((s) => (
                       <MenuItem key={s} value={s}>
                         {s}
                       </MenuItem>
                     ))}
-                  </TextField>
-
+                  </TextField> */}
                   <TextField
                     label="Food Type"
                     name="foodType"
@@ -267,36 +284,132 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                   </TextField>
 
                   <TextField
-                    label="Half Price"
-                    name="priceHalf"
-                    type="number"
-                    value={form.priceHalf}
+                    label="Price Type"
+                    name="priceType"
+                    select
+                    value={form.priceType}
                     onChange={handleChange}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CurrencyRupeeRoundedIcon sx={{ color: "#8a8a8a" }} />
-                        </InputAdornment>
-                      ),
-                    }}
                     sx={fieldStyle}
-                  />
+                  >
+                    {PRICE_TYPES.map((pt) => (
+                      <MenuItem key={pt} value={pt}>
+                        {pt}
+                      </MenuItem>
+                    ))}
+                  </TextField>
 
-                  <TextField
-                    label="Full Price"
-                    name="priceFull"
-                    type="number"
-                    value={form.priceFull}
-                    onChange={handleChange}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CurrencyRupeeRoundedIcon sx={{ color: "#8a8a8a" }} />
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={fieldStyle}
-                  />
+                  {/* Price Fields or Variants */}
+                  {form.priceType === "SINGLE" && (
+                    <TextField
+                      label="Price"
+                      name="priceFull"
+                      type="number"
+                      value={form.priceFull}
+                      onChange={handleChange}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <CurrencyRupeeRoundedIcon
+                              sx={{ color: "#8a8a8a" }}
+                            />
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={fieldStyle}
+                    />
+                  )}
+
+                  {form.priceType === "HALF_FULL" && (
+                    <>
+                      <TextField
+                        label="Half Price"
+                        name="priceHalf"
+                        type="number"
+                        value={form.priceHalf}
+                        onChange={handleChange}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <CurrencyRupeeRoundedIcon
+                                sx={{ color: "#8a8a8a" }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={fieldStyle}
+                      />
+                      <TextField
+                        label="Full Price"
+                        name="priceFull"
+                        type="number"
+                        value={form.priceFull}
+                        onChange={handleChange}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <CurrencyRupeeRoundedIcon
+                                sx={{ color: "#8a8a8a" }}
+                              />
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={fieldStyle}
+                      />
+                    </>
+                  )}
+
+                  {form.priceType === "VARIANT" && (
+                    <Box className="md:col-span-2 flex flex-col gap-3 mt-3">
+                      {form.variants?.map((v, i) => (
+                        <Box
+                          key={i}
+                          className="flex flex-col md:flex-row gap-2 items-start md:items-center"
+                        >
+                          <TextField
+                            label="Variant Name"
+                            value={v.name}
+                            onChange={(e) =>
+                              handleVariantChange(i, "name", e.target.value)
+                            }
+                            sx={{ flex: 1, ...fieldStyle }}
+                          />
+                          <TextField
+                            label="Price"
+                            type="number"
+                            value={v.price}
+                            onChange={(e) =>
+                              handleVariantChange(i, "price", e.target.value)
+                            }
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <CurrencyRupeeRoundedIcon
+                                    sx={{ color: "#8a8a8a" }}
+                                  />
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{ width: 140, ...fieldStyle }}
+                          />
+                          <Button
+                            color="error"
+                            variant="outlined"
+                            onClick={() => removeVariant(i)}
+                            sx={{ height: 40, mt: { xs: 1, md: 0 } }}
+                          >
+                            Remove
+                          </Button>
+                        </Box>
+                      ))}
+                      <Button
+                        variant="contained"
+                        onClick={addVariant}
+                        sx={{ alignSelf: "flex-start", mt: 1 }}
+                      >
+                        Add Variant
+                      </Button>
+                    </Box>
+                  )}
 
                   <TextField
                     label="Description"
@@ -309,8 +422,6 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                     sx={fieldStyle}
                   />
                 </Box>
-
-                {/* <Divider sx={{ mt: 2 }} /> */}
               </motion.div>
             )}
           </DialogContent>
@@ -321,13 +432,8 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
               label="Cancel"
               variant="outlined"
               onClick={onClose}
-              sx={{
-                borderRadius: 3,
-                textTransform: "none",
-                fontWeight: 800,
-              }}
+              sx={{ borderRadius: 3, textTransform: "none", fontWeight: 800 }}
             />
-
             <AppButton
               label="Update Item"
               onClick={handleSubmit}
@@ -349,7 +455,6 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
   );
 }
 
-/* Shared input style */
 const fieldStyle = {
   backgroundColor: "white",
   borderRadius: 3,
