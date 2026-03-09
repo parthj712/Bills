@@ -31,16 +31,18 @@ const FOOD_TYPES = ["Veg", "Non-Veg"];
 
 export default function AddMenuItems({ open, onClose, onSuccess }) {
   const { showSnackbar } = useAppSnackbar();
-
+  const PRICE_TYPES = ["SINGLE", "HALF_FULL", "VARIANT"];
   const [form, setForm] = useState({
     name: "",
     description: "",
     category: "",
     subCategory: "",
     foodType: "",
+    priceType: "HALF_FULL",
     priceHalf: "",
     priceFull: "",
     itemCode: "",
+    variants: [],
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -75,9 +77,11 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
         category: "",
         subCategory: "",
         foodType: "",
+        priceType: "HALF_FULL",
         priceHalf: "",
         priceFull: "",
         itemCode: "",
+        variants: [],
       });
       setTouched({});
       setLoading(false);
@@ -166,6 +170,11 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
         subCategory:
           form.subCategory === "Other" ? customSubCategory : form.subCategory,
       };
+
+      if (form.priceType === "VARIANT") {
+        payload.priceHalf = undefined;
+        payload.priceFull = undefined;
+      }
       console.log(payload);
 
       await addMenuItem(payload);
@@ -557,64 +566,99 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                     </TextField>
 
                     <TextField
-                      label="Half Price"
-                      name="priceHalf"
-                      type="number"
-                      value={form.priceHalf}
-                      size="medium"
+                      select
+                      label="Price Type"
+                      name="priceType"
+                      value={form.priceType}
                       onChange={handleChange}
-                      onBlur={() => markTouched("priceHalf")}
-                      // error={!!(touched.priceHalf && errors.priceHalf)}
-                      helperText={
-                        touched.priceHalf && errors.priceHalf
-                          ? errors.priceHalf
-                          : " "
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CurrencyRupeeRoundedIcon
-                              sx={{ color: "#8a8a8a" }}
-                            />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        backgroundColor: "white",
-                        borderRadius: 3,
-                        "& fieldset": { borderColor: "#e5e7eb" },
-                      }}
-                    />
+                      fullWidth
+                    >
+                      <MenuItem value="SINGLE">Single Price</MenuItem>
+                      <MenuItem value="HALF_FULL">Half / Full</MenuItem>
+                      <MenuItem value="VARIANT">Variants</MenuItem>
+                    </TextField>
 
-                    <TextField
-                      label="Full Price"
-                      name="priceFull"
-                      type="number"
-                      value={form.priceFull}
-                      size="medium"
-                      onChange={handleChange}
-                      onBlur={() => markTouched("priceFull")}
-                      error={!!(touched.priceFull && errors.priceFull)}
-                      helperText={
-                        touched.priceFull && errors.priceFull
-                          ? errors.priceFull
-                          : " "
-                      }
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <CurrencyRupeeRoundedIcon
-                              sx={{ color: "#8a8a8a" }}
+                    {form.priceType === "HALF_FULL" && (
+                      <>
+                        <TextField
+                          label="Half Price"
+                          name="priceHalf"
+                          type="number"
+                          value={form.priceHalf}
+                          onChange={handleChange}
+                        />
+
+                        <TextField
+                          label="Full Price"
+                          name="priceFull"
+                          type="number"
+                          value={form.priceFull}
+                          onChange={handleChange}
+                        />
+                      </>
+                    )}
+
+                    {form.priceType === "SINGLE" && (
+                      <TextField
+                        label="Price"
+                        name="priceFull"
+                        type="number"
+                        value={form.priceFull}
+                        onChange={handleChange}
+                      />
+                    )}
+
+                    {form.priceType === "VARIANT" && (
+                      <Box className="flex flex-col gap-3">
+                        {form.variants?.map((variant, index) => (
+                          <Box key={index} className="flex gap-2">
+                            <TextField
+                              label="Variant Name"
+                              value={variant.name}
+                              onChange={(e) => {
+                                const updated = [...form.variants];
+                                updated[index].name = e.target.value;
+                                setForm({ ...form, variants: updated });
+                              }}
                             />
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{
-                        backgroundColor: "white",
-                        borderRadius: 3,
-                        "& fieldset": { borderColor: "#e5e7eb" },
-                      }}
-                    />
+
+                            <TextField
+                              label="Price"
+                              type="number"
+                              value={variant.price}
+                              onChange={(e) => {
+                                const updated = [...form.variants];
+                                updated[index].price = e.target.value;
+                                setForm({ ...form, variants: updated });
+                              }}
+                            />
+
+                            <AppButton
+                              label="Remove"
+                              onClick={() => {
+                                const updated = form.variants.filter(
+                                  (_, i) => i !== index,
+                                );
+                                setForm({ ...form, variants: updated });
+                              }}
+                            />
+                          </Box>
+                        ))}
+
+                        <AppButton
+                          label="Add Variant"
+                          onClick={() =>
+                            setForm({
+                              ...form,
+                              variants: [
+                                ...(form.variants || []),
+                                { name: "", price: "" },
+                              ],
+                            })
+                          }
+                        />
+                      </Box>
+                    )}
                   </Box>
                 </Box>
 

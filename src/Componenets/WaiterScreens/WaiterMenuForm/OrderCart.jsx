@@ -149,17 +149,18 @@ export default function OrderCart() {
     await itemIncrement({
       tableId,
       menuItemId: item.menuItemId,
-      price: item.price,
+      portion: item.portion || null,
+      variantName: item.variantName || null,
     });
   };
   const handleDecrease = async (item) => {
     await itemDecrement({
       tableId,
       menuItemId: item.menuItemId,
-      price: item.price,
+      portion: item.portion || null,
+      variantName: item.variantName || null,
     });
   };
-
   const handleOpenConfirm = () => {
     if (!cartItems.length || loading) return;
     if (isDineIn && !tableId) return;
@@ -531,7 +532,9 @@ export default function OrderCart() {
     >
       <div>
         <Typography fontSize={16} fontWeight={600}>
-          {item.name} ({item.portion})
+          {item.name}
+          {item.variantName && ` (${item.variantName})`}
+          {item.portion && ` (${item.portion})`}
         </Typography>
 
         <Typography fontSize={14}>₹ {item.price}/-</Typography>
