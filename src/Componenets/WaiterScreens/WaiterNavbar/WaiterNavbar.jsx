@@ -25,6 +25,9 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "@mui/material/Drawer";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
+import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded";
+import AddMenuItems from "@/Componenets/AdminScreens/AdminMenuManagement/AddMenuItems";
+
 const WaiterNavbar = () => {
 
 
@@ -64,6 +67,7 @@ const WaiterNavbar = () => {
   const [kbAnchorEl, setKbAnchorEl] = useState(null);
   const [kbOpen, setKbOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openAddMenu, setOpenAddMenu] = useState(false);
 
   //avatr mail
 
@@ -148,6 +152,13 @@ const WaiterNavbar = () => {
           </Typography>
         </Box>
 
+
+        {(isMobile || isTablet) && (
+          <IconButton onClick={() => setMobileOpen(true)}>
+            <MenuIcon />
+          </IconButton>
+        )}
+
         {isDesktop && (
           <>
             {/* Right: Menu + Sign Out */}
@@ -158,17 +169,33 @@ const WaiterNavbar = () => {
                     <KeyboardIcon />
                   </IconButton>
 
+                  {/* Add Menu Item */}
+                  <AppButton
+                    startIcon={<RestaurantMenuRoundedIcon />}
+                    label="Add Item"
+                    onClick={() => setOpenAddMenu(true)}
+                    sx={{
+                      backgroundColor: "#0b3c5d",
+                      color: "#fff",
+                      fontWeight: 700,
+                      px: 2,
+                      "&:hover": {
+                        backgroundColor: "#082c44",
+                      },
+                    }}
+                  />
+
                   {/* Swiggy */}
                   <Box position="relative" display="inline-block">
                     <AppButton
                       label="Swiggy"
                       className="
-      !bg-[#FC8019]/80
-      !text-white
-      !px-5
-      opacity-80
-      cursor-not-allowed
-    "
+                            !bg-[#FC8019]/80
+                            !text-white
+                            !px-5
+                            opacity-80
+                            cursor-not-allowed
+                          "
                       disabled
                     />
 
@@ -323,6 +350,73 @@ const WaiterNavbar = () => {
             </Dialog>
           </>
         )}
+
+
+
+        <Drawer
+          anchor="right"
+          open={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+        >
+          <Box width={250} p={2} display="flex" flexDirection="column" gap={2}>
+
+            {/* User Info */}
+            <Box display="flex" alignItems="center" gap={2}>
+              <Avatar
+                sx={{
+                  bgcolor: stringToColor(userInitial || "A"),
+                  fontWeight: 600,
+                }}
+              >
+                {userInitial.charAt(0).toUpperCase()}
+              </Avatar>
+
+              <Box>
+                <Typography fontWeight={600}>{userInitial}</Typography>
+                <Typography fontSize={12} color="text.secondary">
+                  Logged In
+                </Typography>
+              </Box>
+            </Box>
+
+            <Divider />
+
+            <MenuItem
+              onClick={() => {
+                setMobileOpen(false);
+                setOpenAddMenu(true);
+              }}
+              sx={{ borderRadius: 1 }}
+            >
+              <RestaurantMenuRoundedIcon fontSize="small" sx={{ mr: 1 }} />
+              Add Menu Item
+            </MenuItem>
+
+            {/* Logout Button */}
+            <MenuItem
+              onClick={() => {
+                setMobileOpen(false);
+                handleLogout();
+              }}
+              sx={{ borderRadius: 1 }}
+            >
+              <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+              Sign Out
+            </MenuItem>
+
+          </Box>
+        </Drawer>
+
+
+        <AddMenuItems
+          open={openAddMenu}
+          onClose={() => setOpenAddMenu(false)}
+          onSuccess={() => {
+            showSnackbar("Menu item added", "success");
+          }}
+        />
+
+
       </Card>
     </div>
   );
