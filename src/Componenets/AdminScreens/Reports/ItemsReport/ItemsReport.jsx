@@ -283,9 +283,8 @@ const ItemsReport = () => {
                   <TableRow sx={{ backgroundColor: "#0b3c5d" }}>
                     {[
                       "Item Name",
-                      "Item Code",
-                      "Category",
-
+                      // "Item Code",
+                      // "Category",
                       "Total Order Count",
                       "Total Qty Sold",
                       "Unit Price",
@@ -314,13 +313,13 @@ const ItemsReport = () => {
                         <TableRow key={index} hover>
                           <TableCell align="center">{row.itemName}</TableCell>
 
-                          <TableCell align="center">
+                          {/* <TableCell align="center">
                             {row.itemCode || "-"}
-                          </TableCell>
+                          </TableCell> */}
 
-                          <TableCell align="center">
+                          {/* <TableCell align="center">
                             {row.category || "-"}
-                          </TableCell>
+                          </TableCell> */}
 
                           <TableCell align="center">
                             {row.totalOrders}
@@ -342,8 +341,8 @@ const ItemsReport = () => {
                           TOTAL
                         </TableCell>
 
-                        <TableCell align="center">-</TableCell>
-                        <TableCell align="center">-</TableCell>
+                        {/* <TableCell align="center">-</TableCell>
+                        <TableCell align="center">-</TableCell> */}
 
                         <TableCell align="center" sx={{ fontWeight: 700 }}>
                           {totals.totalOrders}
