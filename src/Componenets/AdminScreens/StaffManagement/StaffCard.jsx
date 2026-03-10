@@ -170,13 +170,14 @@ export default function StaffCard({
 
                 <Box px={3} py={1.8}>
                     {/* INFO */}
-                    <Box className="grid grid-cols-3 gap-3 mt-1">
+                    <Box className="grid grid-cols-2 gap-3 mt-1">
+
                         <Box>
                             <Typography fontSize={12} color="text.secondary">
-                                Phone
+                                Status
                             </Typography>
                             <Typography fontWeight={600} color="#424242">
-                                {staff.phone}
+                                {staff.isActive ? "Active" : "Inactive"}
                             </Typography>
                         </Box>
 
@@ -193,15 +194,15 @@ export default function StaffCard({
                             </Typography>
                         </Box>
 
-
                         <Box>
                             <Typography fontSize={12} color="text.secondary">
-                                Status
+                                Phone
                             </Typography>
                             <Typography fontWeight={600} color="#424242">
-                                {staff.isActive ? "Active" : "Inactive"}
+                                {staff.phone}
                             </Typography>
                         </Box>
+
                     </Box>
 
                     <Divider sx={{ my: 1 }} />
