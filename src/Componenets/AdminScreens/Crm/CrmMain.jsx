@@ -35,7 +35,7 @@ const CrmMain = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [shopData, setShopData] = useState(null);
-  const isBakery = shopData?.businessCategory === "CAFE";
+  const isBakery = shopData?.businessCategory === "BAKERY";
   // ✅ Fetch Admin Info
   useEffect(() => {
     const fetchInfo = async () => {

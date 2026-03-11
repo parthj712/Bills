@@ -342,7 +342,7 @@ export default function OrderForm({ category }) {
         )}
 
         {/* Mobile + Birthdate – Only for Bakery Shops */}
-        {orderType === "TAKEAWAY" && shopInfo?.businessCategory === "CAFE" && (
+        {orderType === "TAKEAWAY" && shopInfo?.businessCategory === "BAKERY" && (
           <>
             <TextField
               size="small"
