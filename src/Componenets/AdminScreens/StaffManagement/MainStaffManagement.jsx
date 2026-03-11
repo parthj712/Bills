@@ -20,7 +20,10 @@ import {
   Skeleton,
   useTheme,
   useMediaQuery,
-  Menu, MenuItem, ListItemIcon, ListItemText
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import AddStaff from "./AddStaff";
@@ -43,9 +46,7 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 const MainStaffManagement = () => {
-
   const { showSnackbar } = useAppSnackbar();
-
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
@@ -74,8 +75,6 @@ const MainStaffManagement = () => {
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
-
-
   const [openAdd, setOpenAdd] = useState(false);
   const [staffData, setStaffData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -83,18 +82,13 @@ const MainStaffManagement = () => {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState(null);
 
-
   const [openViewDialog, setOpenViewDialog] = useState(false);
   // const [selectedStaff, setSelectedStaff] = useState(null);
-
 
   const [openUpload, setOpenUpload] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
 
-
-
   const [search, setSearch] = useState("");
-
 
   const [anchorEl, setAnchorEl] = useState(null);
   const openMenu = Boolean(anchorEl);
@@ -169,18 +163,11 @@ const MainStaffManagement = () => {
     return { total, active, inactive };
   }, [staffData]);
 
-
   //download excel sheet filed from tabble
   const handleDownloadExcel = () => {
     if (!filteredStaff.length) return;
 
-    const headers = [
-      "Name",
-      "Email",
-      "Phone",
-      "Joining Date",
-      "Status",
-    ];
+    const headers = ["Name", "Email", "Phone", "Joining Date", "Status"];
 
     const data = filteredStaff.map((staff) => ({
       Name: staff.name || "",
@@ -217,17 +204,9 @@ const MainStaffManagement = () => {
     saveAs(file, `Staff-${Date.now()}.xlsx`);
   };
 
-
-
   //download empty excel sheet to fill it
   const handleDownloadEmptyTemplate = () => {
-    const headers = [
-      "Name",
-      "Email",
-      "Phone",
-      "Joining Date",
-      "Status",
-    ];
+    const headers = ["Name", "Email", "Phone", "Joining Date", "Status"];
 
     const worksheet = XLSX.utils.json_to_sheet([], { header: headers });
 
@@ -254,9 +233,6 @@ const MainStaffManagement = () => {
     saveAs(file, "Staff-Upload-Template.xlsx");
   };
 
-
-
-
   // Handle file select (Excel only)
   const handleExcelSelect = (e) => {
     const file = e.target.files?.[0];
@@ -264,7 +240,7 @@ const MainStaffManagement = () => {
 
     const isExcel =
       file.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -275,61 +251,17 @@ const MainStaffManagement = () => {
     setExcelFile(file);
   };
 
-  // Read & parse Excel file
-  // const handleUploadExcel = async () => {
-  //   if (!excelFile) {
-  //     showSnackbar("Please select an Excel file");
-  //     return;
-  //   }
-
-  //   const reader = new FileReader();
-
-  //   reader.onload = (evt) => {
-  //     const data = new Uint8Array(evt.target.result);
-  //     const workbook = XLSX.read(data, { type: "array" });
-
-  //     const sheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[sheetName];
-
-  //     const jsonData = XLSX.utils.sheet_to_json(worksheet, {
-  //       defval: "",
-  //     });
-
-  //     console.log("Parsed Excel Data:", jsonData);
-
-  //     /**
-  //      * 👉 jsonData will look like:
-  //      * [
-  //      *  {
-  //      *    "Item Code": "ITM001",
-  //      *    "Item Name": "Paneer Butter Masala",
-  //      *    "Description": "Spicy",
-  //      *    "Category": "Main Course",
-  //      *    "Half Price": 150,
-  //      *    "Full Price": 250,
-  //      *    "Availability": "Available"
-  //      *  }
-  //      * ]
-  //      */
-
-  //     // TODO: map this to backend payload & call API
-  //     // bulkCreateMenuItems(jsonData)
-
-  //     setOpenUpload(false);
-  //     setExcelFile(null);
-  //   };
-
-  //   reader.readAsArrayBuffer(excelFile);
-  // };
-
-
   return (
     <Box className="flex flex-col gap-6 p-2 lg:p-4 md:p-4">
       {/* Premium Header */}
       <Box className="flex flex-col gap-2">
         <Box className="flex w-full items-start md:items-center gap-3 flex-col md:flex-row">
           <Box>
-            <Typography fontSize={isMobile ? 24 : 30} fontWeight={isMobile ? 600 : 700} className="text-[#000C5A]">
+            <Typography
+              fontSize={isMobile ? 24 : 30}
+              fontWeight={isMobile ? 600 : 700}
+              className="text-[#000C5A]"
+            >
               Staff Management
             </Typography>
           </Box>
@@ -341,7 +273,10 @@ const MainStaffManagement = () => {
                 startIcon={<Add />}
                 onClick={() => {
                   if (!hasAccess) {
-                    showSnackbar("Upgrade to Premium to add more tables 🚀", "warning");
+                    showSnackbar(
+                      "Upgrade to Premium to add more tables 🚀",
+                      "warning",
+                    );
                     return;
                   }
 
@@ -403,7 +338,6 @@ const MainStaffManagement = () => {
         <KpiPill label="Inactive Staff" value={stats.inactive} color="error" />
       </Box>
 
-
       {/* Actions: Download / Upload / File */}
       <Box className="flex justify-end gap-3">
         <Tooltip title="Download Menu">
@@ -433,7 +367,6 @@ const MainStaffManagement = () => {
             <UploadFile />
           </IconButton>
         </Tooltip>
-
 
         <Tooltip title="View File Template">
           <IconButton
@@ -513,11 +446,21 @@ const MainStaffManagement = () => {
                       textAlign: "center",
                     }}
                   >
-                    <TableCell sx={{ fontWeight: 700, color: "#0b3c5d", textAlign: "center" }}>
+                    <TableCell
+                      sx={{
+                        fontWeight: 700,
+                        color: "#0b3c5d",
+                        textAlign: "center",
+                      }}
+                    >
                       {staff.name}
                     </TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{staff.email}</TableCell>
-                    <TableCell sx={{ textAlign: "center" }}>{staff.phone}</TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {staff.email}
+                    </TableCell>
+                    <TableCell sx={{ textAlign: "center" }}>
+                      {staff.phone}
+                    </TableCell>
                     {/* <TableCell sx={{ textAlign: "center" }}>{staff.adharCard}</TableCell> */}
                     {/* <TableCell sx={{ maxWidth: 260 }}>
                     <Typography
@@ -604,7 +547,6 @@ const MainStaffManagement = () => {
                             <VisibilityIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-
                       </Box>
                     </TableCell>
                   </TableRow>
@@ -626,8 +568,6 @@ const MainStaffManagement = () => {
           </Table>
         </TableContainer>
       )}
-
-
 
       {/* MOBILE + TABLET CARDS */}
       {!isDesktop && (
@@ -654,14 +594,11 @@ const MainStaffManagement = () => {
 
           {!loading && filteredStaff.length === 0 && (
             <Box className="col-span-full text-center py-8">
-              <Typography color="text.secondary">
-                No staff found
-              </Typography>
+              <Typography color="text.secondary">No staff found</Typography>
             </Box>
           )}
         </Box>
       )}
-
 
       {/* Modals */}
       <AddStaff
@@ -676,13 +613,11 @@ const MainStaffManagement = () => {
         onSuccess={fetchStaff}
       />
 
-
       <ViewBillStaffDialog
         open={openViewDialog}
         onClose={() => setOpenViewDialog(false)}
         staff={selectedStaff}
       />
-
 
       {isMobile && (
         <motion.div
@@ -713,8 +648,6 @@ const MainStaffManagement = () => {
           </Box>
         </motion.div>
       )}
-
-
     </Box>
   );
 };

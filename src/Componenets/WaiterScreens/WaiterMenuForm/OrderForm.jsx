@@ -23,6 +23,7 @@ import { useRef } from "react";
 import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import { getShopInfo } from "@/service/shopService";
 
 export default function OrderForm({ category }) {
   const { showSnackbar } = useAppSnackbar();
@@ -43,12 +44,28 @@ export default function OrderForm({ category }) {
   const orderType = searchParams.get("orderType") || "DINE-IN";
 
   const [customerName, setCustomerName] = useState("");
+  const [customerMobile, setcustomerMobile] = useState("");
+  const [customerBirthDate, setcustomerBirthDate] = useState("");
   const [nameError, setNameError] = useState("");
+  const [shopInfo, setShopInfo] = useState(null);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // keyboatd shortcuts
+  const fetchShopInfo = async () => {
+    try {
+      const res = await getShopInfo();
+      console.log("hello", res.data?.data);
+      setShopInfo(res.data?.data);
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
+  useEffect(() => {
+    fetchShopInfo();
+  }, []);
+
+  // keyboatd shortcuts
   useEffect(() => {
     dispatch(fetchMenuItems());
   }, [dispatch]);
@@ -229,7 +246,11 @@ export default function OrderForm({ category }) {
       const payload = {
         orderType,
         tableId,
-        customerName,
+        customer: {
+          name: customerName,
+          mobile: customerMobile,
+          birthDate: customerBirthDate,
+        },
         items: selectedItems.map((x) => ({
           menuItemId: x.item._id,
           name: x.item.name,
@@ -292,7 +313,7 @@ export default function OrderForm({ category }) {
           Add Order
         </Typography>
 
-        {/* Customer Name – Only for TAKEAWAY */}
+        {/* Customer Name – For TAKEAWAY */}
         {orderType === "TAKEAWAY" && (
           <TextField
             size="small"
@@ -318,6 +339,37 @@ export default function OrderForm({ category }) {
               );
             }}
           />
+        )}
+
+        {/* Mobile + Birthdate – Only for Bakery Shops */}
+        {orderType === "TAKEAWAY" && shopInfo?.businessCategory === "CAFE" && (
+          <>
+            <TextField
+              size="small"
+              fullWidth
+              label="Mobile Number"
+              placeholder="Enter mobile number"
+              value={customerMobile}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                // Only numbers and max 10 digits
+                if (/^\d{0,10}$/.test(value)) {
+                  setcustomerMobile(value);
+                }
+              }}
+            />
+
+            <TextField
+              size="small"
+              fullWidth
+              type="date"
+              label="Birthdate"
+              InputLabelProps={{ shrink: true }}
+              value={customerBirthDate}
+              onChange={(e) => setcustomerBirthDate(e.target.value)}
+            />
+          </>
         )}
 
         {/* Search */}

@@ -17,6 +17,7 @@ const FeedbackQRSection = () => {
   const fetchExistingLink = async () => {
     try {
       const res = await getFeedbackLink();
+
       setFeedbackUrl(res.data.feedbackUrl);
     } catch (err) {
       // ignore if not generated yet
@@ -27,6 +28,7 @@ const FeedbackQRSection = () => {
     try {
       setLoading(true);
       const res = await generateFeedbackLink();
+
       setFeedbackUrl(res.data.feedbackUrl);
       showSnackbar("Feedback link generated ✅");
     } catch (err) {

@@ -36,6 +36,7 @@ const businessCategories = [
   { value: "CAFE", label: "Cafe / Coffee Shop" },
   { value: "RETAIL", label: "Retail Store / Kirana" },
   { value: "CLOUD_KITCHEN", label: "Cloud Kitchen" },
+  { value: "BAKERY", label: "Bakery" },
 ];
 export default function RegisterScreen() {
   const { showSnackbar } = useAppSnackbar();
