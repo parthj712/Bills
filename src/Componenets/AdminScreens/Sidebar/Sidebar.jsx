@@ -145,6 +145,11 @@ export default function Sidebar() {
       icon: <AccountBalanceWalletIcon fontSize="small" />,
     },
     {
+      label: "Customers Info",
+      href: "/admin/crm",
+      icon: <Receipt fontSize="small" />,
+    },
+    {
       label: "Customer Feedbacks",
       href: "/admin/feedbacks",
       icon: <FeedbackIcon fontSize="small" />,

@@ -108,6 +108,11 @@ export default function MobileSidebar({ open, onClose }) {
       icon: <ReceiptLongIcon fontSize="small" />,
     },
     {
+      label: "Customers Info",
+      href: "/admin/crm",
+      icon: <Receipt fontSize="small" />,
+    },
+    {
       label: "Customer Feedbacks",
       href: "/admin/feedbacks",
       icon: <FeedbackIcon fontSize="small" />,
@@ -176,7 +181,6 @@ export default function MobileSidebar({ open, onClose }) {
                 className="cursor-pointer text-gray-600"
               />
             </div>
-
 
             <Box className="mb-4 px-2">
               <motion.div className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-2 text-center shadow-sm">
