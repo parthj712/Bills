@@ -66,21 +66,39 @@ export default function OrderCart() {
 
   const nameRegex = /^[A-Za-z\s]+$/;
   const [nameError, setNameError] = useState("");
+  console.log(cartItems);
 
-  const subtotal = useMemo(
-    () =>
-      cartItems.reduce((sum, item) => {
-        const price = Number(item.price) || 0;
-        const qty = Number(item.qty) || 0;
-        return sum + price * qty;
-      }, 0),
-    [cartItems],
-  );
+  const GST_PERCENT = 5;
+  const VAT_PERCENT = 10;
+  const { foodSubtotal, liquorSubtotal } = useMemo(() => {
+    let food = 0;
+    let liquor = 0;
 
+    cartItems.forEach((item) => {
+      const total = (Number(item.price) || 0) * (Number(item.qty) || 0);
+      console.log("CATEGORY:", item.category);
+      const category = item.category?.trim().toLowerCase();
+
+      if (category === "liquor" || category === "liqour") {
+        liquor += total;
+      } else {
+        food += total;
+      }
+    });
+
+    return {
+      foodSubtotal: food,
+      liquorSubtotal: liquor,
+    };
+  }, [cartItems]);
+
+  const subtotal = foodSubtotal + liquorSubtotal;
   const hasGST = !!shopInfo?.gstNumber;
+  const gstAmount = hasGST ? foodSubtotal * (GST_PERCENT / 100) : 0;
 
-  const tax = hasGST ? subtotal * 0.05 : 0;
-  const grandTotal = subtotal + tax;
+  const vatAmount = liquorSubtotal * (VAT_PERCENT / 100);
+
+  const grandTotal = subtotal + gstAmount + vatAmount;
 
   const handleFecthShopInfo = async () => {
     try {
@@ -169,71 +187,81 @@ export default function OrderCart() {
 
   const formatBillForPrint = () => {
     return `
-    <div class="center bold" style="font-size:18px;">
-      ${shopInfo?.shopName || ""}
-    </div>
+  <div class="center bold" style="font-size:18px;">
+    ${shopInfo?.shopName || ""}
+  </div>
 
-    <div class="center" style="font-size:12px;">
-      ${shopInfo?.tagline || ""}
-    </div>
+  <div class="center" style="font-size:12px;">
+    ${shopInfo?.tagline || ""}
+  </div>
 
-    <div class="divider"></div>
+  <div class="divider"></div>
 
-    <div class="center">
-      ${orderType}
-    </div>
+  <div class="center">
+    ${orderType}
+  </div>
 
-    <div class="center">
-      ${new Date().toLocaleString("en-IN")}
-    </div>
+  <div class="center">
+    ${new Date().toLocaleString("en-IN")}
+  </div>
 
-    <div class="divider"></div>
+  <div class="divider"></div>
 
-    ${cartItems
-      .map(
-        (item) => `
-        <div>
-          <div class="bold">${item.name}</div>
-          <div class="row">
-            <span>${item.qty} x ₹${item.price.toFixed(2)}</span>
-            <span>₹${(item.qty * item.price).toFixed(2)}</span>
-          </div>
+  ${cartItems
+    .map(
+      (item) => `
+      <div>
+        <div class="bold">${item.name}</div>
+        <div class="row">
+          <span>${item.qty} x ₹${item.price.toFixed(2)}</span>
+          <span>₹${(item.qty * item.price).toFixed(2)}</span>
         </div>
-      `,
-      )
-      .join("")}
+      </div>
+    `,
+    )
+    .join("")}
 
-    <div class="divider"></div>
+  <div class="divider"></div>
 
-    <div class="row">
-      <span>Subtotal</span>
-      <span>₹${subtotal.toFixed(2)}</span>
-    </div>
+  <div class="row">
+    <span>Subtotal</span>
+    <span>₹${subtotal.toFixed(2)}</span>
+  </div>
 
   ${
-    hasGST
+    foodSubtotal > 0 && hasGST
       ? `
-<div class="row">
-  <span>GST (5%)</span>
-  <span>₹${tax.toFixed(2)}</span>
-</div>
-`
+      <div class="row">
+        <span>GST (5%)</span>
+        <span>₹${gstAmount.toFixed(2)}</span>
+      </div>
+    `
       : ""
   }
-)}
 
-    <div class="divider"></div>
+  ${
+    liquorSubtotal > 0
+      ? `
+      <div class="row">
+        <span>VAT (10%)</span>
+        <span>₹${vatAmount.toFixed(2)}</span>
+      </div>
+    `
+      : ""
+  }
 
-    <div class="row total">
-      <span>TOTAL</span>
-      <span>₹${grandTotal.toFixed(2)}</span>
-    </div>
+  <div class="divider"></div>
 
-    <div class="divider"></div>
+  <div class="row total">
+    <span>TOTAL</span>
+    <span>₹${grandTotal.toFixed(2)}</span>
+  </div>
 
-    <div class="center bold">
-      Thank You • Visit Again
-    </div>
+  <div class="divider"></div>
+
+  <div class="center bold">
+    Thank You • Visit Again
+  </div>
   `;
   };
 
@@ -622,10 +650,17 @@ export default function OrderCart() {
             <span>₹ {subtotal.toFixed(2)}</span>
           </div>
 
-          {hasGST && (
+          {foodSubtotal > 0 && hasGST && (
             <div className="flex justify-between">
               <span>GST (5%)</span>
-              <span>₹ {tax.toFixed(2)}</span>
+              <span>₹ {gstAmount.toFixed(2)}</span>
+            </div>
+          )}
+
+          {liquorSubtotal > 0 && (
+            <div className="flex justify-between">
+              <span>VAT (10%)</span>
+              <span>₹ {vatAmount.toFixed(2)}</span>
             </div>
           )}
 
@@ -648,7 +683,14 @@ export default function OrderCart() {
             {hasGST && (
               <Box display="flex" justifyContent="space-between" mb={2}>
                 <Typography color="text.secondary">GST (5%)</Typography>
-                <Typography>₹ {tax.toFixed(2)}</Typography>
+                <Typography>₹ {gstAmount.toFixed(2)}</Typography>
+              </Box>
+            )}
+
+            {liquorSubtotal > 0 && (
+              <Box display="flex" justifyContent="space-between" mb={2}>
+                <Typography color="text.secondary">VAT (10%)</Typography>
+                <Typography>₹ {vatAmount.toFixed(2)}</Typography>
               </Box>
             )}
 
@@ -731,7 +773,8 @@ export default function OrderCart() {
         <BillPreview
           items={cartItems}
           subtotal={subtotal}
-          tax={tax}
+          gst={gstAmount}
+          vat={vatAmount}
           total={grandTotal}
           shopInfo={shopInfo}
           orderType={orderType}

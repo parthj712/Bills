@@ -28,7 +28,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const FOOD_TYPES = ["Veg", "Non-Veg"];
+const FOOD_TYPES = ["Veg", "Non-Veg", "Drink"];
 
 export default function AddMenuItems({ open, onClose, onSuccess }) {
   const { showSnackbar } = useAppSnackbar();
@@ -210,6 +210,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
           .map((v) => ({
             name: v.name.trim(),
             price: Number(v.price),
+            portionML: v.portionML ? Number(v.portionML) : null,
           }));
       }
 
@@ -549,18 +550,18 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
 
                     {(form.subCategory === "Other" ||
                       form.category === "Other") && (
-                        <TextField
-                          label="New Sub Category"
-                          value={customSubCategory}
-                          onChange={(e) => setCustomSubCategory(e.target.value)}
-                          fullWidth
-                          sx={{
-                            backgroundColor: "white",
-                            borderRadius: 3,
-                            "& fieldset": { borderColor: "#e5e7eb" },
-                          }}
-                        />
-                      )}
+                      <TextField
+                        label="New Sub Category"
+                        value={customSubCategory}
+                        onChange={(e) => setCustomSubCategory(e.target.value)}
+                        fullWidth
+                        sx={{
+                          backgroundColor: "white",
+                          borderRadius: 3,
+                          "& fieldset": { borderColor: "#e5e7eb" },
+                        }}
+                      />
+                    )}
 
                     <TextField
                       label="Food Type"
@@ -633,18 +634,26 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                     )}
                   </Box>
 
-
                   {form.priceType === "VARIANT" && (
                     <Box className="flex flex-col gap-3 mt-3">
                       {form.variants?.map((variant, index) => (
-                        <Box key={index} className="flex gap-6">
+                        <Box key={index} className="flex gap-4 items-center">
                           <TextField
                             fullWidth
                             label="Variant Name"
                             value={variant.name}
                             onChange={(e) => {
                               const updated = [...form.variants];
-                              updated[index].name = e.target.value;
+                              const name = e.target.value;
+
+                              updated[index].name = name;
+
+                              // ⭐ auto detect ML from name like 60ml
+                              const ml = parseInt(name);
+                              if (form.foodType === "Drink" && ml) {
+                                updated[index].portionML = ml;
+                              }
+
                               setForm({ ...form, variants: updated });
                             }}
                           />
@@ -660,6 +669,20 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                               setForm({ ...form, variants: updated });
                             }}
                           />
+
+                          {form.foodType === "Drink" && (
+                            <TextField
+                              label="Portion ML"
+                              type="number"
+                              value={variant.portionML || ""}
+                              onChange={(e) => {
+                                const updated = [...form.variants];
+                                updated[index].portionML = e.target.value;
+                                setForm({ ...form, variants: updated });
+                              }}
+                            />
+                          )}
+
                           <AppButton
                             startIcon={<DeleteIcon />}
                             sx={{
@@ -670,7 +693,9 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                               },
                             }}
                             onClick={() => {
-                              const updated = form.variants.filter((_, i) => i !== index);
+                              const updated = form.variants.filter(
+                                (_, i) => i !== index,
+                              );
                               setForm({ ...form, variants: updated });
                             }}
                           />
@@ -684,7 +709,7 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
                             ...form,
                             variants: [
                               ...(form.variants || []),
-                              { name: "", price: "" },
+                              { name: "", price: "", portionML: "" },
                             ],
                           })
                         }

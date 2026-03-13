@@ -4,15 +4,14 @@ import { Box, Divider, Typography } from "@mui/material";
 const BillPreview = ({
   items,
   subtotal,
-  tax,
+  gst = 0,
+  vat = 0,
   total,
   shopInfo,
   orderType,
   date,
   customerName,
 }) => {
-
-
   const formattedDate = new Date(date || new Date()).toLocaleDateString(
     "en-IN",
     {
@@ -20,7 +19,7 @@ const BillPreview = ({
       year: "numeric",
       month: "short",
       day: "numeric",
-    }
+    },
   );
 
   const formattedTime = new Date(date || new Date()).toLocaleTimeString(
@@ -28,39 +27,28 @@ const BillPreview = ({
     {
       hour: "2-digit",
       minute: "2-digit",
-    }
+    },
   );
-
-  console.log("shopinfo", shopInfo)
-
-
-
-
-
 
   return (
     <div>
       <div
         id="print-bill"
         style={{
-          width: "76mm",   // for 58mm printer
-          // fontFamily: "monospace",
+          width: "76mm",
           fontSize: 12,
           margin: "0 auto",
           fontFamily: "'Inter', sans-serif",
           color: "#1E293B",
           padding: 8,
           background: "#fff",
-          boxShadow: "none",
-          borderRadius: 0,
-
         }}
       >
         {/* Logo */}
         {shopInfo?.logo?.url && (
           <Box display="flex" justifyContent="center" mb={2}>
             <img
-              src={shopInfo.logo?.url}
+              src={shopInfo.logo.url}
               alt="Hotel Logo"
               style={{ maxWidth: 70, objectFit: "contain" }}
             />
@@ -95,74 +83,66 @@ const BillPreview = ({
         <Divider sx={{ my: 2 }} />
 
         {/* Order Meta */}
-        <Box
-          display="flex"
-          flexDirection={"column"}
-          justifyContent="space-between"
-          sx={{ fontSize: 12, color: "#64748B" }}
-        >
-          <span>{orderType}</span>
-          <span>{formattedDate}</span>
+        <Box sx={{ fontSize: 12, color: "#64748B" }}>
+          <div>{orderType}</div>
+          <div>{formattedDate}</div>
+          <div>{formattedTime}</div>
+          <div>{customerName || "-"}</div>
         </Box>
 
-        <Box
-          display="flex"
-          flexDirection={"column"}
-          justifyContent="space-between"
-          sx={{ fontSize: 12, color: "#64748B", mb: 2 }}
-        >
-          <span>{formattedTime}</span>
-          <span>{customerName || "-"}</span>
-        </Box>
-
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{ my: 2 }} />
 
         {/* Items */}
         {items.map((item) => (
           <Box
             key={`${item.menuItemId}-${item.portion}-${item.addedAt}`}
-            display="flex"
-            flexDirection={"column"}
-            justifyContent="space-between"
             sx={{ mb: 1.5 }}
           >
-
             <Typography fontSize={14} fontWeight={500}>
               {item.name}
             </Typography>
 
-            <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} my={0.5}>
-              <Typography fontSize={14} >
-                {item.qty} × ₹ {item.price.toFixed(2)}
+            <Box display="flex" justifyContent="space-between" my={0.5}>
+              <Typography fontSize={14}>
+                {item.qty} × ₹ {Number(item.price).toFixed(2)}
               </Typography>
+
               <Typography fontSize={14} fontWeight={500}>
                 ₹ {(item.price * item.qty).toFixed(2)}
               </Typography>
-
             </Box>
           </Box>
         ))}
 
         <Divider sx={{ my: 2 }} />
 
-        {/* Totals */}
+        {/* Subtotal */}
         <Box display="flex" justifyContent="space-between" mb={1}>
           <Typography fontSize={13} color="#64748B">
             Subtotal
           </Typography>
-          <Typography fontSize={13}>
-            ₹ {subtotal.toFixed(2)}
-          </Typography>
+          <Typography fontSize={13}>₹ {subtotal.toFixed(2)}</Typography>
         </Box>
 
-        <Box display="flex" justifyContent="space-between" mb={2}>
-          <Typography fontSize={13} color="#64748B">
-            Tax
-          </Typography>
-          <Typography fontSize={13}>
-            ₹ {tax.toFixed(2)}
-          </Typography>
-        </Box>
+        {/* GST */}
+        {gst > 0 && (
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography fontSize={13} color="#64748B">
+              GST (5%)
+            </Typography>
+            <Typography fontSize={13}>₹ {gst.toFixed(2)}</Typography>
+          </Box>
+        )}
+
+        {/* VAT */}
+        {vat > 0 && (
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography fontSize={13} color="#64748B">
+              VAT (10%)
+            </Typography>
+            <Typography fontSize={13}>₹ {vat.toFixed(2)}</Typography>
+          </Box>
+        )}
 
         <Divider />
 
@@ -176,28 +156,20 @@ const BillPreview = ({
           <Typography fontSize={18} fontWeight={700}>
             Total
           </Typography>
-          <Typography
-            fontSize={20}
-            fontWeight={800}
-            sx={{ color: "#0F172A" }}
-          >
+
+          <Typography fontSize={20} fontWeight={800} sx={{ color: "#0F172A" }}>
             ₹ {total.toFixed(2)}
           </Typography>
         </Box>
 
         <Divider sx={{ my: 2 }} />
 
-        <Typography
-          align="center"
-          fontSize={12}
-          sx={{ color: "#64748B" }}
-        >
+        <Typography align="center" fontSize={12} sx={{ color: "#64748B" }}>
           Thank You • Visit Again
         </Typography>
 
         {/* QR */}
         {shopInfo?.upiQr?.url && (
-
           <Box mt={3} display="flex" flexDirection="column" alignItems="center">
             <Typography fontSize={12} fontWeight={600} mb={1}>
               Scan to Pay
@@ -216,7 +188,6 @@ const BillPreview = ({
         )}
       </div>
     </div>
-
   );
 };
 

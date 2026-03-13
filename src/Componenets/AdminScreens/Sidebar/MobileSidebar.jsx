@@ -55,6 +55,7 @@ export default function MobileSidebar({ open, onClose }) {
   const [openReports, setOpenReports] = useState(false);
   const [shopCategory, setShopCategory] = useState(null);
   const isDineIn = shopCategory === "DINE_IN";
+  const isBar = shopCategory === "RESTO_&_BAR";
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
@@ -107,6 +108,15 @@ export default function MobileSidebar({ open, onClose }) {
       href: "/admin/expense",
       icon: <ReceiptLongIcon fontSize="small" />,
     },
+    ...(isBar
+      ? [
+          {
+            label: "Bar Inventory",
+            href: "/admin/bar-inventory",
+            icon: <LiquorIcon fontSize="small" />,
+          },
+        ]
+      : []),
     {
       label: "Customers Info",
       href: "/admin/crm",
