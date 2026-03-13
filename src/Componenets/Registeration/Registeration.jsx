@@ -32,6 +32,7 @@ import { useAppSnackbar } from "../CommonComponents/SnackbarProvider/SnackbarPro
 const MotionDiv = motion.div;
 const businessCategories = [
   { value: "DINE_IN", label: "Restaurant (Dine-In)" },
+  { value: "RESTO_&_BAR", label: "Restaurant (Resto & Bar)" },
   { value: "QUICK_SERVICE", label: "Fast Food / Snack Center" },
   { value: "CAFE", label: "Cafe / Coffee Shop" },
   { value: "RETAIL", label: "Retail Store / Kirana" },

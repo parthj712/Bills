@@ -34,6 +34,7 @@ export default function WaiterMenuForm() {
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const section = searchParams.get("section");
   const [category, setCategory] = useState("");
+  const [subCategory, setSubCategory] = useState("");
   const [openCategoryDialog, setOpenCategoryDialog] = useState(false);
 
   const { items = [] } = useSelector((state) => state.menu);
@@ -93,7 +94,11 @@ export default function WaiterMenuForm() {
         <div className="grid grid-cols-12 gap-6">
           {/* LEFT */}
           <div className="col-span-12 lg:col-span-7">
-            <OrderForm category={category} />
+            <OrderForm
+              category={category}
+              subCategory={subCategory}
+              setSubCategory={setSubCategory}
+            />
           </div>
 
           {/* RIGHT */}
@@ -156,6 +161,7 @@ export default function WaiterMenuForm() {
                 color={category === cat ? "primary" : "default"}
                 onClick={() => {
                   setCategory(cat);
+                  setSubCategory("");
                   setOpenCategoryDialog(false);
                 }}
               />

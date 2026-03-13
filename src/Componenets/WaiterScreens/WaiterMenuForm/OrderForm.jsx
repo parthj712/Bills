@@ -25,7 +25,7 @@ import { addTakeawayOrder, saveOrdersToDraft } from "@/service/orderService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import { getShopInfo } from "@/service/shopService";
 
-export default function OrderForm({ category }) {
+export default function OrderForm({ category, subCategory, setSubCategory }) {
   const { showSnackbar } = useAppSnackbar();
 
   const searchRef = useRef(null);
@@ -76,10 +76,31 @@ export default function OrderForm({ category }) {
     return [...new Set(items.menu?.map((i) => i.categoryName).filter(Boolean))];
   }, [items]);
 
+  const subCategories = useMemo(() => {
+    if (!category) return [];
+
+    return [
+      ...new Set(
+        items.menu
+          ?.filter((i) => i.categoryName === category)
+          .map((i) => i.subCategory)
+          .filter(Boolean),
+      ),
+    ];
+  }, [items, category]);
+
   const filteredItems = useMemo(() => {
-    const byCategory = category
-      ? items.menu?.filter((i) => i.categoryName === category)
-      : items.menu;
+    let filtered = items.menu;
+
+    if (category) {
+      filtered = filtered?.filter((i) => i.categoryName === category);
+    }
+
+    if (subCategory) {
+      filtered = filtered?.filter((i) => i.subCategory === subCategory);
+    }
+
+    const byCategory = filtered;
 
     const q = search.trim().toLowerCase();
     if (!q) return byCategory;
@@ -89,7 +110,7 @@ export default function OrderForm({ category }) {
       const code = (i.itemCode || "").toLowerCase();
       return name.includes(q) || code.includes(q);
     });
-  }, [items, category, search]);
+  }, [items, category, subCategory, search]);
   console.log("byCa", selectedItems);
   useEffect(() => {
     setActiveIndex(0);
@@ -342,35 +363,36 @@ export default function OrderForm({ category }) {
         )}
 
         {/* Mobile + Birthdate – Only for Bakery Shops */}
-        {orderType === "TAKEAWAY" && shopInfo?.businessCategory === "BAKERY" && (
-          <>
-            <TextField
-              size="small"
-              fullWidth
-              label="Mobile Number"
-              placeholder="Enter mobile number"
-              value={customerMobile}
-              onChange={(e) => {
-                const value = e.target.value;
+        {orderType === "TAKEAWAY" &&
+          shopInfo?.businessCategory === "BAKERY" && (
+            <>
+              <TextField
+                size="small"
+                fullWidth
+                label="Mobile Number"
+                placeholder="Enter mobile number"
+                value={customerMobile}
+                onChange={(e) => {
+                  const value = e.target.value;
 
-                // Only numbers and max 10 digits
-                if (/^\d{0,10}$/.test(value)) {
-                  setcustomerMobile(value);
-                }
-              }}
-            />
+                  // Only numbers and max 10 digits
+                  if (/^\d{0,10}$/.test(value)) {
+                    setcustomerMobile(value);
+                  }
+                }}
+              />
 
-            <TextField
-              size="small"
-              fullWidth
-              type="date"
-              label="Birthdate"
-              InputLabelProps={{ shrink: true }}
-              value={customerBirthDate}
-              onChange={(e) => setcustomerBirthDate(e.target.value)}
-            />
-          </>
-        )}
+              <TextField
+                size="small"
+                fullWidth
+                type="date"
+                label="Birthdate"
+                InputLabelProps={{ shrink: true }}
+                value={customerBirthDate}
+                onChange={(e) => setcustomerBirthDate(e.target.value)}
+              />
+            </>
+          )}
 
         {/* Search */}
         <TextField
@@ -402,6 +424,20 @@ export default function OrderForm({ category }) {
             />
           ))}
         </div> */}
+
+        {subCategories.length > 0 && (
+          <Box display="flex" gap={1} flexWrap="wrap">
+            {subCategories.map((sub) => (
+              <Chip
+                key={sub}
+                label={sub}
+                clickable
+                onClick={() => setSubCategory(sub)}
+                color={subCategory === sub ? "primary" : "default"}
+              />
+            ))}
+          </Box>
+        )}
 
         <Box className="grid lg:grid-cols-1 gap-4">
           <Box>

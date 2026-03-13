@@ -37,6 +37,7 @@ import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import CloseIcon from "@mui/icons-material/Close";
 import { Badge } from "@mui/material";
 import { getShopInfo } from "@/service/shopService";
+import LiquorIcon from "@mui/icons-material/Liquor";
 
 const reportItems = [
   {
@@ -100,6 +101,7 @@ export default function Sidebar() {
   const [openIncoming, setOpenIncoming] = useState(false);
   const [shopData, setShopData] = useState([]);
   const isDineIn = shopData?.businessCategory === "DINE_IN";
+  const isBar = shopData?.businessCategory === "RESTO_&_BAR";
 
   const allowedPlans = ["PREMIUM", "TRIAL"];
 
@@ -144,6 +146,17 @@ export default function Sidebar() {
       href: "/admin/expense",
       icon: <AccountBalanceWalletIcon fontSize="small" />,
     },
+
+    ...(isBar
+      ? [
+          {
+            label: "Bar Inventory",
+            href: "/admin/bar-inventory",
+            icon: <LiquorIcon fontSize="small" />,
+          },
+        ]
+      : []),
+
     {
       label: "Customers Info",
       href: "/admin/crm",

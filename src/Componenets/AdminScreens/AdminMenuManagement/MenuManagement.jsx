@@ -172,6 +172,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       "Category",
       "Variant",
       "Price",
+
       "Half Price",
       "Full Price",
       "Availability",
@@ -242,6 +243,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       "priceFull",
       "variantName",
       "variantPrice",
+      "portionML",
       "description",
     ];
 
@@ -288,7 +290,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
     const isExcel =
       file.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -594,7 +596,6 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
                           }}
                         >
                           {item.variants?.map((v, i) => (
-
                             <Chip
                               key={i}
                               size="small"
@@ -732,7 +733,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => { }}
+        onSubmit={(data) => {}}
         onSuccess={handleFetchMenu}
       />
 
