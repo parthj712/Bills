@@ -26,6 +26,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Box, Typography } from "@mui/material";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
+import LiquorIcon from "@mui/icons-material/Liquor";
 
 const reportItems = [
   {
