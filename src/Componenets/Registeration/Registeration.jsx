@@ -46,7 +46,7 @@ export default function RegisterScreen() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
-  // ✅ Stepper State
+  // ✅ Stepper Statee
   // 0 = Basic Info, 1 = OTP, 2 = Business Setup
   const [step, setStep] = useState(0);
 
