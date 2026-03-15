@@ -81,6 +81,7 @@ const CrmMain = () => {
       const res = await getOrders();
 
       const orders = res.data.orders || [];
+      console.log(orders);
 
       const customerMap = {};
 

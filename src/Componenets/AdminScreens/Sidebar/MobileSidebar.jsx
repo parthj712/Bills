@@ -55,7 +55,7 @@ export default function MobileSidebar({ open, onClose }) {
   const [openReports, setOpenReports] = useState(false);
   const [shopCategory, setShopCategory] = useState(null);
   const isDineIn = shopCategory === "DINE_IN";
-  const isBar = shopCategory === "RESTO_&_BAR";
+  const isBar = shopCategory === "RESTO_BAR";
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
