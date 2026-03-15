@@ -101,7 +101,7 @@ export default function Sidebar() {
   const [openIncoming, setOpenIncoming] = useState(false);
   const [shopData, setShopData] = useState([]);
   const isDineIn = shopData?.businessCategory === "DINE_IN";
-  const isBar = shopData?.businessCategory === "RESTO_&_BAR";
+  const isBar = shopData?.businessCategory === "RESTO_BAR";
 
   const allowedPlans = ["PREMIUM", "TRIAL"];
 
