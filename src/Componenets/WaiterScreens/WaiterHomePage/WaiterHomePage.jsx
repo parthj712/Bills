@@ -78,6 +78,7 @@ export default function WaiterHomePage() {
   const showTables =
     shopData?.businessCategory === "DINE_IN" ||
     shopData?.businessCategory === "RESTO_BAR";
+    
   const fecthShopData = async () => {
     try {
       const res = await getShopInfo();
