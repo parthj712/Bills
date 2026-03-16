@@ -2,6 +2,7 @@
 
 import {
   addOrUpdateGST,
+  addOrUpdateVAT,
   addTagline,
   addWebsite,
   getShopInfo,
@@ -41,6 +42,7 @@ export default function Settings() {
   const [editWebsite, setEditWebsite] = useState(false);
   const [editTagline, setEditTagline] = useState(false);
   const [editGST, setEditGST] = useState(false);
+  const [editVAT, setEditVAT] = useState(false);
 
   const [logoPreview, setLogoPreview] = useState("");
   const [qrPreview, setQrPreview] = useState("");
@@ -210,6 +212,17 @@ export default function Settings() {
       showSnackbar("Failed to save GST ❌");
     }
   };
+  const handleSaveVat = async () => {
+    try {
+      await addOrUpdateVAT({
+        vatNumber: shopData.vatNumber,
+      });
+      showSnackbar("VAT Saved Successfully ✅");
+      setEditVAT(false);
+    } catch (error) {
+      showSnackbar("Failed to save VAT ❌");
+    }
+  };
   return (
     <Box className="min-h-screen p-1 lg:p-4 md:p-4 bg-[#f9fafb]">
       {/* PAGE TITLE */}
@@ -291,6 +304,73 @@ export default function Settings() {
                 <Button
                   size="small"
                   onClick={() => setEditGST(true)}
+                  sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
+                >
+                  ✏️
+                </Button>
+              </Box>
+            )}
+          </Box>
+
+          {/* VAT */}
+          <Box
+            mb={2}
+            p={3}
+            sx={{
+              borderRadius: 2,
+              boxShadow: 1,
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            <Typography fontWeight={600} fontSize={14} mb={1}>
+              VAT Number
+            </Typography>
+
+            {!shopData.vatNumber || editVAT ? (
+              <Box>
+                <TextField
+                  value={shopData.vatNumber || ""}
+                  onChange={(e) =>
+                    setShopData({ ...shopData, vatNumber: e.target.value })
+                  }
+                  fullWidth
+                  size="small"
+                  autoFocus={editVAT}
+                  placeholder="Enter VAT Number"
+                />
+
+                {editVAT && (
+                  <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={() => setEditVAT(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="contained"
+                      onClick={handleSaveVat}
+                      sx={{
+                        backgroundColor: "#0b3c5d",
+                        textTransform: "none",
+                      }}
+                    >
+                      Save
+                    </Button>
+                  </Box>
+                )}
+              </Box>
+            ) : (
+              <Box display="flex" alignItems="center" gap={1}>
+                <Typography sx={{ fontSize: 15, fontWeight: 600 }}>
+                  {shopData.vatNumber}
+                </Typography>
+
+                <Button
+                  size="small"
+                  onClick={() => setEditVAT(true)}
                   sx={{ minWidth: 0, p: 0.5, borderRadius: "50%" }}
                 >
                   ✏️

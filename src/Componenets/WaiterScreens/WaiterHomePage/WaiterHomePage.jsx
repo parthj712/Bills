@@ -72,7 +72,12 @@ export default function WaiterHomePage() {
   // keyboard states
   const [keyBuffer, setKeyBuffer] = useState("");
   const [highlightTableNo, setHighlightTableNo] = useState(null);
-  const isDineIn = shopData?.businessCategory === "DINE_IN";
+  // const isDineIn = shopData?.businessCategory === "DINE_IN";
+  // const isBar = shopData?.businessCategory === "RESTO_BAR";
+
+  const showTables =
+    shopData?.businessCategory === "DINE_IN" ||
+    shopData?.businessCategory === "RESTO_BAR";
   const fecthShopData = async () => {
     try {
       const res = await getShopInfo();
@@ -135,11 +140,11 @@ export default function WaiterHomePage() {
   }, []);
 
   useEffect(() => {
-    if (isDineIn) {
+    if (showTables) {
       handleGetTables();
     }
     // fetchRecentBills();
-  }, [isDineIn]);
+  }, [showTables]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
@@ -170,7 +175,7 @@ export default function WaiterHomePage() {
 
   const handleKeyPress = (event) => {
     //these blocks everything
-    if (!isDineIn) return;
+    if (!showTables) return;
     // ❌ Disable keyboard when menu is open
     if (open) return;
 
@@ -340,7 +345,7 @@ export default function WaiterHomePage() {
           <div className="flex-1">
             <div className="flex justify-end mb-4">
               <AppButton
-                label={isDineIn ? "Takeaway" : "Add Order"}
+                label={showTables ? "Takeaway" : "Add Order"}
                 onClick={() => handleOrderTypeClick("TAKEAWAY")}
                 sx={{
                   backgroundColor: "#334155",
@@ -357,10 +362,9 @@ export default function WaiterHomePage() {
                 }}
               />
             </div>
-            {isDineIn && (
+            {showTables && (
               <Card className="p-7 shadow-md ">
                 <div className="flex items-center justify-between  mb-4">
-
                   <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
                     Dine-In Orders
                   </Typography>
@@ -382,7 +386,7 @@ export default function WaiterHomePage() {
                   </span>
                 </div>
 
-                <FormControl size="small" sx={{ minWidth:"100%", mb: 3 }}>
+                <FormControl size="small" sx={{ minWidth: "100%", mb: 3 }}>
                   <InputLabel>Section</InputLabel>
 
                   <Select
@@ -390,8 +394,6 @@ export default function WaiterHomePage() {
                     label="Section"
                     onChange={(e) => setSelectedSection(e.target.value)}
                   >
-         
-
                     {sectionList.map((section) => (
                       <MenuItem key={section} value={section}>
                         {section}
@@ -415,10 +417,11 @@ export default function WaiterHomePage() {
                   ) : (
                     Object.entries(groupedTables)
                       .filter(([sectionName]) =>
-                        selectedSection === "ALL" ? true : sectionName === selectedSection
+                        selectedSection === "ALL"
+                          ? true
+                          : sectionName === selectedSection,
                       )
                       .map(
-
                         // const sectionList = Object.keys(groupedTables);
 
                         ([sectionName, sectionTables]) => (
@@ -467,12 +470,13 @@ export default function WaiterHomePage() {
                   transition-all duration-300
                   hover:shadow-lg hover:scale-[1.0]
                   ${tableStyles[table.status]}
-                  ${highlightTableNo === table.tableNo
-                                        ? table.status === "OCCUPIED"
-                                          ? "ring-4 ring-red-500 ring-offset-2"
-                                          : "ring-4 ring-green-500 ring-offset-2"
-                                        : ""
-                                      }
+                  ${
+                    highlightTableNo === table.tableNo
+                      ? table.status === "OCCUPIED"
+                        ? "ring-4 ring-red-500 ring-offset-2"
+                        : "ring-4 ring-green-500 ring-offset-2"
+                      : ""
+                  }
                 `}
                                   >
                                     {/* Table Number */}
@@ -497,10 +501,11 @@ export default function WaiterHomePage() {
                                         table.status === "OCCUPIED" ? 700 : 600
                                       }
                                       className={`px-2 py-[2px] rounded-full
-                    ${table.status === "OCCUPIED"
-                                          ? "bg-red-100 text-red-700 border border-red-500"
-                                          : "bg-green-100 text-green-700 border border-green-500"
-                                        }`}
+                    ${
+                      table.status === "OCCUPIED"
+                        ? "bg-red-100 text-red-700 border border-red-500"
+                        : "bg-green-100 text-green-700 border border-green-500"
+                    }`}
                                     >
                                       {table.status}
                                     </Typography>

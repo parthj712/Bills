@@ -26,6 +26,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Box, Typography } from "@mui/material";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
+import LiquorIcon from "@mui/icons-material/Liquor";
 
 const reportItems = [
   {
@@ -56,6 +57,7 @@ export default function MobileSidebar({ open, onClose }) {
   const [shopCategory, setShopCategory] = useState(null);
   const isDineIn = shopCategory === "DINE_IN";
   const isBar = shopCategory === "RESTO_BAR";
+  const showTables = shopCategory === "DINE_IN" || shopCategory === "RESTO_BAR";
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
@@ -76,7 +78,7 @@ export default function MobileSidebar({ open, onClose }) {
     },
 
     // Only restaurants should see tables
-    ...(isDineIn
+    ...(showTables
       ? [
           {
             label: "Table Management",
@@ -88,7 +90,7 @@ export default function MobileSidebar({ open, onClose }) {
 
     // Dynamic naming
     {
-      label: isDineIn ? "Menu Management" : "Item Management",
+      label: showTables ? "Menu Management" : "Item Management",
       href: "/admin/menu",
       icon: <RestaurantMenu fontSize="small" />,
     },
@@ -138,6 +140,9 @@ export default function MobileSidebar({ open, onClose }) {
     const fetchShopInfo = async () => {
       try {
         const res = await getShopInfo();
+        setShopData(res.data?.data);
+        console.log("shopdata", res.data?.data);
+
         setShopCategory(res.data?.data?.businessCategory);
       } catch (error) {
         console.log(error.message);
@@ -146,7 +151,7 @@ export default function MobileSidebar({ open, onClose }) {
 
     fetchShopInfo();
   }, []);
-
+  console.log("shopCategory", shopCategory);
   useEffect(() => {
     const fetchSubscriptionExpiry = async () => {
       try {

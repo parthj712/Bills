@@ -125,7 +125,7 @@ export default function AdminDashboard() {
   const stats = [
     {
       title: "Total Sales",
-      value: `₹${summary.totalRevenue}`,
+      value: `₹${Number(summary.totalRevenue || 0).toFixed(2)}`,
       icon: <HomeWork fontSize="large" />,
       bg: "bg-orange-100",
       iconColor: "text-orange-600",
@@ -141,7 +141,7 @@ export default function AdminDashboard() {
 
     {
       title: "Today's Sales",
-      value: `₹${summary.todayRevenue}`,
+      value: `₹${Number(summary.todayRevenue || 0).toFixed(2)}`,
       icon: <CurrencyRupee fontSize="large" />,
       bg: "bg-purple-100",
       iconColor: "text-purple-600",

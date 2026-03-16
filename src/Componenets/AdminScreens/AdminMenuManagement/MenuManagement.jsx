@@ -231,7 +231,6 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
   //download empty excel sheet to fill it
   const handleDownloadEmptyTemplate = () => {
-    // Table headers only
     const headers = [
       "name",
       "categoryName",
@@ -247,30 +246,33 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       "description",
     ];
 
-    // Create an empty row structure (important for Excel headers)
-    const emptyData = [];
+    const worksheet = XLSX.utils.json_to_sheet([], { header: headers });
 
-    // Create worksheet with headers
-    const worksheet = XLSX.utils.json_to_sheet(emptyData, {
-      header: headers,
-    });
-
-    // Optional: set column widths for better UX
-    worksheet["!cols"] = [
-      { wch: 14 },
-      { wch: 20 },
-      { wch: 30 },
-      { wch: 18 },
-      { wch: 12 },
-      { wch: 12 },
-      { wch: 15 },
-    ];
-
-    // Create workbook
+    // Menu sheet
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Menu Template");
 
-    // Export file
+    // Notes sheet
+    const notesData = [
+      { Notes: "Important Instructions:" },
+      { Notes: "1. categoryName example: Liquor for alcohol, Food, Beverage" },
+      { Notes: "2. foodType example: Drink ,Veg ,Non-Veg" },
+      {
+        Notes:
+          "3. priceType: VARIANT if using variants like( 30ml,60ml,500g,1kg,2kg) ,HALF_FULL for hotel menus Like(paneer chill etc),SINGLE like(items that dose not have half version)",
+      },
+      { Notes: "4. variantName example: 30ml, 60ml, 90ml ,500g, 1kg,2,kg" },
+      { Notes: "5. portionML should contain numeric value like 30, 60, 90" },
+      {
+        Notes:
+          "6. priceHalf and priceFull are used only for simple pricing in HALF_FULL",
+      },
+      { Notes: "7. itemCode should be unique for each item" },
+    ];
+
+    const notesSheet = XLSX.utils.json_to_sheet(notesData);
+    XLSX.utils.book_append_sheet(workbook, notesSheet, "Instructions");
+
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",

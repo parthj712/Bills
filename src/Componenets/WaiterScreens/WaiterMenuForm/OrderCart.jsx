@@ -94,9 +94,10 @@ export default function OrderCart() {
 
   const subtotal = foodSubtotal + liquorSubtotal;
   const hasGST = !!shopInfo?.gstNumber;
+  const hasVAT = !!shopInfo?.vatNumber;
   const gstAmount = hasGST ? foodSubtotal * (GST_PERCENT / 100) : 0;
-
-  const vatAmount = liquorSubtotal * (VAT_PERCENT / 100);
+  console.log("hasVat", hasVAT);
+  const vatAmount = hasVAT ? liquorSubtotal * (VAT_PERCENT / 100) : 0;
 
   const grandTotal = subtotal + gstAmount + vatAmount;
 
@@ -240,7 +241,7 @@ export default function OrderCart() {
   }
 
   ${
-    liquorSubtotal > 0
+    liquorSubtotal > 0 && hasVAT
       ? `
       <div class="row">
         <span>VAT (10%)</span>
@@ -657,7 +658,7 @@ export default function OrderCart() {
             </div>
           )}
 
-          {liquorSubtotal > 0 && (
+          {liquorSubtotal > 0 && hasVAT && (
             <div className="flex justify-between">
               <span>VAT (10%)</span>
               <span>₹ {vatAmount.toFixed(2)}</span>
