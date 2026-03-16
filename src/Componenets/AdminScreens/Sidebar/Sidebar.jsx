@@ -60,21 +60,6 @@ const reportItems = [
     href: "/admin/reports/gstreport",
     icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
-  // {
-  //   label: "GST Report",
-  //   href: "/admin/reports/gst",
-  //   icon: <Receipt fontSize="small" />,
-  // },
-  // {
-  //   label: "Staff Report",
-  //   href: "/admin/reports/staff",
-  //   icon: <Group fontSize="small" />,
-  // },
-  // {
-  //   label: "Daily Summary",
-  //   href: "/admin/reports/daily",
-  //   icon: <Today fontSize="small" />,
-  // },
 ];
 
 const settingsItem = {
@@ -102,6 +87,9 @@ export default function Sidebar() {
   const [shopData, setShopData] = useState([]);
   const isDineIn = shopData?.businessCategory === "DINE_IN";
   const isBar = shopData?.businessCategory === "RESTO_BAR";
+  const showTables =
+    shopData?.businessCategory === "DINE_IN" ||
+    shopData?.businessCategory === "RESTO_BAR";
 
   const allowedPlans = ["PREMIUM", "TRIAL"];
 
@@ -113,7 +101,7 @@ export default function Sidebar() {
     },
 
     // show only for restaurants
-    ...(isDineIn
+    ...(showTables
       ? [
           {
             label: "Table Management",
@@ -125,7 +113,7 @@ export default function Sidebar() {
 
     // change label dynamically
     {
-      label: isDineIn ? "Menu Management" : "Item Management",
+      label: showTables ? "Menu Management" : "Item Management",
       href: "/admin/menu",
       icon: <RestaurantMenu fontSize="small" />,
     },

@@ -32,6 +32,7 @@ export default function AddBarInventoryDialog({ open, onClose, onSuccess }) {
   const loadMenuItems = async () => {
     try {
       const res = await getLiquorMenuItems();
+      console.log("ressssssssssss", res);
       setMenuItems(res.data);
     } catch (error) {
       console.error("Failed to load menu items");

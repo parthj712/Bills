@@ -51,6 +51,9 @@ export const removeShopQR = async () => {
 export const addOrUpdateGST = async (payload) => {
   return await API.post("/shops/gst-number", payload);
 };
+export const addOrUpdateVAT = async (payload) => {
+  return await API.post("/shops/vat-number", payload);
+};
 
 export const generateFeedbackLink = async () => {
   return API.post("/shops/generate-feedback-slug");

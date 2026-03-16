@@ -6,17 +6,13 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
-  Dialog,
-  DialogContent,
-  DialogActions,
   Button,
-  IconButton,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
 } from "@mui/material";
-import Image from "next/image";
+
 import AppButton from "../CommonComponents/AppButton";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState, useCallback, useRef } from "react";
@@ -24,7 +20,6 @@ import { useRouter } from "next/navigation";
 import API from "@/service/api";
 import RealStepper from "./RealStepper";
 import OtpBoxes from "../CommonComponents/OTPBoxes";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 //toast notification
 import { useAppSnackbar } from "../CommonComponents/SnackbarProvider/SnackbarProvider";
@@ -44,7 +39,6 @@ export default function RegisterScreen() {
 
   const router = useRouter();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   // ✅ Stepper Statee
   // 0 = Basic Info, 1 = OTP, 2 = Business Setup
@@ -57,6 +51,7 @@ export default function RegisterScreen() {
     email: "",
     phone: "",
     gstNumber: "",
+    vatNumber: "",
     address: "",
     password: "",
     businessCategory: "",
@@ -555,6 +550,14 @@ export default function RegisterScreen() {
                   value={form.gstNumber}
                   onChange={handleChange("gstNumber")}
                 />
+
+                {form.businessCategory === "RESTO_BAR" && (
+                  <TextField
+                    label="VAT Number"
+                    value={form.vatNumber}
+                    onChange={handleChange("vatNumber")}
+                  />
+                )}
 
                 <TextField
                   label="Address"
