@@ -188,7 +188,7 @@ const CrmMain = () => {
         fontWeight={700}
         className="text-[#000C5A]"
       >
-        Customer CRM
+        Customer Information
       </Typography>
 
       {/* Search + KPI */}
