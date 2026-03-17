@@ -38,7 +38,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
   const { items = [] } = useSelector((state) => state.menu);
 
   const [search, setSearch] = useState("");
-  // const [category, setCategory] = useState("");
+  //const [category, setCategory] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [kotMessage, setKotMessage] = useState("");
   const orderType = searchParams.get("orderType") || "DINE-IN";
@@ -136,9 +136,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
       const firstVariant = item.variants[0];
 
       setSelectedItems((prev) => {
-        const existing = prev.find(
-          (x) => x.item._id === item._id && x.variantName === firstVariant.name,
-        );
+        const existing = prev.find((x) => x.item._id === item._id);
 
         if (existing) {
           return prev.map((x) =>
