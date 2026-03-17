@@ -209,8 +209,8 @@ export default function OrderCart() {
   <div class="divider"></div>
 
   ${cartItems
-    .map(
-      (item) => `
+        .map(
+          (item) => `
       <div>
         <div class="bold">${item.name}</div>
         <div class="row">
@@ -219,8 +219,8 @@ export default function OrderCart() {
         </div>
       </div>
     `,
-    )
-    .join("")}
+        )
+        .join("")}
 
   <div class="divider"></div>
 
@@ -229,27 +229,25 @@ export default function OrderCart() {
     <span>₹${subtotal.toFixed(2)}</span>
   </div>
 
-  ${
-    foodSubtotal > 0 && hasGST
-      ? `
+  ${foodSubtotal > 0 && hasGST
+        ? `
       <div class="row">
         <span>GST (5%)</span>
         <span>₹${gstAmount.toFixed(2)}</span>
       </div>
     `
-      : ""
-  }
+        : ""
+      }
 
-  ${
-    liquorSubtotal > 0 && hasVAT
-      ? `
+  ${liquorSubtotal > 0 && hasVAT
+        ? `
       <div class="row">
         <span>VAT (10%)</span>
         <span>₹${vatAmount.toFixed(2)}</span>
       </div>
     `
-      : ""
-  }
+        : ""
+      }
 
   <div class="divider"></div>
 
@@ -294,16 +292,16 @@ export default function OrderCart() {
     <div class="divider"></div>
 
     ${cartItems
-      .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
-      .map(
-        (item) => `
+        .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
+        .map(
+          (item) => `
         <div style="margin-bottom:6px;">
           <div class="bold">${item.name} (${item.portion})</div>
           <div>Qty: ${item.qty}</div>
         </div>
       `,
-      )
-      .join("")}
+        )
+        .join("")}
 
     <div class="divider"></div>
 
@@ -539,10 +537,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-                ...item,
-                kotPrinted: true,
-                kotNumber: kotNumber,
-              },
+              ...item,
+              kotPrinted: true,
+              kotNumber: kotNumber,
+            },
         ),
       );
     };
