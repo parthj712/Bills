@@ -27,6 +27,14 @@ import { Skeleton, CircularProgress } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
+import {
+  getNotifications,
+  getUnreadCount,
+  markNotificationAsRead,
+} from "@/service/notificationService";
+import NotificationDialog from "./NotificationDailog";
+import NotificationBell from "./NotificationBell";
+import { socket } from "@/app/lib/socket";
 
 const topProducts = [
   { name: "Paneer Butter Masala", percent: 72 },
@@ -46,6 +54,9 @@ export default function AdminDashboard() {
   const [summary, setSummary] = useState([]);
 
   const [openTodayOrders, setOpenTodayOrders] = useState(false);
+  const [openNotification, setOpenNotification] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const today = new Date();
 
@@ -154,260 +165,330 @@ export default function AdminDashboard() {
       iconColor: performanceColor,
     },
   ];
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await getNotifications();
+      console.log("notifications", res);
+      setNotifications(res.notifications);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  const fetchUnread = async () => {
+    const res = await getUnreadCount();
+    console.log("unread", res);
+    setUnread(res.unreadCount);
+  };
+
+  const handleRead = async (id) => {
+    try {
+      await markNotificationAsRead(id);
+
+      setNotifications((prev) =>
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
+      );
+
+      setUnreadCount((prev) => Math.max(prev - 1, 0));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+  useEffect(() => {
+    const interval = setInterval(fetchUnread, 10000); // every 10 sec
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (openNotification) {
+      fetchNotifications();
+    }
+  }, [openNotification]);
+
+  useEffect(() => {
+    socket.on("new-notification", (data) => {
+      console.log("NEW 🔔", data);
+
+      // update state
+      setNotifications((prev) => [data, ...prev]);
+      setUnread((prev) => prev + 1);
+    });
+
+    return () => socket.off("new-notification");
+  }, []);
   return (
-    <Box className="min-h-screen bg-[#f8fafc] overflow-hidden">
-      {subscription && subscription.daysLeft <= 2 && (
-        <Card
-          className="mb-6 !rounded-2xl"
-          sx={{
-            p: 3,
-            background:
-              subscription.daysLeft <= 0
-                ? "linear-gradient(90deg,#991b1b,#ef4444)"
-                : subscription.daysLeft === 1
-                  ? "linear-gradient(90deg,#92400e,#f59e0b)"
-                  : "linear-gradient(90deg,#1e3a8a,#3b82f6)",
-            color: "white",
-          }}
-        >
-          {/* Title */}
-          <Typography fontWeight={700} fontSize={18}>
-            {subscription.daysLeft > 1 && "⚠️ Subscription Expiring Soon"}
-            {subscription.daysLeft === 1 && "⏰ Subscription Expires Tomorrow"}
-            {subscription.daysLeft <= 0 && "❌ Subscription Expired"}
-          </Typography>
+    <>
+      <Box className="min-h-screen bg-[#f8fafc] overflow-hidden">
+        {subscription && subscription.daysLeft <= 2 && (
+          <Card
+            className="mb-6 !rounded-2xl"
+            sx={{
+              p: 3,
+              background:
+                subscription.daysLeft <= 0
+                  ? "linear-gradient(90deg,#991b1b,#ef4444)"
+                  : subscription.daysLeft === 1
+                    ? "linear-gradient(90deg,#92400e,#f59e0b)"
+                    : "linear-gradient(90deg,#1e3a8a,#3b82f6)",
+              color: "white",
+            }}
+          >
+            {/* Title */}
+            <Typography fontWeight={700} fontSize={18}>
+              {subscription.daysLeft > 1 && "⚠️ Subscription Expiring Soon"}
+              {subscription.daysLeft === 1 &&
+                "⏰ Subscription Expires Tomorrow"}
+              {subscription.daysLeft <= 0 && "❌ Subscription Expired"}
+            </Typography>
 
-          {/* Message */}
-          <Typography fontSize={14} sx={{ mt: 1, opacity: 0.95 }}>
-            {subscription.daysLeft > 1 &&
-              `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.`}
-            {subscription.daysLeft === 1 &&
-              `Your subscription expires tomorrow.`}
-            {subscription.daysLeft <= 0 && `Your subscription has expired.`}{" "}
-            Please contact our support team for renewal assistance.
-          </Typography>
+            {/* Message */}
+            <Typography fontSize={14} sx={{ mt: 1, opacity: 0.95 }}>
+              {subscription.daysLeft > 1 &&
+                `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.`}
+              {subscription.daysLeft === 1 &&
+                `Your subscription expires tomorrow.`}
+              {subscription.daysLeft <= 0 && `Your subscription has expired.`}{" "}
+              Please contact our support team for renewal assistance.
+            </Typography>
 
-          {/* ACTION BUTTONS */}
-          <Box mt={3} display="flex" gap={2} flexWrap="wrap">
-            {/* CALL BUTTON */}
-            <a href="tel:+919545934174" style={{ textDecoration: "none" }}>
-              <Card
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: "10px",
-                  cursor: "pointer",
-                  background: "white",
-                  color: "#991b1b",
-                  fontWeight: 600,
-                  display: "inline-block",
-                }}
+            {/* ACTION BUTTONS */}
+            <Box mt={3} display="flex" gap={2} flexWrap="wrap">
+              {/* CALL BUTTON */}
+              <a href="tel:+919545934174" style={{ textDecoration: "none" }}>
+                <Card
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    background: "white",
+                    color: "#991b1b",
+                    fontWeight: 600,
+                    display: "inline-block",
+                  }}
+                >
+                  📞 Call Support
+                </Card>
+              </a>
+
+              {/* MAIL BUTTON */}
+              <a
+                href="mailto:billflowpos37@gmail.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
+                style={{ textDecoration: "none" }}
               >
-                📞 Call Support
-              </Card>
-            </a>
+                <Card
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    background: "white",
+                    color: "#991b1b",
+                    fontWeight: 600,
+                    display: "inline-block",
+                  }}
+                >
+                  📧 Send Query via Email
+                </Card>
+              </a>
+            </Box>
+          </Card>
+        )}
 
-            {/* MAIL BUTTON */}
-            <a
-              href="mailto:billflowpos37@gmail.com?subject=Subscription Renewal&body=Hi Team,%0D%0A%0D%0AMy subscription has expired. Please assist with renewal.%0D%0A%0D%0AThank you."
-              style={{ textDecoration: "none" }}
-            >
-              <Card
-                sx={{
-                  px: 3,
-                  py: 1,
-                  borderRadius: "10px",
-                  cursor: "pointer",
-                  background: "white",
-                  color: "#991b1b",
-                  fontWeight: 600,
-                  display: "inline-block",
-                }}
-              >
-                📧 Send Query via Email
-              </Card>
-            </a>
-          </Box>
-        </Card>
-      )}
-
-      {/* HEADER */}
-
-      <Box className="bg-[#f8fafc] px-0 lg:px-4 md:px-4">
         {/* HEADER */}
-        <Typography
-          fontSize={isMobile ? 24 : 30}
-          fontWeight={700}
-          className="text-[#000C5A]"
-          mb={3}
-        >
-          Dashboard Overview
-        </Typography>
 
-        {/* ================= LOADING STATE ================= */}
-        {loadingSub ? (
-          <Box>
-            {/* Skeleton Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton
-                  key={i}
-                  variant="rounded"
-                  height={120}
-                  sx={{ borderRadius: "18px" }}
-                />
-              ))}
-            </div>
-
-            {/* Skeleton Cards */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Skeleton
-                variant="rounded"
-                height={260}
-                sx={{ borderRadius: "18px" }}
-              />
-              <Skeleton
-                variant="rounded"
-                height={260}
-                sx={{ borderRadius: "18px" }}
-              />
-              <Skeleton
-                variant="rounded"
-                height={260}
-                sx={{ borderRadius: "18px" }}
-              />
-            </div>
-          </Box>
-        ) : (
-          /* ================= DASHBOARD CONTENT ================= */
-          <Box sx={{ position: "relative" }}>
-            {/* MAIN DASHBOARD UI */}
-            <Box
-              sx={{
-                filter: hasAccess ? "none" : "blur(6px)",
-                pointerEvents: hasAccess ? "auto" : "none",
-                transition: "0.3s ease",
-              }}
+        <Box className="bg-[#f8fafc] px-0 lg:px-4 md:px-4">
+          {/* HEADER */}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={2}
+          >
+            {/* LEFT: Title */}
+            <Typography
+              fontSize={isMobile ? 22 : 30}
+              fontWeight={700}
+              className="text-[#000C5A]"
             >
-              {/* STATS */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {stats.map((stat, index) => (
-                  <StatCard key={index} stat={stat} onClick={stat.onClick} />
+              Dashboard Overview
+            </Typography>
+
+            {/* RIGHT: Bell */}
+            <NotificationBell onClick={() => setOpenNotification(true)} />
+          </Box>
+
+          {/* ================= LOADING STATE ================= */}
+          {loadingSub ? (
+            <Box>
+              {/* Skeleton Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton
+                    key={i}
+                    variant="rounded"
+                    height={120}
+                    sx={{ borderRadius: "18px" }}
+                  />
                 ))}
               </div>
 
-              {/* CONTENT */}
+              {/* Skeleton Cards */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <TopProductsCard topProducts={topProducts} />
-                <QuickInsights />
+                <Skeleton
+                  variant="rounded"
+                  height={260}
+                  sx={{ borderRadius: "18px" }}
+                />
+                <Skeleton
+                  variant="rounded"
+                  height={260}
+                  sx={{ borderRadius: "18px" }}
+                />
+                <Skeleton
+                  variant="rounded"
+                  height={260}
+                  sx={{ borderRadius: "18px" }}
+                />
               </div>
             </Box>
-
-            {/* ================= LOCK OVERLAY ================= */}
-            {!hasAccess && (
+          ) : (
+            /* ================= DASHBOARD CONTENT ================= */
+            <Box sx={{ position: "relative" }}>
+              {/* MAIN DASHBOARD UI */}
               <Box
                 sx={{
-                  position: "absolute",
-                  inset: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "column",
-                  background: "rgba(255,255,255,0.65)",
-                  borderRadius: "20px",
-                  textAlign: "center",
-                  backdropFilter: "blur(3px)",
+                  filter: hasAccess ? "none" : "blur(6px)",
+                  pointerEvents: hasAccess ? "auto" : "none",
+                  transition: "0.3s ease",
                 }}
               >
-                <Typography fontSize={28} fontWeight={700} color="black">
-                  🔒 Locked Features
-                </Typography>
+                {/* STATS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  {stats.map((stat, index) => (
+                    <StatCard key={index} stat={stat} onClick={stat.onClick} />
+                  ))}
+                </div>
 
-                <Typography
-                  fontSize={14}
-                  sx={{ mt: 1, opacity: 0.8 }}
-                  color="black"
-                >
-                  Upgrade your subscription to view analytics, reports &
-                  insights.
-                </Typography>
-
-                <a
-                  href="https://forms.gle/bxESuy45yUVKp67P9"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ textDecoration: "none" }}
-                >
-                  <Card
-                    sx={{
-                      mt: 3,
-                      px: 4,
-                      py: 1.5,
-                      borderRadius: "14px",
-                      fontWeight: 700,
-                      cursor: "pointer",
-                      background: "linear-gradient(90deg,#2563eb,#3b82f6)",
-                      color: "white",
-                      textAlign: "center",
-                    }}
-                  >
-                    Upgrade to Premium 🚀
-                  </Card>
-                </a>
+                {/* CONTENT */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <TopProductsCard topProducts={topProducts} />
+                  <QuickInsights />
+                </div>
               </Box>
-            )}
-          </Box>
-        )}
-      </Box>
 
-      <Dialog
-        open={openTodayOrders}
-        onClose={() => setOpenTodayOrders(false)}
-        fullWidth
-        maxWidth="xs"
-      >
-        <Box p={3}>
-          <Typography fontSize={20} fontWeight={700} mb={2}>
-            Today's Orders Breakdown
-          </Typography>
+              {/* ================= LOCK OVERLAY ================= */}
+              {!hasAccess && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    background: "rgba(255,255,255,0.65)",
+                    borderRadius: "20px",
+                    textAlign: "center",
+                    backdropFilter: "blur(3px)",
+                  }}
+                >
+                  <Typography fontSize={28} fontWeight={700} color="black">
+                    🔒 Locked Features
+                  </Typography>
 
-          <Divider sx={{ mb: 2 }} />
+                  <Typography
+                    fontSize={14}
+                    sx={{ mt: 1, opacity: 0.8 }}
+                    color="black"
+                  >
+                    Upgrade your subscription to view analytics, reports &
+                    insights.
+                  </Typography>
 
-          {summary.orderTypeStats?.map((item, index) => (
-            <Box
-              key={index}
-              display="flex"
-              justifyContent="space-between"
-              mb={1}
-            >
-              <Typography fontSize={16}>{item.orderType} Orders</Typography>
-              <Typography fontSize={16} fontWeight={700}>
-                {item.todayOrders}
-              </Typography>
+                  <a
+                    href="https://forms.gle/bxESuy45yUVKp67P9"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ textDecoration: "none" }}
+                  >
+                    <Card
+                      sx={{
+                        mt: 3,
+                        px: 4,
+                        py: 1.5,
+                        borderRadius: "14px",
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        background: "linear-gradient(90deg,#2563eb,#3b82f6)",
+                        color: "white",
+                        textAlign: "center",
+                      }}
+                    >
+                      Upgrade to Premium 🚀
+                    </Card>
+                  </a>
+                </Box>
+              )}
             </Box>
-          ))}
-
-          <Divider sx={{ my: 2 }} />
-
-          <Box textAlign="right">
-            <Card
-              onClick={() => setOpenTodayOrders(false)}
-              sx={{
-                display: "inline-block",
-                px: 3,
-                py: 1,
-                cursor: "pointer",
-                borderRadius: "10px",
-                background: "linear-gradient(90deg,#2563eb,#3b82f6)",
-                color: "white",
-                fontWeight: 600,
-              }}
-            >
-              Close
-            </Card>
-          </Box>
+          )}
         </Box>
-      </Dialog>
-    </Box>
+
+        <Dialog
+          open={openTodayOrders}
+          onClose={() => setOpenTodayOrders(false)}
+          fullWidth
+          maxWidth="xs"
+        >
+          <Box p={3}>
+            <Typography fontSize={20} fontWeight={700} mb={2}>
+              Today's Orders Breakdown
+            </Typography>
+
+            <Divider sx={{ mb: 2 }} />
+
+            {summary.orderTypeStats?.map((item, index) => (
+              <Box
+                key={index}
+                display="flex"
+                justifyContent="space-between"
+                mb={1}
+              >
+                <Typography fontSize={16}>{item.orderType} Orders</Typography>
+                <Typography fontSize={16} fontWeight={700}>
+                  {item.todayOrders}
+                </Typography>
+              </Box>
+            ))}
+
+            <Divider sx={{ my: 2 }} />
+
+            <Box textAlign="right">
+              <Card
+                onClick={() => setOpenTodayOrders(false)}
+                sx={{
+                  display: "inline-block",
+                  px: 3,
+                  py: 1,
+                  cursor: "pointer",
+                  borderRadius: "10px",
+                  background: "linear-gradient(90deg,#2563eb,#3b82f6)",
+                  color: "white",
+                  fontWeight: 600,
+                }}
+              >
+                Close
+              </Card>
+            </Box>
+          </Box>
+        </Dialog>
+      </Box>
+      <NotificationDialog
+        open={openNotification}
+        onClose={() => setOpenNotification(false)}
+        notifications={notifications}
+        onMarkRead={handleRead}
+      />
+    </>
   );
 }
