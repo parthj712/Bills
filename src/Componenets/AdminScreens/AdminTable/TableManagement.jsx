@@ -94,7 +94,7 @@ export default function TableManagement() {
     setOpenEditDialog(true);
   };
   const [loading, setLoading] = useState(true);
-  console.log(tables);
+
   const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const groupedTables = tables.reduce((acc, table) => {
@@ -113,7 +113,7 @@ export default function TableManagement() {
     setLoading(true);
     try {
       const res = await getTables();
-      console.log("Fetched tables:", res); // debug API
+
       setTables(res);
     } catch (err) {
       console.log("Failed to fetch tables", err);
@@ -129,7 +129,6 @@ export default function TableManagement() {
 
   useEffect(() => {
     const handleTableUpdate = (data) => {
-      console.log("Table updated via socket:", data);
       setTables((prev) =>
         prev.map((t) =>
           t._id === data.tableId ? { ...t, status: data.status } : t,

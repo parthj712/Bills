@@ -42,7 +42,7 @@ const FeedbackManagement = () => {
   const fetchFeedbacks = async () => {
     try {
       const res = await getFeedbacks();
-      console.log(res.data);
+
       setFeedbacks(res.data);
     } catch (error) {
       console.log("failed to fetch feedbacks", error.message);

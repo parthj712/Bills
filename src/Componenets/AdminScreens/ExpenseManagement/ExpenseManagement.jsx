@@ -36,9 +36,7 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 import ExpenseCard from "./ExpenseCard";
 
 const ExpenseManagement = () => {
-
   const { showSnackbar } = useAppSnackbar();
-
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -57,7 +55,7 @@ const ExpenseManagement = () => {
     try {
       setLoading(true);
       const res = await getExpense();
-      console.log(res);
+
       setExpenseData(res.data || []);
     } catch (err) {
       console.log(err);
@@ -128,7 +126,6 @@ const ExpenseManagement = () => {
   //   saveAs(file, `Expenses-${Date.now()}.xlsx`);
   // };
 
-
   const handleDownloadEmptyTemplate = () => {
     const headers = ["note", "categoryName", "amount", "paymentMode", "date"];
 
@@ -165,7 +162,7 @@ const ExpenseManagement = () => {
 
     const isExcel =
       file.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -182,7 +179,9 @@ const ExpenseManagement = () => {
     try {
       const res = await uploadExcelFile(excelFile);
 
-      showSnackbar(`Uploaded Successfully: ${res.data.inserted} expenses added`);
+      showSnackbar(
+        `Uploaded Successfully: ${res.data.inserted} expenses added`,
+      );
 
       setExcelFile(null);
       fetchExpenses();
@@ -437,7 +436,6 @@ const ExpenseManagement = () => {
           </Table>
         </TableContainer>
       )}
-
 
       {!isDesktop && (
         <Box className="flex flex-col gap-4">

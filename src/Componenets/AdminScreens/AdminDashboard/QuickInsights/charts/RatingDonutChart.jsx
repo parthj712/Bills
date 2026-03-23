@@ -8,6 +8,7 @@ import {
   useTheme,
   Divider,
   LinearProgress,
+  Paper,
 } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { getRatingsSummary } from "@/service/reportService";
@@ -53,7 +54,6 @@ export default function RatingsDonutChart() {
     .map((star) => ({
       id: star,
       value: distribution[star] || 0,
-      label: `${star} Star`,
       color: STAR_COLORS[star],
     }))
     .filter((item) => item.value > 0);
@@ -66,122 +66,218 @@ export default function RatingsDonutChart() {
 
   return (
     <Box>
-      {/* HEADER */}
-      <Box mb={2}>
-        <Typography fontSize={18} fontWeight={600}>
-          ⭐ Ratings Overview
-        </Typography>
-        <Typography fontSize={13} sx={{ opacity: 0.6 }}>
-          Customer Satisfaction Distribution
-        </Typography>
-      </Box>
-
-      {/* DONUT CHART */}
-      <Box
-        display="grid"
-        gridTemplateColumns={isMobile ? "1fr" : "1fr 1fr"}
-        gap={4}
-        alignItems="center"
-      >
-        {/* Chart */}
-        <Box
-          position="relative"
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-        >
-          <PieChart
-            series={[
-              {
-                data: donutData,
-                innerRadius: isMobile ? 60 : 90,
-                outerRadius: isMobile ? 90 : 120,
-                paddingAngle: 3,
-                cornerRadius: 6,
-              },
-            ]}
-            width={isMobile ? 260 : 340}
-            height={isMobile ? 240 : 280}
-            slotProps={{ legend: { hidden: true } }}
-          />
-
-          <Box position="absolute" textAlign="center">
-            <Typography fontSize={12} sx={{ opacity: 0.6 }}>
-              Average Rating
-            </Typography>
-
-            <Typography fontSize={24} fontWeight={800}>
-              {avgRating}
-            </Typography>
-
-            <Typography fontSize={11} sx={{ opacity: 0.6 }}>
-              {totalFeedbacks} Reviews
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Category Ratings */}
+      {/* ================= MOBILE VIEW ================= */}
+      {isMobile ? (
         <Box>
-          {ratingBars.map((item) => (
-            <Box key={item.label} mb={3}>
-              <Box display="flex" justifyContent="space-between">
-                <Typography fontSize={14}>{item.label}</Typography>
-
-                <Typography fontWeight={600}>
-                  {item.value.toFixed(1)} ⭐
-                </Typography>
-              </Box>
-
-              <LinearProgress
-                variant="determinate"
-                value={(item.value / 5) * 100}
-                sx={{
-                  height: 8,
-                  borderRadius: 5,
-                  mt: 1,
-                }}
-              />
-            </Box>
-          ))}
-        </Box>
-      </Box>
-
-      <Divider sx={{ my: 3 }} />
-
-      {/* RATING DISTRIBUTION */}
-      <Box
-        display="grid"
-        gridTemplateColumns={isMobile ? "1fr 1fr" : "repeat(5,1fr)"}
-        gap={2}
-      >
-        {[5, 4, 3, 2, 1].map((star) => (
+          {/* TOP RATING CARD */}
           <Box
-            key={star}
             sx={{
               p: 2,
               borderRadius: 3,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              background: `${STAR_COLORS[star]}15`,
+              background: "linear-gradient(135deg, #f59e0b, #d97706)",
+              color: "#fff",
+              mb: 2,
             }}
           >
-            <Box display="flex" alignItems="center" gap={1}>
-              <Box
-                sx={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: "50%",
-                  background: STAR_COLORS[star],
-                }}
+            <Typography fontSize={12} sx={{ opacity: 0.7 }}>
+              Average Rating
+            </Typography>
+
+            <Typography fontSize={26} fontWeight={800}>
+              ⭐ {avgRating}
+            </Typography>
+
+            <Typography fontSize={11} sx={{ opacity: 0.8 }}>
+              {totalFeedbacks} reviews
+            </Typography>
+          </Box>
+
+          {/* DONUT CARD */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "#fff",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
+              mb: 2,
+            }}
+          >
+            <Box position="relative" display="flex" justifyContent="center">
+              <PieChart
+                series={[
+                  {
+                    data: donutData,
+                    innerRadius: 55,
+                    outerRadius: 85,
+                    paddingAngle: 2,
+                  },
+                ]}
+                width={240}
+                height={220}
               />
-              <Typography fontSize={13}>{star} Star</Typography>
+
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                sx={{ transform: "translate(-50%, -50%)" }}
+                textAlign="center"
+              >
+                <Typography fontSize={12} color="text.secondary">
+                  Rating
+                </Typography>
+                <Typography fontWeight={700} fontSize={16}>
+                  {avgRating}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* CATEGORY CARDS */}
+          <Box display="flex" gap={1} mb={2}>
+            {ratingBars.map((item) => (
+              <Box
+                key={item.label}
+                flex={1}
+                sx={{
+                  p: 1.5,
+                  borderRadius: 2,
+                  background: "#fff",
+                  boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+                  textAlign: "center",
+                }}
+              >
+                <Typography fontSize={11} color="text.secondary">
+                  {item.label}
+                </Typography>
+                <Typography fontWeight={700} fontSize={14}>
+                  {item.value.toFixed(1)} ⭐
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+
+          {/* DISTRIBUTION */}
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={1}>
+            {[5, 4, 3, 2, 1].map((star) => (
+              <Box
+                key={star}
+                sx={{
+                  p: 1.5,
+                  borderRadius: 2,
+                  background: `${STAR_COLORS[star]}15`,
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography fontSize={12}>{star} ⭐</Typography>
+                <Typography fontWeight={600}>
+                  {distribution[star] || 0}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Box>
+      ) : (
+        /* ================= DESKTOP VIEW ================= */
+        <Paper
+          sx={{
+            p: 3,
+            borderRadius: 3,
+            background: "linear-gradient(145deg,#fff,#f8fafc)",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+          }}
+        >
+          {/* HEADER */}
+          <Box mb={2}>
+            <Typography fontSize={18} fontWeight={600}>
+              ⭐ Ratings Overview
+            </Typography>
+            <Typography fontSize={13} sx={{ opacity: 0.6 }}>
+              Customer Satisfaction Distribution
+            </Typography>
+          </Box>
+
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={4}>
+            {/* DONUT */}
+            <Box position="relative" display="flex" justifyContent="center">
+              <PieChart
+                series={[
+                  {
+                    data: donutData,
+                    innerRadius: 90,
+                    outerRadius: 120,
+                    paddingAngle: 3,
+                  },
+                ]}
+                width={320}
+                height={260}
+              />
+
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                sx={{ transform: "translate(-50%, -50%)" }}
+                textAlign="center"
+              >
+                <Typography fontSize={12} sx={{ opacity: 0.6 }}>
+                  Avg Rating
+                </Typography>
+                <Typography fontSize={24} fontWeight={800}>
+                  {avgRating}
+                </Typography>
+                <Typography fontSize={11} sx={{ opacity: 0.6 }}>
+                  {totalFeedbacks} Reviews
+                </Typography>
+              </Box>
             </Box>
 
-            <Typography fontWeight={600}>{distribution[star] || 0}</Typography>
+            {/* CATEGORY BARS */}
+            <Box>
+              {ratingBars.map((item) => (
+                <Box key={item.label} mb={3}>
+                  <Box display="flex" justifyContent="space-between">
+                    <Typography fontSize={14}>{item.label}</Typography>
+                    <Typography fontWeight={600}>
+                      {item.value.toFixed(1)} ⭐
+                    </Typography>
+                  </Box>
+
+                  <LinearProgress
+                    variant="determinate"
+                    value={(item.value / 5) * 100}
+                    sx={{ height: 8, borderRadius: 5, mt: 1 }}
+                  />
+                </Box>
+              ))}
+            </Box>
           </Box>
-        ))}
-      </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* DISTRIBUTION */}
+          <Box display="grid" gridTemplateColumns="repeat(5,1fr)" gap={2}>
+            {[5, 4, 3, 2, 1].map((star) => (
+              <Box
+                key={star}
+                sx={{
+                  p: 2,
+                  borderRadius: 3,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  background: `${STAR_COLORS[star]}15`,
+                }}
+              >
+                <Typography>{star} ⭐</Typography>
+                <Typography fontWeight={600}>
+                  {distribution[star] || 0}
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        </Paper>
+      )}
     </Box>
   );
 }

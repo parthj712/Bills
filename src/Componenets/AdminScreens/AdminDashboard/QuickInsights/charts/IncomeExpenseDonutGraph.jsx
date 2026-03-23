@@ -11,10 +11,11 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Paper,
+  Stack,
 } from "@mui/material";
 import dayjs from "dayjs";
 import { getExpense } from "@/service/expenseService";
-import { wrap } from "framer-motion";
 
 const months = [
   { label: "All", value: "all" },
@@ -35,166 +36,290 @@ const months = [
 const IncomeExpenseDonutGraph = ({ bills }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const [expenseList, setExpenseList] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("all");
 
-  // ================= FETCH EXPENSE =================
-  const fetchExpense = async () => {
-    try {
-      const res = await getExpense();
-      setExpenseList(res.data || []);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
+  // ================= FETCH =================
   useEffect(() => {
+    const fetchExpense = async () => {
+      try {
+        const res = await getExpense();
+        setExpenseList(res.data || []);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
     fetchExpense();
   }, []);
-  console.log("bills", bills);
 
-  // ================= FILTERED BILLS =================
+  // ================= FILTER =================
   const filteredBills = useMemo(() => {
     if (selectedMonth === "all") return bills || [];
-
-    return bills?.filter((bill) => {
-      const billMonth = dayjs(bill.createdAt).month();
-      return billMonth === selectedMonth;
-    });
+    return bills?.filter(
+      (bill) => dayjs(bill.createdAt).month() === selectedMonth,
+    );
   }, [bills, selectedMonth]);
 
-  // ================= FILTERED EXPENSE =================
   const filteredExpenses = useMemo(() => {
     if (selectedMonth === "all") return expenseList;
-
-    return expenseList?.filter((item) => {
-      const expenseMonth = dayjs(item.createdAt).month();
-      return expenseMonth === selectedMonth;
-    });
+    return expenseList?.filter(
+      (item) => dayjs(item.createdAt).month() === selectedMonth,
+    );
   }, [expenseList, selectedMonth]);
 
-  // ================= TOTAL INCOME =================
-  const totalIncome = useMemo(() => {
-    return (
-      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) || 0
-    );
-  }, [filteredBills]);
+  // ================= TOTALS =================
+  const totalIncome = useMemo(
+    () =>
+      filteredBills?.reduce((sum, bill) => sum + (bill.subtotal || 0), 0) || 0,
+    [filteredBills],
+  );
 
-  // ================= TOTAL EXPENSE =================
-  const totalExpense = useMemo(() => {
-    return (
-      filteredExpenses?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0
-    );
-  }, [filteredExpenses]);
+  const totalExpense = useMemo(
+    () =>
+      filteredExpenses?.reduce((sum, item) => sum + (item.amount || 0), 0) || 0,
+    [filteredExpenses],
+  );
 
+  const total = totalIncome + totalExpense;
   const profit = totalIncome - totalExpense;
+
+  const incomePercent = total ? ((totalIncome / total) * 100).toFixed(1) : 0;
+  const expensePercent = total ? ((totalExpense / total) * 100).toFixed(1) : 0;
 
   return (
     <Box>
-      {/* Header + Filter */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Typography fontSize={16} fontWeight={600}>
-          Income vs Expense
-        </Typography>
-
-        <FormControl size="small">
-          <Select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
+      {/* ================= MOBILE VIEW ================= */}
+      {isMobile ? (
+        <Box>
+          {/* BALANCE CARD */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg, #1e293b, #0f172a)",
+              color: "#fff",
+              mb: 2,
+            }}
           >
-            {months.map((month) => (
-              <MenuItem key={month.label} value={month.value}>
-                {month.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
+            <Typography fontSize={12} sx={{ opacity: 0.7 }}>
+              Total Balance
+            </Typography>
 
-      {/* ================= DONUT ================= */}
-      <PieChart
-        series={[
-          {
-            innerRadius: isMobile ? 60 : 90,
-            outerRadius: isMobile ? 90 : 120,
-            paddingAngle: 3,
-            cornerRadius: 6,
-            data: [
-              {
-                id: 0,
-                value: totalIncome,
-                label: "Income",
-                color: "#16a34a",
-              },
-              {
-                id: 1,
-                value: totalExpense,
-                label: "Expense",
-                color: "#dc2626",
-              },
-            ],
-          },
-        ]}
-        width={isMobile ? 260 : 320}
-        height={isMobile ? 240 : 280}
-        slotProps={{
-          legend: {
-            direction: "row",
-            position: { vertical: "bottom", horizontal: "middle" },
-          },
-        }}
-      />
+            <Typography fontSize={22} fontWeight={700}>
+              ₹ {profit.toLocaleString()}
+            </Typography>
 
-      <Divider sx={{ my: 2 }} />
+            <Typography
+              fontSize={11}
+              sx={{
+                mt: 0.5,
+                color: profit >= 0 ? "#4ade80" : "#f87171",
+              }}
+            >
+              {profit >= 0 ? "Profit" : "Loss"}
+            </Typography>
+          </Box>
 
-      {/* ================= SUMMARY ================= */}
-      <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        mt={2}
-        p={isMobile ? 1.5 : 2}
-      >
-        {/* Income */}
-        <Box flex={1} textAlign="center">
-          <Typography fontSize={isMobile ? 11 : 13} color="text.secondary">
-            💰 Income
-          </Typography>
-          <Typography fontWeight={600} fontSize={isMobile ? 13 : 16}>
-            ₹ {totalIncome.toLocaleString()}
-          </Typography>
-        </Box>
-        {/* Expense */}
-        <Box flex={1} textAlign="center">
-          <Typography fontSize={isMobile ? 11 : 13} color="text.secondary">
-            💸 Expense
-          </Typography>
-          <Typography fontWeight={600} fontSize={isMobile ? 13 : 16}>
-            ₹ {totalExpense.toLocaleString()}
-          </Typography>
-        </Box>
-
-        {/* Profit */}
-        <Box flex={1} textAlign="center">
-          <Typography fontSize={isMobile ? 11 : 13} color="text.secondary">
-            📊 Profit
-          </Typography>
-          <Typography
-            fontWeight={700}
-            fontSize={isMobile ? 13 : 16}
-            color={profit >= 0 ? "success.main" : "error.main"}
+          {/* DONUT CARD */}
+          <Box
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "#fff",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+              mb: 2,
+            }}
           >
-            ₹ {profit.toLocaleString()}
-          </Typography>
+            <Box position="relative" display="flex" justifyContent="center">
+              <PieChart
+                series={[
+                  {
+                    innerRadius: 55,
+                    outerRadius: 80,
+                    paddingAngle: 2,
+                    data: [
+                      { value: totalIncome, color: "#22c55e" },
+                      { value: totalExpense, color: "#ef4444" },
+                    ],
+                  },
+                ]}
+                width={220}
+                height={200}
+              />
+
+              {/* CENTER TEXT */}
+              <Box
+                position="absolute"
+                top="50%"
+                left="50%"
+                sx={{ transform: "translate(-50%, -50%)" }}
+                textAlign="center"
+              >
+                <Typography fontSize={11} color="text.secondary">
+                  Income
+                </Typography>
+                <Typography fontWeight={700} fontSize={14}>
+                  ₹ {totalIncome.toLocaleString()}
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* KPI CARDS */}
+          <Box display="flex" gap={1}>
+            <KpiCard title="Income" value={totalIncome} color="#22c55e" />
+            <KpiCard title="Expense" value={totalExpense} color="#ef4444" />
+          </Box>
         </Box>
-      </Box>
+      ) : (
+        /* ================= DESKTOP VIEW ================= */
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2.5,
+            borderRadius: 3,
+            border: "1px solid #eee",
+            background: "linear-gradient(145deg, #ffffff, #fafafa)",
+          }}
+        >
+          {/* HEADER */}
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Box>
+              <Typography fontWeight={600} fontSize={16}>
+                Financial Overview
+              </Typography>
+              <Typography fontSize={12} color="text.secondary">
+                Income vs Expense breakdown
+              </Typography>
+            </Box>
+
+            <FormControl size="small">
+              <Select
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                {months.map((month) => (
+                  <MenuItem key={month.label} value={month.value}>
+                    {month.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* DONUT */}
+          <Box position="relative" display="flex" justifyContent="center">
+            <PieChart
+              series={[
+                {
+                  innerRadius: 75,
+                  outerRadius: 110,
+                  paddingAngle: 2,
+                  cornerRadius: 5,
+                  data: [
+                    { value: totalIncome, color: "#4CAF50" },
+                    { value: totalExpense, color: "#F44336" },
+                  ],
+                },
+              ]}
+              width={300}
+              height={260}
+            />
+
+            <Box
+              position="absolute"
+              top="50%"
+              left="50%"
+              sx={{ transform: "translate(-50%, -50%)" }}
+              textAlign="center"
+            >
+              <Typography fontSize={12} color="text.secondary">
+                Total
+              </Typography>
+              <Typography fontWeight={700} fontSize={16}>
+                ₹ {totalIncome.toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          {/* DETAILS */}
+          <Stack spacing={1.5}>
+            <Row
+              label="Income"
+              value={totalIncome}
+              percent={incomePercent}
+              color="#4CAF50"
+            />
+            <Row
+              label="Expense"
+              value={totalExpense}
+              percent={expensePercent}
+              color="#F44336"
+            />
+            <Row
+              label="Profit"
+              value={profit}
+              color={profit >= 0 ? "#4CAF50" : "#F44336"}
+              bold
+            />
+          </Stack>
+        </Paper>
+      )}
     </Box>
   );
 };
+
+// ================= KPI CARD =================
+const KpiCard = ({ title, value, color }) => (
+  <Box
+    flex={1}
+    sx={{
+      p: 1.5,
+      borderRadius: 2,
+      background: "#fff",
+      boxShadow: "0 4px 15px rgba(0,0,0,0.05)",
+    }}
+  >
+    <Typography fontSize={11} color="text.secondary">
+      {title}
+    </Typography>
+    <Typography fontWeight={700} fontSize={14} sx={{ color }}>
+      ₹ {value.toLocaleString()}
+    </Typography>
+  </Box>
+);
+
+// ================= ROW =================
+const Row = ({ label, value, percent, color, bold }) => (
+  <Box display="flex" justifyContent="space-between" alignItems="center">
+    <Box display="flex" alignItems="center" gap={1}>
+      <Box
+        sx={{
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          backgroundColor: color,
+        }}
+      />
+      <Typography fontSize={13} color="text.secondary">
+        {label}
+      </Typography>
+    </Box>
+
+    <Box textAlign="right">
+      <Typography fontWeight={bold ? 700 : 600} fontSize={13}>
+        ₹ {value.toLocaleString()}
+      </Typography>
+      {percent && (
+        <Typography fontSize={11} color="text.secondary">
+          {percent}%
+        </Typography>
+      )}
+    </Box>
+  </Box>
+);
 
 export default IncomeExpenseDonutGraph;

@@ -50,7 +50,7 @@ const CrmMain = () => {
 
     fetchInfo();
   }, []);
-  console.log(shopData);
+
   // format date
   const formatDate = (date) => {
     if (!date) return "-";
@@ -81,7 +81,6 @@ const CrmMain = () => {
       const res = await getOrders();
 
       const orders = res.data.orders || [];
-      console.log(orders);
 
       const customerMap = {};
 
