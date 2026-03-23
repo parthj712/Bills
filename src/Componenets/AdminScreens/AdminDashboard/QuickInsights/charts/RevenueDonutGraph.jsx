@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, Typography, Box, Divider } from "@mui/material";
+import { Typography, Box, Divider } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { getDineInTakeAway } from "@/utils/reportHelper";
 import { useEffect, useState } from "react";
@@ -13,23 +13,23 @@ export default function RevenueDonutChart({ bills }) {
 
   const [shopData, setShopData] = useState(null);
 
-  const fecthShopData = async () => {
-    try {
-      const res = await getShopInfo();
-      setShopData(res.data.data);
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
   useEffect(() => {
-    fecthShopData();
+    const fetchShopData = async () => {
+      try {
+        const res = await getShopInfo();
+        setShopData(res.data.data);
+      } catch (error) {
+        console.log(error.message);
+      }
+    };
+
+    fetchShopData();
   }, []);
 
   const isDineIn = shopData?.businessCategory === "DINE_IN";
   if (!bills?.length) return null;
 
-  let totalRevenue = bills.reduce((sum, b) => sum + (b.grandTotal || 0), 0);
+  const totalRevenue = bills.reduce((sum, b) => sum + (b.grandTotal || 0), 0);
 
   let data = [];
   let dineIn = 0;
@@ -49,32 +49,30 @@ export default function RevenueDonutChart({ bills }) {
         id: 0,
         value: totalRevenue,
         label: "Orders",
-        color: "#3b82f6",
+        color: "url(#revenueGradient)",
       },
     ];
   }
 
   return (
     <Box>
-      {/* Header */}
-      <Box mb={isMobile ? 1.5 : 2}>
+      {/* HEADER */}
+      <Box mb={2}>
         <Typography fontSize={isMobile ? 16 : 18} fontWeight={700}>
           {isDineIn ? "🍽 Revenue Split" : "🧾 Total Sales"}
         </Typography>
 
-        <Typography fontSize={isMobile ? 12 : 13} sx={{ opacity: 0.65 }}>
+        <Typography fontSize={12} sx={{ opacity: 0.6 }}>
           {isDineIn
             ? "Dine-In vs TakeAway Contribution"
             : "Total billing revenue"}
         </Typography>
       </Box>
 
-      {/* Chart */}
+      {/* DONUT */}
       <Box
         sx={{
           position: "relative",
-          width: "100%",
-          height: isMobile ? 260 : 320,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -83,97 +81,107 @@ export default function RevenueDonutChart({ bills }) {
         <PieChart
           series={[
             {
-              innerRadius: isMobile ? 60 : 90,
-              outerRadius: isMobile ? 90 : 120,
-              paddingAngle: 3,
-              cornerRadius: 8,
+              innerRadius: isMobile ? 70 : 95,
+              outerRadius: isMobile ? 95 : 120,
+              paddingAngle: 2,
+              cornerRadius: 6,
               data,
             },
           ]}
-          width={isMobile ? 260 : 360}
-          height={isMobile ? 240 : 280}
+          width={isMobile ? 260 : 340}
+          height={isMobile ? 240 : 260}
           slotProps={{
-            legend: {
-              direction: "row",
-              position: {
-                vertical: "bottom",
-                horizontal: "middle",
-              },
-            },
-          }}
-        />
-
-        {/* Center Text */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            textAlign: "center",
-            pointerEvents: "none",
+            legend: { hidden: true },
           }}
         >
-          <Typography fontSize={isMobile ? 12 : 12} sx={{ opacity: 0.6 }}>
+          {/* Gradient */}
+          <defs>
+            <linearGradient id="revenueGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#3b82f6" />
+              <stop offset="100%" stopColor="#1d4ed8" />
+            </linearGradient>
+          </defs>
+        </PieChart>
+
+        {/* CENTER TEXT */}
+        <Box
+          position="absolute"
+          top="50%"
+          left="50%"
+          sx={{
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: 1.2,
+          }}
+        >
+          <Typography fontSize={11} sx={{ opacity: 0.6 }}>
             Total Revenue
           </Typography>
 
-          <Typography fontSize={isMobile ? 14 : 22} fontWeight={800}>
+          <Typography
+            fontWeight={800}
+            fontSize={isMobile ? 16 : 22}
+            sx={{ letterSpacing: "0.5px" }}
+          >
             ₹{totalRevenue.toLocaleString("en-IN")}
           </Typography>
         </Box>
       </Box>
 
-      {/* Bottom Split */}
+      {/* SPLIT CARDS */}
       {isDineIn && (
         <>
           <Divider sx={{ my: 2 }} />
 
           <Box
-            sx={{
-              display: "flex",
-              flexDirection: isMobile ? "column" : "row",
-              gap: 2,
-            }}
+            display="flex"
+            flexDirection={isMobile ? "column" : "row"}
+            gap={2}
           >
-            <Box
-              sx={{
-                flex: 1,
-                p: 2,
-                borderRadius: 3,
-                background: "rgba(34,197,94,0.08)",
-                textAlign: "center",
-              }}
-            >
-              <Typography fontSize={12} sx={{ opacity: 0.7 }}>
-                Dine In
-              </Typography>
+            <SplitCard
+              label="Dine In"
+              value={dineIn}
+              color="#22c55e"
+              bg="rgba(34,197,94,0.08)"
+            />
 
-              <Typography fontWeight={800} fontSize={isMobile ? 15 : 16}>
-                ₹{dineIn.toLocaleString("en-IN")}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                flex: 1,
-                p: 2,
-                borderRadius: 3,
-                background: "rgba(59,130,246,0.08)",
-                textAlign: "center",
-              }}
-            >
-              <Typography fontSize={12} sx={{ opacity: 0.7 }}>
-                Take Away
-              </Typography>
-
-              <Typography fontWeight={800} fontSize={isMobile ? 15 : 16}>
-                ₹{takeAway.toLocaleString("en-IN")}
-              </Typography>
-            </Box>
+            <SplitCard
+              label="Take Away"
+              value={takeAway}
+              color="#3b82f6"
+              bg="rgba(59,130,246,0.08)"
+            />
           </Box>
         </>
       )}
     </Box>
   );
 }
+
+/* ================= SPLIT CARD ================= */
+const SplitCard = ({ label, value, color, bg }) => (
+  <Box
+    flex={1}
+    sx={{
+      p: 2,
+      borderRadius: 3,
+      background: bg,
+      textAlign: "center",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        transform: "translateY(-2px)",
+      },
+    }}
+  >
+    <Typography fontSize={12} sx={{ opacity: 0.7 }}>
+      {label}
+    </Typography>
+
+    <Typography fontWeight={800} fontSize={16} sx={{ color }}>
+      ₹{value.toLocaleString("en-IN")}
+    </Typography>
+  </Box>
+);

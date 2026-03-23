@@ -214,8 +214,6 @@ export default function AddMenuItems({ open, onClose, onSuccess }) {
           }));
       }
 
-      console.log("FINAL PAYLOAD:", payload);
-
       await addMenuItem(payload);
 
       setSuccess(true);

@@ -37,7 +37,6 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
 
   const MotionPaper = motion.div;
   const controls = useAnimation();
-  console.log("menu", menu);
 
   useEffect(() => {
     if (menu) {
@@ -91,9 +90,9 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
         price:
           form.priceType === "HALF_FULL"
             ? {
-              half: form.priceHalf,
-              full: form.priceFull,
-            }
+                half: form.priceHalf,
+                full: form.priceFull,
+              }
             : form.priceType === "SINGLE"
               ? { full: form.priceFull }
               : undefined,

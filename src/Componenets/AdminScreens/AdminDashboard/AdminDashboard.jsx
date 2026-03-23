@@ -36,12 +36,12 @@ import NotificationDialog from "./NotificationDailog";
 import NotificationBell from "./NotificationBell";
 import { socket } from "@/app/lib/socket";
 
-const topProducts = [
-  { name: "Paneer Butter Masala", percent: 72 },
-  { name: "Veg Biryani", percent: 65 },
-  { name: "Butter Naan", percent: 54 },
-  { name: "Cold Coffee", percent: 41 },
-];
+// const topProducts = [
+//   { name: "Paneer Butter Masala", percent: 72 },
+//   { name: "Veg Biryani", percent: 65 },
+//   { name: "Butter Naan", percent: 54 },
+//   { name: "Cold Coffee", percent: 41 },
+// ];
 
 export default function AdminDashboard() {
   const theme = useTheme();
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
   const fetchSummary = async () => {
     try {
       const res = await getDashboardSummary();
-      console.log(res.data);
+
       setSummary(res.data);
     } catch (error) {
       console.log(error);
@@ -132,7 +132,7 @@ export default function AdminDashboard() {
   } else {
     performanceIcon = <TrendingFlatIcon fontSize="large" />;
   }
-  console.log(summary);
+
   const stats = [
     {
       title: "Total Sales",
@@ -169,7 +169,7 @@ export default function AdminDashboard() {
   const fetchNotifications = async () => {
     try {
       const res = await getNotifications();
-      console.log("notifications", res);
+
       setNotifications(res.notifications);
     } catch (err) {
       console.log(err);
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
   };
   const fetchUnread = async () => {
     const res = await getUnreadCount();
-    console.log("unread", res);
+
     setUnread(res.unreadCount);
   };
 
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
 
                 {/* CONTENT */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <TopProductsCard topProducts={topProducts} />
+                  <TopProductsCard />
                   <QuickInsights />
                 </div>
               </Box>
