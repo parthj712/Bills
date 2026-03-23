@@ -2,16 +2,12 @@
 
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { getTables } from "@/service/tableService";
-import LogoutIcon from "@mui/icons-material/Logout";
 import {
   Box,
   Typography,
   Card,
   useTheme,
   useMediaQuery,
-  IconButton,
-  Avatar,
-  Menu,
   MenuItem,
   Tooltip,
   Skeleton,
@@ -78,7 +74,7 @@ export default function WaiterHomePage() {
   const showTables =
     shopData?.businessCategory === "DINE_IN" ||
     shopData?.businessCategory === "RESTO_BAR";
-    
+
   const fecthShopData = async () => {
     try {
       const res = await getShopInfo();
@@ -471,13 +467,12 @@ export default function WaiterHomePage() {
                   transition-all duration-300
                   hover:shadow-lg hover:scale-[1.0]
                   ${tableStyles[table.status]}
-                  ${
-                    highlightTableNo === table.tableNo
-                      ? table.status === "OCCUPIED"
-                        ? "ring-4 ring-red-500 ring-offset-2"
-                        : "ring-4 ring-green-500 ring-offset-2"
-                      : ""
-                  }
+                  ${highlightTableNo === table.tableNo
+                                        ? table.status === "OCCUPIED"
+                                          ? "ring-4 ring-red-500 ring-offset-2"
+                                          : "ring-4 ring-green-500 ring-offset-2"
+                                        : ""
+                                      }
                 `}
                                   >
                                     {/* Table Number */}
@@ -502,11 +497,10 @@ export default function WaiterHomePage() {
                                         table.status === "OCCUPIED" ? 700 : 600
                                       }
                                       className={`px-2 py-[2px] rounded-full
-                    ${
-                      table.status === "OCCUPIED"
-                        ? "bg-red-100 text-red-700 border border-red-500"
-                        : "bg-green-100 text-green-700 border border-green-500"
-                    }`}
+                    ${table.status === "OCCUPIED"
+                                          ? "bg-red-100 text-red-700 border border-red-500"
+                                          : "bg-green-100 text-green-700 border border-green-500"
+                                        }`}
                                     >
                                       {table.status}
                                     </Typography>
