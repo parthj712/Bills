@@ -31,7 +31,6 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useMemo, useState } from "react";
 import AddMenuItems from "./AddMenuItems";
 import {
-  addMenuItem,
   deleteMenuItem,
   getMenuItems,
   updateMenuAvailability,
@@ -45,16 +44,18 @@ import MenuItemCard from "./MenuItemCard";
 import { Download, UploadFile, Description } from "@mui/icons-material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { fetchMenuItems } from "@/redux/slices/menuSlice";
+
 import AppPagination from "@/Componenets/CommonComponents/PaginationControl";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
-
+import { useRefreshData } from "@/hooks/useRefreshData";
+import RefreshIcon from "@mui/icons-material/Refresh";
 export default function MenuManagement() {
   const { showSnackbar } = useAppSnackbar();
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
+  const { refresh } = useRefreshData(showSnackbar);
 
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
 
@@ -330,6 +331,10 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
     return filteredMenu.slice(start, end);
   }, [filteredMenu, page, rowsPerPage]);
 
+  const handleRefresh = () => {
+    refresh([handleFetchMenu, fetchSubscriptionExpiry], "Menu items Fetched");
+  };
+
   return (
     <Box className="flex flex-col gap-6 p-2">
       {/* Premium Header */}
@@ -425,6 +430,18 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
       {/* Actions: Download / Upload / File */}
       <Box className="flex justify-end gap-3">
+        <Tooltip title="Refresh">
+          <IconButton
+            onClick={handleRefresh}
+            sx={{
+              backgroundColor: "#ede7f6",
+              color: "#5e35b1",
+              "&:hover": { backgroundColor: "#d1c4e9" },
+            }}
+          >
+            <RefreshIcon className={loading ? "animate-spin" : ""} />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Download Menu">
           <IconButton
             onClick={handleDownloadExcel}

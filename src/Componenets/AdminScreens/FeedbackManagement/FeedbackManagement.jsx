@@ -1,12 +1,15 @@
 "use client";
 
 import AppButton from "@/Componenets/CommonComponents/AppButton";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import { useRefreshData } from "@/hooks/useRefreshData";
 import { getFeedbacks, updateResovleStatus } from "@/service/feedbackService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
-import { Add } from "@mui/icons-material";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 import {
   Box,
+  IconButton,
   Paper,
   Switch,
   Table,
@@ -25,8 +28,10 @@ const FeedbackManagement = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const { showSnackbar } = useAppSnackbar();
   const [feedbacks, setFeedbacks] = useState(null);
   const [subscription, setSubscription] = useState(null);
+  const { refresh } = useRefreshData(showSnackbar);
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
   const fetchSubscriptionExpiry = async () => {
     try {
@@ -34,8 +39,6 @@ const FeedbackManagement = () => {
       setSubscription(res.data);
     } catch (error) {
       console.log(error?.message || error);
-    } finally {
-      setLoadingSub(false); // ✅ stop loading
     }
   };
 
@@ -77,9 +80,13 @@ const FeedbackManagement = () => {
       console.log(error);
     }
   };
+
+  const handleRefresh = () => {
+    refresh([fetchFeedbacks, fetchSubscriptionExpiry], "Feedbacks refreshed");
+  };
   return (
     <Box className="flex flex-col gap-6 p-2">
-      <Box className="flex flex-row gap-2">
+      <Box className="flex justify-between items-center">
         <Typography
           fontSize={isMobile ? 24 : 30}
           fontWeight={700}
@@ -87,6 +94,17 @@ const FeedbackManagement = () => {
         >
           Customer Feedbacks
         </Typography>
+
+        <IconButton
+          onClick={handleRefresh}
+          sx={{
+            backgroundColor: "#ede7f6",
+            color: "#5e35b1",
+            "&:hover": { backgroundColor: "#d1c4e9" },
+          }}
+        >
+          <RefreshIcon />
+        </IconButton>
       </Box>
 
       {isDesktop && (

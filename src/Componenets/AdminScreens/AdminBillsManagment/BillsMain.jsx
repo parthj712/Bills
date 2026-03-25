@@ -22,6 +22,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BillCard from "./BillCard";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { useRefreshData } from "@/hooks/useRefreshData";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const BillsMain = () => {
   const theme = useTheme();
@@ -33,6 +36,16 @@ const BillsMain = () => {
 
   const [billsData, setBillsData] = useState([]);
   const [search, setSearch] = useState("");
+  const { showSnackbar } = useAppSnackbar();
+  const { refresh } = useRefreshData(showSnackbar);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refresh([fetchBills], "Bills refreshed");
+    setRefreshing(false);
+  };
 
   console.log("bills", billsData);
   const fetchBills = async () => {
@@ -166,7 +179,7 @@ const BillsMain = () => {
 
   return (
     <Box className="flex flex-col gap-6 px-4">
-      <Box className="flex flex-col gap-2 w-full">
+      <Box className="flex justify-between items-center w-full">
         <Typography
           fontSize={isMobile ? 24 : 30}
           fontWeight={700}
@@ -175,7 +188,16 @@ const BillsMain = () => {
           Bills Management
         </Typography>
 
-        {/* <Box className="h-[4px] w-32 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400" /> */}
+        <IconButton
+          onClick={handleRefresh}
+          sx={{
+            backgroundColor: "#ede7f6",
+            color: "#5e35b1",
+            "&:hover": { backgroundColor: "#d1c4e9" },
+          }}
+        >
+          <RefreshIcon className={refreshing ? "animate-spin" : ""} />
+        </IconButton>
       </Box>
 
       <Box className="grid grid-cols-1 lg:grid-cols-1 gap-4 items-stretch">

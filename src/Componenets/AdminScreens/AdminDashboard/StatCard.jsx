@@ -1,7 +1,6 @@
 import { Card, Typography, Box } from "@mui/material";
 
 export const StatCard = ({ stat, onClick }) => {
-  console.log("statsss", stat);
   return (
     <Card
       onClick={onClick}

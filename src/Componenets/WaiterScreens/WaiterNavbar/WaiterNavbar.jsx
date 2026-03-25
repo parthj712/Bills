@@ -27,10 +27,9 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 
 import RestaurantMenuRoundedIcon from "@mui/icons-material/RestaurantMenuRounded";
 import AddMenuItems from "@/Componenets/AdminScreens/AdminMenuManagement/AddMenuItems";
+import API from "@/service/api";
 
 const WaiterNavbar = () => {
-
-
   const stringToColor = (string) => {
     let hash = 0;
     for (let i = 0; i < string.length; i++) {
@@ -50,8 +49,6 @@ const WaiterNavbar = () => {
 
     return colors[Math.abs(hash) % colors.length];
   };
-
-
 
   const { showSnackbar } = useAppSnackbar();
 
@@ -94,18 +91,27 @@ const WaiterNavbar = () => {
     setAnchorEl(null);
   };
 
-  const handleLogout = () => {
-    // clear auth
-    localStorage.removeItem("token"); // or cookies
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout");
 
-    showSnackbar("Logout Sucessfull", "success");
+      localStorage.removeItem("token");
 
-    router.push("/login");
+      showSnackbar("Logout Successful", "success");
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      localStorage.removeItem("token");
+
+      showSnackbar("Logged out (local)", "warning");
+
+      router.push("/login");
+    }
   };
 
   const handleKbOpen = () => {
-
-
     showSnackbar("Keyboard shortcuts opened", "info");
     setKbOpen(true);
   };
@@ -113,8 +119,6 @@ const WaiterNavbar = () => {
   const handleKbClose = () => setKbOpen(false);
 
   const handleOrderTypeClick = (orderType) => {
-
-
     showSnackbar(`${orderType} order selected`, "info");
 
     router.push(`/waiter/order?orderType=${orderType}`);
@@ -151,7 +155,6 @@ const WaiterNavbar = () => {
             Service Console
           </Typography>
         </Box>
-
 
         {(isMobile || isTablet) && (
           <IconButton onClick={() => setMobileOpen(true)}>
@@ -264,7 +267,6 @@ const WaiterNavbar = () => {
                       fontWeight: 600,
                     }}
                   >
-
                     {userInitial.charAt(0).toUpperCase()}
                   </Avatar>
 
@@ -351,15 +353,12 @@ const WaiterNavbar = () => {
           </>
         )}
 
-
-
         <Drawer
           anchor="right"
           open={mobileOpen}
           onClose={() => setMobileOpen(false)}
         >
           <Box width={250} p={2} display="flex" flexDirection="column" gap={2}>
-
             {/* User Info */}
             <Box display="flex" alignItems="center" gap={2}>
               <Avatar
@@ -403,10 +402,8 @@ const WaiterNavbar = () => {
               <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
               Sign Out
             </MenuItem>
-
           </Box>
         </Drawer>
-
 
         <AddMenuItems
           open={openAddMenu}
@@ -415,8 +412,6 @@ const WaiterNavbar = () => {
             showSnackbar("Menu item added", "success");
           }}
         />
-
-
       </Card>
     </div>
   );
