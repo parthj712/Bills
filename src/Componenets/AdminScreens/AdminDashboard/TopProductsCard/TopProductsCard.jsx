@@ -3,13 +3,10 @@ import { Card, Typography, Box, Skeleton } from "@mui/material";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useEffect, useMemo, useState } from "react";
 
-
 export const TopProductsCard = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-
-  console.log();
   // ✅ Fetch Orders Dynamically
   useEffect(() => {
     setLoading(true);
@@ -19,7 +16,6 @@ export const TopProductsCard = () => {
       })
       .finally(() => setLoading(false));
   }, []);
-
 
   const topProducts = useMemo(() => {
     let productMap = {};
@@ -99,10 +95,6 @@ export const TopProductsCard = () => {
     </Card>
   );
 };
-
-
-
-
 
 const BarSkeleton = () => (
   <Box display="flex" flexDirection="column" gap={1.4}>

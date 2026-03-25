@@ -280,6 +280,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
           portion: x.portion,
           variantName: x.variantName,
         })),
+        kotMessage,
       };
       console.log(payload);
 

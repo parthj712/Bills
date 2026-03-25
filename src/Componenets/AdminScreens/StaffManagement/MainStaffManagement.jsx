@@ -20,10 +20,6 @@ import {
   Skeleton,
   useTheme,
   useMediaQuery,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import AddStaff from "./AddStaff";
@@ -43,14 +39,15 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { useRefreshData } from "@/hooks/useRefreshData";
 
 const MainStaffManagement = () => {
   const { showSnackbar } = useAppSnackbar();
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
-
+  const { refresh } = useRefreshData(showSnackbar);
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
 
   const hasAccess =
@@ -233,6 +230,9 @@ const MainStaffManagement = () => {
     saveAs(file, "Staff-Upload-Template.xlsx");
   };
 
+  const handleRefresh = () => {
+    refresh([fetchStaff, fetchSubscriptionExpiry], "Staff refreshed");
+  };
   // Handle file select (Excel only)
   const handleExcelSelect = (e) => {
     const file = e.target.files?.[0];
@@ -340,6 +340,18 @@ const MainStaffManagement = () => {
 
       {/* Actions: Download / Upload / File */}
       <Box className="flex justify-end gap-3">
+        <Tooltip title="Refresh">
+          <IconButton
+            onClick={handleRefresh}
+            sx={{
+              backgroundColor: "#ede7f6",
+              color: "#5e35b1",
+              "&:hover": { backgroundColor: "#d1c4e9" },
+            }}
+          >
+            <RefreshIcon className={loading ? "animate-spin" : ""} />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Download Menu">
           <IconButton
             onClick={handleDownloadExcel}
@@ -403,6 +415,7 @@ const MainStaffManagement = () => {
                   // "Aadhaar",
                   // "Address",
                   "Joining Date",
+                  "Online",
                   "Status",
                   "Actions",
                 ].map((head) => (
@@ -476,6 +489,35 @@ const MainStaffManagement = () => {
                         month: "short",
                         year: "numeric",
                       })}
+                    </TableCell>
+
+                    <TableCell sx={{ textAlign: "center" }}>
+                      <Chip
+                        size="small"
+                        label={
+                          staff.isOnline
+                            ? "Online"
+                            : staff.lastSeen
+                              ? `Last seen ${new Date(
+                                  staff.lastSeen,
+                                ).toLocaleTimeString("en-IN", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}`
+                              : "Offline"
+                        }
+                        sx={{
+                          fontWeight: 700,
+                          borderRadius: 2,
+                          backgroundColor: staff.isOnline
+                            ? "#e8f5e9"
+                            : "#ffebee",
+                          color: staff.isOnline ? "#2e7d32" : "#d32f2f",
+                          border: staff.isOnline
+                            ? "1.5px solid #81c784"
+                            : "1.5px solid #ef9a9a",
+                        }}
+                      />
                     </TableCell>
 
                     <TableCell sx={{ textAlign: "center" }}>

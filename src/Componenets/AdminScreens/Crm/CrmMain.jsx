@@ -1,9 +1,10 @@
 "use client";
 
-import { getOrders } from "@/service/orderService";
+import { getCustomerInfo, getOrders } from "@/service/orderService";
 import {
   Avatar,
   Box,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -22,6 +23,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import KpiPill from "../AdminMenuManagement/KpiPill/KpiPill";
 import CrmCard from "./CrmCard";
 import { getShopInfo } from "@/service/shopService";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { useRefreshData } from "@/hooks/useRefreshData";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 const CrmMain = () => {
   const theme = useTheme();
@@ -30,11 +34,12 @@ const CrmMain = () => {
 
   const [customerInfo, setCustomerInfo] = useState([]);
   const [search, setSearch] = useState("");
-
+  const { showSnackbar } = useAppSnackbar();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const [shopData, setShopData] = useState(null);
+  const { refresh } = useRefreshData(showSnackbar);
   const isBakery = shopData?.businessCategory === "BAKERY";
   // ✅ Fetch Admin Info
   useEffect(() => {
@@ -179,6 +184,10 @@ const CrmMain = () => {
     return getUpcomingBirthdays(customerInfo);
   }, [customerInfo]);
 
+  const handleRefresh = () => {
+    refresh([fetchCustomerInfo], "Customer data refreshed");
+  };
+
   return (
     <Box className="p-2 lg:p-4">
       {/* Title */}
@@ -189,6 +198,18 @@ const CrmMain = () => {
       >
         Customer Information
       </Typography>
+      <Box className="flex justify-end mt-2">
+        <IconButton
+          onClick={handleRefresh}
+          sx={{
+            backgroundColor: "#ede7f6",
+            color: "#5e35b1",
+            "&:hover": { backgroundColor: "#d1c4e9" },
+          }}
+        >
+          <RefreshIcon />
+        </IconButton>
+      </Box>
 
       {/* Search + KPI */}
       <Box className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6 gap-4 mt-3">

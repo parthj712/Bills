@@ -23,7 +23,7 @@ import {
 import { motion } from "framer-motion";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { Download, UploadFile, Description } from "@mui/icons-material";
+import { UploadFile, Description } from "@mui/icons-material";
 
 import AddExpense from "./AddExpense";
 
@@ -34,6 +34,8 @@ import {
 } from "@/service/expenseService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import ExpenseCard from "./ExpenseCard";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { useRefreshData } from "@/hooks/useRefreshData";
 
 const ExpenseManagement = () => {
   const { showSnackbar } = useAppSnackbar();
@@ -43,12 +45,11 @@ const ExpenseManagement = () => {
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const [openAdd, setOpenAdd] = useState(false);
-
-  const [selectedExpense, setSelectedExpense] = useState(null);
   const [excelFile, setExcelFile] = useState(null);
   const [expenseData, setExpenseData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const { refresh } = useRefreshData(showSnackbar);
 
   // Fetch Expenses
   const fetchExpenses = async () => {
@@ -190,6 +191,10 @@ const ExpenseManagement = () => {
       alert("Upload Failed");
     }
   };
+
+  const handleRefresh = async () => {
+    refresh([fetchExpenses], "Expenses Fetched");
+  };
   return (
     <Box className="flex flex-col gap-6 p-2 lg:p-4 md:p-4">
       {/* Header */}
@@ -264,6 +269,18 @@ const ExpenseManagement = () => {
       <Box className="flex justify-end gap-2 flex-wrap">
         {/* Download Template */}
 
+        <Tooltip title="Refresh">
+          <IconButton
+            onClick={handleRefresh}
+            sx={{
+              backgroundColor: "#ede7f6",
+              color: "#5e35b1",
+              "&:hover": { backgroundColor: "#d1c4e9" },
+            }}
+          >
+            <RefreshIcon className={loading ? "animate-spin" : ""} />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="View File Template">
           <IconButton
             onClick={handleDownloadEmptyTemplate}

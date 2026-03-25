@@ -27,6 +27,9 @@ import { Skeleton, CircularProgress } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import { IconButton } from "@mui/material";
+
 import {
   getNotifications,
   getUnreadCount,
@@ -35,6 +38,8 @@ import {
 import NotificationDialog from "./NotificationDailog";
 import NotificationBell from "./NotificationBell";
 import { socket } from "@/app/lib/socket";
+import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import { useRefreshData } from "@/hooks/useRefreshData";
 
 // const topProducts = [
 //   { name: "Paneer Butter Masala", percent: 72 },
@@ -57,16 +62,14 @@ export default function AdminDashboard() {
   const [openNotification, setOpenNotification] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const { showSnackbar } = useAppSnackbar();
+  const { refresh } = useRefreshData(showSnackbar);
 
   const today = new Date();
 
   const yesterday = new Date();
-
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
   yesterday.setDate(today.getDate() - 1);
   const allowedPlans = ["PREMIUM", "TRIAL", "STANDARD"];
-  console.log(summary);
   const hasAccess =
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
@@ -178,7 +181,7 @@ export default function AdminDashboard() {
   const fetchUnread = async () => {
     const res = await getUnreadCount();
 
-    setUnread(res.unreadCount);
+    setUnreadCount(res.unreadCount); // ✅ correct
   };
 
   const handleRead = async (id) => {
@@ -216,6 +219,13 @@ export default function AdminDashboard() {
 
     return () => socket.off("new-notification");
   }, []);
+
+  const handleRefresh = () => {
+    refresh(
+      [fetchSummary, fetchSubscriptionExpiry, fetchNotifications, fetchUnread],
+      "Dashboard refreshed",
+    );
+  };
   return (
     <>
       <Box className="min-h-screen bg-[#f8fafc] overflow-hidden">
@@ -314,8 +324,21 @@ export default function AdminDashboard() {
               Dashboard Overview
             </Typography>
 
-            {/* RIGHT: Bell */}
-            <NotificationBell onClick={() => setOpenNotification(true)} />
+            {/* RIGHT: Actions */}
+            <Box display="flex" alignItems="center" gap={1}>
+              <IconButton
+                onClick={handleRefresh}
+                sx={{
+                  backgroundColor: "#ede7f6",
+                  color: "#5e35b1",
+                  "&:hover": { backgroundColor: "#d1c4e9" },
+                }}
+              >
+                <RefreshIcon />
+              </IconButton>
+
+              <NotificationBell onClick={() => setOpenNotification(true)} />
+            </Box>
           </Box>
 
           {/* ================= LOADING STATE ================= */}
