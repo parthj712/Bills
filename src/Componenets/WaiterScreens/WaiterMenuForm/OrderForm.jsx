@@ -335,30 +335,47 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
 
         {/* Customer Name – For TAKEAWAY */}
         {orderType === "TAKEAWAY" && (
-          <TextField
-            size="small"
-            fullWidth
-            label="Customer Name"
-            placeholder="Enter customer name"
-            value={customerName}
-            error={!!nameError}
-            helperText={nameError}
-            onChange={(e) => {
-              const value = e.target.value;
+          <>
+            <TextField
+              size="small"
+              fullWidth
+              label="Customer Name"
+              placeholder="Enter customer name"
+              value={customerName}
+              error={!!nameError}
+              helperText={nameError}
+              onChange={(e) => {
+                const value = e.target.value;
 
-              // Allow only letters & spaces
-              if (value && !/^[A-Za-z\s]+$/.test(value)) {
-                setNameError("Only letters allowed");
-              } else {
-                setNameError("");
-              }
+                // Allow only letters & spaces
+                if (value && !/^[A-Za-z\s]+$/.test(value)) {
+                  setNameError("Only letters allowed");
+                } else {
+                  setNameError("");
+                }
 
-              // Capitalize first letters
-              setCustomerName(
-                value.replace(/\b\w/g, (char) => char.toUpperCase()),
-              );
-            }}
-          />
+                // Capitalize first letters
+                setCustomerName(
+                  value.replace(/\b\w/g, (char) => char.toUpperCase()),
+                );
+              }}
+            />
+            <TextField
+              size="small"
+              fullWidth
+              label="Mobile Number"
+              placeholder="Enter mobile number"
+              value={customerMobile}
+              onChange={(e) => {
+                const value = e.target.value;
+
+                // Only numbers and max 10 digits
+                if (/^\d{0,10}$/.test(value)) {
+                  setcustomerMobile(value);
+                }
+              }}
+            />
+          </>
         )}
 
         {/* Mobile + Birthdate – Only for Bakery Shops */}
