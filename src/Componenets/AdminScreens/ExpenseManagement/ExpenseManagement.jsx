@@ -3,6 +3,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { Add, Delete, Search } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import {
   Box,
   IconButton,
@@ -36,6 +38,7 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 import ExpenseCard from "./ExpenseCard";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useRefreshData } from "@/hooks/useRefreshData";
+import { generateLocalExpenseInsights } from "@/utils/expenseInsights";
 
 const ExpenseManagement = () => {
   const { showSnackbar } = useAppSnackbar();
@@ -50,6 +53,8 @@ const ExpenseManagement = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const { refresh } = useRefreshData(showSnackbar);
+  const [showInsights, setShowInsights] = useState(false);
+  const [loadingInsights, setLoadingInsights] = useState(false);
 
   // Fetch Expenses
   const fetchExpenses = async () => {
@@ -65,9 +70,23 @@ const ExpenseManagement = () => {
     }
   };
 
+  const localInsights = useMemo(() => {
+    return generateLocalExpenseInsights(expenseData);
+  }, [expenseData]);
+
   useEffect(() => {
     fetchExpenses();
   }, []);
+
+  const handleShowInsights = async () => {
+    setLoadingInsights(true);
+
+    // simulate delay OR call AI API here
+    setTimeout(() => {
+      setShowInsights(true);
+      setLoadingInsights(false);
+    }, 600);
+  };
 
   // Search Filter
   const filteredExpenses = useMemo(() => {
@@ -251,25 +270,179 @@ const ExpenseManagement = () => {
 
         <Box
           sx={{
-            backgroundColor: "#e3f2fd",
-            borderRadius: 2,
+            background: "linear-gradient(135deg, #0b3c5d, #1565c0)",
+            borderRadius: "16px",
             p: 2,
+            color: "#fff",
             display: "flex",
             alignItems: "center",
-            justifyContent: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 10px 30px rgba(21,101,192,0.3)",
           }}
         >
-          <Typography fontWeight={700} color="#0b3c5d">
-            Total Expense: ₹ {totalExpense.toLocaleString("en-IN")}
-          </Typography>
+          {/* LEFT → Expense */}
+          <Box>
+            <Typography fontSize={13} sx={{ opacity: 0.8 }}>
+              Total Expense
+            </Typography>
+            <Typography fontSize={22} fontWeight={700}>
+              ₹ {totalExpense.toLocaleString("en-IN")}
+            </Typography>
+          </Box>
+
+          {/* RIGHT → Actions */}
+          <Box className="flex items-center gap-2">
+            {/* Insights */}
+            <Tooltip title={showInsights ? "Hide Insights" : "Check Insights"}>
+              <IconButton
+                onClick={
+                  showInsights
+                    ? () => setShowInsights(false)
+                    : handleShowInsights
+                }
+                sx={{
+                  background: showInsights
+                    ? "rgba(255,255,255,0.2)"
+                    : "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                  backdropFilter: "blur(6px)",
+                  "&:hover": {
+                    background: "rgba(255,255,255,0.3)",
+                  },
+                }}
+              >
+                ✨
+              </IconButton>
+            </Tooltip>
+
+            {/* Refresh */}
+            <Tooltip title="Refresh">
+              <IconButton
+                onClick={handleRefresh}
+                sx={{
+                  background: "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                }}
+              >
+                <RefreshIcon />
+              </IconButton>
+            </Tooltip>
+
+            {/* Template */}
+            <Tooltip title="Download Template">
+              <IconButton
+                onClick={handleDownloadEmptyTemplate}
+                sx={{
+                  background: "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                }}
+              >
+                <Description />
+              </IconButton>
+            </Tooltip>
+
+            {/* Upload */}
+            <Tooltip title="Upload Excel">
+              <IconButton
+                component="label"
+                sx={{
+                  background: "rgba(255,255,255,0.15)",
+                  color: "#fff",
+                }}
+              >
+                <UploadFile />
+                <input hidden type="file" onChange={handleExcelSelect} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
+
+      {localInsights.length > 0 && showInsights && (
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #fff8e1, #fff3e0)",
+            p: 2,
+            borderRadius: 2,
+            border: "1px solid #ffe082",
+            mt: 1,
+            position: "relative",
+          }}
+        >
+          {/* Header */}
+          <Box className="flex justify-between items-center mb-1">
+            <Typography fontWeight={700} sx={{ color: "#e65100" }}>
+              💡 Expense Insights
+            </Typography>
+
+            {/* ❌ Cancel Button */}
+            <IconButton
+              size="small"
+              onClick={() => setShowInsights(false)}
+              sx={{
+                color: "#e65100",
+                "&:hover": { backgroundColor: "#ffe0b2" },
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+
+          {/* Insights List */}
+          {localInsights.map((text, i) => (
+            <Typography
+              key={i}
+              sx={{
+                fontSize: 14,
+                mb: 0.5,
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                color: "#e65100",
+              }}
+            >
+              • {text}
+            </Typography>
+          ))}
+        </Box>
+      )}
 
       {/* Excel Download */}
       <Box className="flex justify-end gap-2 flex-wrap">
         {/* Download Template */}
 
-        <Tooltip title="Refresh">
+        {/* <Tooltip title="Check Insights">
+          <span>
+            <AppButton
+              label={loadingInsights ? "Analyzing..." : "Insights"}
+              onClick={
+                showInsights ? () => setShowInsights(false) : handleShowInsights
+              }
+              disabled={loadingInsights}
+              sx={{
+                background: showInsights
+                  ? "#eeeeee"
+                  : "linear-gradient(135deg, #ff9800, #f57c00)",
+                color: showInsights ? "#333" : "#fff",
+                height: 40,
+                px: 2,
+                borderRadius: "10px",
+                fontWeight: 600,
+                textTransform: "none",
+                boxShadow: showInsights
+                  ? "none"
+                  : "0 6px 20px rgba(255,152,0,0.3)",
+                "&:hover": {
+                  background: showInsights
+                    ? "#e0e0e0"
+                    : "linear-gradient(135deg, #fb8c00, #ef6c00)",
+                },
+              }}
+            />
+          </span>
+        </Tooltip> */}
+
+        {/* <Tooltip title="Refresh">
           <IconButton
             onClick={handleRefresh}
             sx={{
@@ -280,8 +453,8 @@ const ExpenseManagement = () => {
           >
             <RefreshIcon className={loading ? "animate-spin" : ""} />
           </IconButton>
-        </Tooltip>
-        <Tooltip title="View File Template">
+        </Tooltip> */}
+        {/* <Tooltip title="View File Template">
           <IconButton
             onClick={handleDownloadEmptyTemplate}
             sx={{
@@ -294,10 +467,10 @@ const ExpenseManagement = () => {
           >
             <Description />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
 
         {/* Upload Excel */}
-        <Tooltip title="Upload Excel">
+        {/* <Tooltip title="Upload Excel">
           <IconButton
             component="label"
             sx={{
@@ -314,7 +487,7 @@ const ExpenseManagement = () => {
               onChange={handleExcelSelect}
             />
           </IconButton>
-        </Tooltip>
+        </Tooltip> */}
 
         {/* Confirm Upload Button */}
         {excelFile && (
