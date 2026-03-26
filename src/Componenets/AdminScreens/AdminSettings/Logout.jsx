@@ -32,6 +32,7 @@ import { useEffect, useState } from "react";
 import InfoRow from "./InfoCard";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import FeedbackQRSection from "./FeedbackQRSection";
+import API from "@/service/api";
 
 export default function Settings() {
   const { showSnackbar } = useAppSnackbar();
@@ -75,9 +76,24 @@ export default function Settings() {
     if (shopData.upiQr?.url) setQrPreview(shopData.upiQr.url);
   }, [shopData]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      await API.post("/auth/logout");
+
+      localStorage.removeItem("token");
+
+      showSnackbar("Logout Successful", "success");
+
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      localStorage.removeItem("token");
+
+      showSnackbar("Logged out (local)", "warning");
+
+      router.push("/login");
+    }
   };
 
   const handleSaveGST = async () => {
