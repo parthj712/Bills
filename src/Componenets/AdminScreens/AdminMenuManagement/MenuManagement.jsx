@@ -247,33 +247,158 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       "description",
     ];
 
-    const worksheet = XLSX.utils.json_to_sheet([], { header: headers });
+    // ==============================
+    // 🟢 Sheet 1: Empty Upload
+    // ==============================
+    const uploadSheet = XLSX.utils.json_to_sheet([], { header: headers });
 
-    // Menu sheet
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Menu Template");
+    // ==============================
+    // 🍽️ Hotel Example
+    // ==============================
+    const hotelData = [
+      {
+        name: "Paneer Butter Masala",
+        categoryName: "Food",
+        subCategory: "Main Course",
+        foodType: "Veg",
+        itemCode: "PBM01",
+        priceType: "HALF_FULL",
+        priceHalf: 150,
+        priceFull: 280,
+        description: "Rich creamy curry",
+      },
+      {
+        name: "Chicken Biryani",
+        categoryName: "Food",
+        subCategory: "Rice",
+        foodType: "Non-Veg",
+        itemCode: "CB01",
+        priceType: "SINGLE",
+        priceFull: 220,
+      },
+    ];
 
-    // Notes sheet
+    const hotelSheet = XLSX.utils.json_to_sheet(hotelData, {
+      header: headers,
+    });
+
+    // ==============================
+    // 🎂 Cake Shop Example
+    // ==============================
+    const cakeData = [
+      {
+        name: "Chocolate Cake",
+        categoryName: "Food",
+        subCategory: "Cake",
+        foodType: "Veg",
+        itemCode: "CK01",
+        priceType: "VARIANT",
+        variantName: "500g",
+        variantPrice: 400,
+      },
+      {
+        name: "Chocolate Cake",
+        categoryName: "Food",
+        subCategory: "Cake",
+        foodType: "Veg",
+        itemCode: "CK01",
+        priceType: "VARIANT",
+        variantName: "1kg",
+        variantPrice: 750,
+      },
+    ];
+
+    const cakeSheet = XLSX.utils.json_to_sheet(cakeData, {
+      header: headers,
+    });
+
+    // ==============================
+    // 🥃 Drinks / Bar Example
+    // ==============================
+    const drinksData = [
+      {
+        name: "Whisky",
+        categoryName: "Liquor",
+        subCategory: "Bar",
+        foodType: "Drink",
+        itemCode: "WH01",
+        priceType: "VARIANT",
+        variantName: "30ml",
+        variantPrice: 120,
+        portionML: 30,
+      },
+      {
+        name: "Whisky",
+        categoryName: "Liquor",
+        subCategory: "Bar",
+        foodType: "Drink",
+        itemCode: "WH01",
+        priceType: "VARIANT",
+        variantName: "60ml",
+        variantPrice: 220,
+        portionML: 60,
+      },
+      {
+        name: "Pepsi",
+        categoryName: "Beverage",
+        subCategory: "Soft Drink",
+        foodType: "Drink",
+        itemCode: "C001",
+        priceType: "VARIANT",
+        variantName: "30ml",
+        variantPrice: 40,
+        portionML: 30,
+      },
+      {
+        name: "Pepsi",
+        categoryName: "Beverage",
+        subCategory: "Soft Drink",
+        foodType: "Drink",
+        itemCode: "C001",
+        priceType: "VARIANT",
+        variantName: "60ml",
+        variantPrice: 70,
+        portionML: 60,
+      },
+    ];
+
+    const drinksSheet = XLSX.utils.json_to_sheet(drinksData, {
+      header: headers,
+    });
+
+    // ==============================
+    // 🟡 Instructions
+    // ==============================
     const notesData = [
-      { Notes: "Important Instructions:" },
-      { Notes: "1. categoryName example: Liquor for alcohol, Food, Beverage" },
-      { Notes: "2. foodType example: Drink ,Veg ,Non-Veg" },
-      {
-        Notes:
-          "3. priceType: VARIANT if using variants like( 30ml,60ml,500g,1kg,2kg) ,HALF_FULL for hotel menus Like(paneer chill etc),SINGLE like(items that dose not have half version)",
-      },
-      { Notes: "4. variantName example: 30ml, 60ml, 90ml ,500g, 1kg,2,kg" },
-      { Notes: "5. portionML should contain numeric value like 30, 60, 90" },
-      {
-        Notes:
-          "6. priceHalf and priceFull are used only for simple pricing in HALF_FULL",
-      },
-      { Notes: "7. itemCode should be unique for each item" },
+      { Notes: "📌 HOW TO USE THIS FILE" },
+      { Notes: "1. Fill data ONLY in 'Menu Upload'" },
+      { Notes: "2. Check examples based on your business type" },
+      { Notes: "" },
+      { Notes: "🍽️ Hotel → HALF_FULL or SINGLE" },
+      { Notes: "🎂 Cake Shop → VARIANT (500g, 1kg)" },
+      { Notes: "🥃 Drinks → VARIANT (30ml, 60ml)" },
+      { Notes: "" },
+      { Notes: "⚠ IMPORTANT RULES" },
+      { Notes: "- Same itemCode for variants" },
+      { Notes: "- Do not change column names" },
     ];
 
     const notesSheet = XLSX.utils.json_to_sheet(notesData);
+
+    // ==============================
+    // 📦 Workbook
+    // ==============================
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, uploadSheet, "Menu Upload");
+    XLSX.utils.book_append_sheet(workbook, hotelSheet, "Hotel Example");
+    XLSX.utils.book_append_sheet(workbook, cakeSheet, "Cake Example");
+    XLSX.utils.book_append_sheet(workbook, drinksSheet, "Drinks Example");
     XLSX.utils.book_append_sheet(workbook, notesSheet, "Instructions");
 
+    // ==============================
+    // ⬇️ Export
+    // ==============================
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
