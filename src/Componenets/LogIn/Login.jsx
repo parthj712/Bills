@@ -59,10 +59,6 @@ export default function Login() {
       newErrors.email = "Enter valid email";
     }
 
-    // if (!/^[6-9]\d{9}$/.test(formData.phone)) {
-    //   newErrors.phone = "Enter valid 10-digit number";
-    // }
-
     if (formData.password.length < 6) {
       newErrors.password = "Minimum 6 characters required";
     }

@@ -87,6 +87,7 @@ export default function Sidebar() {
   const [shopData, setShopData] = useState([]);
   const isDineIn = shopData?.businessCategory === "DINE_IN";
   const isBar = shopData?.businessCategory === "RESTO_BAR";
+  
   const showTables =
     shopData?.businessCategory === "DINE_IN" ||
     shopData?.businessCategory === "RESTO_BAR";

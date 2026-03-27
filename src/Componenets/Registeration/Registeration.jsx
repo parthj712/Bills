@@ -40,7 +40,7 @@ export default function RegisterScreen() {
   const router = useRouter();
   const theme = useTheme();
 
-  // ✅ Stepper State
+  // ✅ Stepper Statee
   // 0 = Basic Info, 1 = OTP, 2 = Business Setup
   const [step, setStep] = useState(0);
 

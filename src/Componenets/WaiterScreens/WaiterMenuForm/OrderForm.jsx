@@ -426,7 +426,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
             sx={{ fontWeight: 600 }}
             label="All"
             clickable
-            color={category === "" ? "primary" : "default"}
+            color={category === "" ? "primary" : "default"}..
             onClick={() => setCategory("")}
           />
           {categories.map((cat) => (
