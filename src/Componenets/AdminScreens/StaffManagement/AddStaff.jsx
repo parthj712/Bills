@@ -28,15 +28,14 @@ import { motion, AnimatePresence, useAnimation } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
-
 const AddStaff = ({ open, onClose, onSuccess }) => {
-
   const showSnackbar = useAppSnackbar();
 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    userName: "",
     address: "",
     adharCard: "",
     phone: "",
@@ -48,7 +47,6 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
 
   const [success, setSuccess] = useState(false);
   const controls = useAnimation();
-
 
   // Reset when opening (premium UX)
   useEffect(() => {
@@ -70,6 +68,7 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
     if (!formData.name.trim()) e.name = "Name is required";
     if (!formData.address.trim()) e.address = "Address is required";
     if (!formData.adharCard.trim()) e.adharCard = "Aadhaar is required";
+    if (!formData.userName.trim()) e.userName = "User Name is required";
     if (!formData.phone.trim()) e.phone = "Phone is required";
     if (!formData.email.trim()) e.email = "Email is required";
     if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email))
@@ -89,6 +88,7 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
         name: true,
         email: true,
         password: true,
+        userName: true,
         address: true,
         adharCard: true,
         phone: true,
@@ -112,6 +112,7 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
           name: "",
           email: "",
           password: "",
+          userName: "",
           address: "",
           adharCard: "",
           phone: "",
@@ -120,13 +121,13 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
       }, 1200);
     } catch (error) {
       triggerShake(); // ❌ API error
-      showSnackbar(error?.response?.data?.message || "Failed to register staff");
+      showSnackbar(
+        error?.response?.data?.message || "Failed to register staff",
+      );
     } finally {
       setLoading(false);
     }
   };
-
-
 
   const MotionPaper = motion.div;
 
@@ -146,14 +147,12 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
     },
   };
 
-
   const triggerShake = () => {
     controls.start({
       x: [0, -8, 8, -6, 6, 0],
       transition: { duration: 0.4 },
     });
   };
-
 
   return (
     <AnimatePresence>
@@ -206,7 +205,9 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
                   >
                     Add Staff
                   </DialogTitle>
-                  <Typography sx={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
+                  <Typography
+                    sx={{ color: "rgba(255,255,255,0.8)", fontSize: 14 }}
+                  >
                     Create staff account and assign role
                   </Typography>
                 </Box>
@@ -245,11 +246,16 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
             ) : (
               <motion.div animate={controls}>
                 <Box py={1}>
-                  <Typography fontSize={22} fontWeight={700} className="text-[#0b3c5d]">
+                  <Typography
+                    fontSize={22}
+                    fontWeight={700}
+                    className="text-[#0b3c5d]"
+                  >
                     Staff Details
                   </Typography>
                   <Typography fontSize={14} className="text-gray-500" mb={2}>
-                    Please enter correct details for billing access and login credentials.
+                    Please enter correct details for billing access and login
+                    credentials.
                   </Typography>
                 </Box>
                 <Box className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -273,13 +279,38 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
                   />
 
                   <TextField
+                    label="User Name"
+                    name="userName"
+                    value={formData.userName}
+                    onChange={handleChange}
+                    onBlur={() => markTouched("userName")}
+                    error={!!(touched.userName && errors.userName)}
+                    helperText={
+                      touched.userName && errors.userName
+                        ? errors.userName
+                        : " "
+                    }
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PersonRoundedIcon sx={{ color: "#8a8a8a" }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                    sx={fieldStyle}
+                    className="md:col-span-2"
+                  />
+
+                  <TextField
                     label="Phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
                     onBlur={() => markTouched("phone")}
                     error={!!(touched.phone && errors.phone)}
-                    helperText={touched.phone && errors.phone ? errors.phone : " "}
+                    helperText={
+                      touched.phone && errors.phone ? errors.phone : " "
+                    }
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -298,7 +329,9 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
                     onChange={handleChange}
                     onBlur={() => markTouched("email")}
                     error={!!(touched.email && errors.email)}
-                    helperText={touched.email && errors.email ? errors.email : " "}
+                    helperText={
+                      touched.email && errors.email ? errors.email : " "
+                    }
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
@@ -317,7 +350,9 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
                     onBlur={() => markTouched("adharCard")}
                     error={!!(touched.adharCard && errors.adharCard)}
                     helperText={
-                      touched.adharCard && errors.adharCard ? errors.adharCard : " "
+                      touched.adharCard && errors.adharCard
+                        ? errors.adharCard
+                        : " "
                     }
                     InputProps={{
                       startAdornment: (
@@ -364,8 +399,9 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
                     helperText={touched.role && errors.role ? errors.role : " "}
                     sx={fieldStyle}
                   >
-                    <MenuItem value="ADMIN">Admin</MenuItem>
+                    <MenuItem value="WAITER">Waiter</MenuItem>
                     <MenuItem value="CASHIER">Cashier</MenuItem>
+                    <MenuItem value="MANAGER">Manager</MenuItem>
                   </TextField>
 
                   <TextField
@@ -377,7 +413,9 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
                     onBlur={() => markTouched("password")}
                     error={!!(touched.password && errors.password)}
                     helperText={
-                      touched.password && errors.password ? errors.password : " "
+                      touched.password && errors.password
+                        ? errors.password
+                        : " "
                     }
                     InputProps={{
                       startAdornment: (
@@ -392,8 +430,8 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
 
                 <Divider sx={{ mt: 2 }} />
                 <Typography fontSize={12} className="text-gray-500 mt-2">
-                  Tip: Use a strong password and verify phone/email before sharing
-                  credentials.
+                  Tip: Use a strong password and verify phone/email before
+                  sharing credentials.
                 </Typography>
               </motion.div>
             )}
@@ -430,7 +468,8 @@ const AddStaff = ({ open, onClose, onSuccess }) => {
             />
           </DialogActions>
         </Dialog>
-      )}</AnimatePresence>
+      )}
+    </AnimatePresence>
   );
 };
 
