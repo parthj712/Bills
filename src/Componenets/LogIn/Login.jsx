@@ -91,7 +91,7 @@ export default function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      showSnackbar("Login Successful 🎉", "success");
+      showSnackbar("Login Successful! 🎉", "success");
 
       if (user.role === "ADMIN") {
         router.push("/welcome");
