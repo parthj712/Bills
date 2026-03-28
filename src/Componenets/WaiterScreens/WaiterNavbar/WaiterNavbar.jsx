@@ -75,8 +75,8 @@ const WaiterNavbar = () => {
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
-      if (user?.email) {
-        setUserInitial(user.email);
+      if (user?.userName) {
+        setUserInitial(user.userName);
       }
     }
   }, []);
@@ -93,7 +93,7 @@ const WaiterNavbar = () => {
 
   const handleLogout = async () => {
     try {
-      await API.post("/auth/logout");
+      await API.post("/staff/staff-logout");
 
       localStorage.removeItem("token");
 

@@ -410,10 +410,9 @@ const MainStaffManagement = () => {
               <TableRow>
                 {[
                   "Name",
-                  "Email",
+                  "User Name",
                   "Phone",
-                  // "Aadhaar",
-                  // "Address",
+
                   "Joining Date",
                   "Online",
                   "Status",
@@ -469,7 +468,7 @@ const MainStaffManagement = () => {
                       {staff.name}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
-                      {staff.email}
+                      {staff.userName}
                     </TableCell>
                     <TableCell sx={{ textAlign: "center" }}>
                       {staff.phone}

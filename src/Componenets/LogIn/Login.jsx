@@ -319,6 +319,24 @@ export default function Login() {
           >
             Back to Home
           </Button>
+
+          {/* Staff Login Redirect */}
+          <Typography
+            onClick={() => router.push("/stafflogin")}
+            sx={{
+              textAlign: "center",
+              fontSize: 14,
+              cursor: "pointer",
+              color: "#4f46e5",
+              fontWeight: 500,
+              mt: 1,
+              "&:hover": {
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Login as Staff
+          </Typography>
         </Box>
       </Box>
 

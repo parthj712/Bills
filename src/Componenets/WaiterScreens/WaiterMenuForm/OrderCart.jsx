@@ -64,10 +64,6 @@ export default function OrderCart() {
 
   const [loading, setLoading] = useState(false);
 
-  const nameRegex = /^[A-Za-z\s]+$/;
-  const [nameError, setNameError] = useState("");
-  console.log(cartItems);
-
   const GST_PERCENT = 5;
   const VAT_PERCENT = 10;
   const { foodSubtotal, liquorSubtotal } = useMemo(() => {
@@ -76,7 +72,6 @@ export default function OrderCart() {
 
     cartItems.forEach((item) => {
       const total = (Number(item.price) || 0) * (Number(item.qty) || 0);
-      console.log("CATEGORY:", item.category);
       const category = item.category?.trim().toLowerCase();
 
       if (category === "liquor" || category === "liqour") {
@@ -161,9 +156,6 @@ export default function OrderCart() {
     };
   }, [tableId, orderType]);
 
-  const handleCancelOrder = () => {
-    router.back();
-  };
   const handleIncrease = async (item) => {
     await itemIncrement({
       tableId,
@@ -188,35 +180,41 @@ export default function OrderCart() {
 
   const formatBillForPrint = () => {
     return `
-  <div class="center bold" style="font-size:18px;">
+  <div style="text-align:center; font-weight:bold; font-size:18px;">
     ${shopInfo?.shopName || ""}
   </div>
 
-  <div class="center" style="font-size:12px;">
+  <div style="text-align:center; font-size:12px;">
     ${shopInfo?.tagline || ""}
   </div>
 
   <div class="divider"></div>
 
-  <div class="center">
+  <div style="text-align:center;">
     ${orderType}
   </div>
 
-  <div class="center">
+  <div style="text-align:center; font-size:12px;">
     ${new Date().toLocaleString("en-IN")}
   </div>
 
   <div class="divider"></div>
 
+  <!-- ITEMS -->
   ${cartItems
-        .map(
-          (item) => `
-      <div>
-        <div class="bold">${item.name}</div>
-        <div class="row">
-          <span>${item.qty} x ₹${item.price.toFixed(2)}</span>
-          <span>₹${(item.qty * item.price).toFixed(2)}</span>
-        </div>
+    .map(
+      (item) => `
+      <div style="margin-bottom:6px;">
+        <div>${item.name}</div>
+
+        <table style="width:100%; font-size:12px;">
+          <tr>
+            <td>${item.qty} x ₹${item.price.toFixed(2)}</td>
+            <td style="text-align:right;">
+              ₹${(item.qty * item.price).toFixed(2)}
+            </td>
+          </tr>
+        </table>
       </div>
     `,
         )
@@ -224,41 +222,49 @@ export default function OrderCart() {
 
   <div class="divider"></div>
 
-  <div class="row">
-    <span>Subtotal</span>
-    <span>₹${subtotal.toFixed(2)}</span>
-  </div>
+  <!-- TOTALS (TABLE FIX) -->
+  <table style="width:100%; font-size:13px;">
+    <tr>
+      <td>Subtotal</td>
+      <td style="text-align:right;">₹${Number(subtotal.toFixed(2))}</td>
+    </tr>
 
-  ${foodSubtotal > 0 && hasGST
+    ${
+      foodSubtotal > 0 && hasGST
         ? `
-      <div class="row">
-        <span>GST (5%)</span>
-        <span>₹${gstAmount.toFixed(2)}</span>
-      </div>
-    `
+        <tr>
+          <td>GST (5%)</td>
+          <td style="text-align:right;">₹${gstAmount.toFixed(2)}</td>
+        </tr>
+      `
         : ""
-      }
+    }
 
-  ${liquorSubtotal > 0 && hasVAT
+    ${
+      liquorSubtotal > 0 && hasVAT
         ? `
-      <div class="row">
-        <span>VAT (10%)</span>
-        <span>₹${vatAmount.toFixed(2)}</span>
-      </div>
-    `
+        <tr>
+          <td>VAT (10%)</td>
+          <td style="text-align:right;">₹${vatAmount.toFixed(2)}</td>
+        </tr>
+      `
         : ""
-      }
+    }
+  </table>
 
   <div class="divider"></div>
 
-  <div class="row total">
-    <span>TOTAL</span>
-    <span>₹${grandTotal.toFixed(2)}</span>
-  </div>
+  <!-- GRAND TOTAL -->
+  <table style="width:100%; font-size:16px; font-weight:bold;">
+    <tr>
+      <td>TOTAL</td>
+      <td style="text-align:right;">₹${grandTotal.toFixed(2)}</td>
+    </tr>
+  </table>
 
   <div class="divider"></div>
 
-  <div class="center bold">
+  <div style="text-align:center;">
     Thank You • Visit Again
   </div>
   `;
@@ -371,44 +377,42 @@ export default function OrderCart() {
     <html>
       <head>
         <title>Print Bill</title>
-        <style>
-          body {
-            margin: 0;
-            padding: 10px;
-            width: 80mm;
-            font-family: monospace;
-            font-size: 13px;
-          }
+     <style>
+  body {
+    margin: 0;
+    padding: 10px;
+    width: 58mm;
+    font-family: monospace;
+    font-size: 13px;
+  }
 
-          .center {
-            text-align: center;
-          }
+  .center {
+    text-align: center;
+  }
 
-          .bold {
-            font-weight: bold;
-          }
+  .bold {
+    font-weight: bold;
+  }
 
-          .divider {
-            border-top: 1px dashed #000;
-            margin: 8px 0;
-          }
+  .divider {
+    border-top: 1px dashed #000;
+    margin: 8px 0;
+  }
 
-          .row {
-            display: flex;
-            justify-content: space-between;
-            margin: 3px 0;
-          }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
 
-          .total {
-            font-size: 18px;
-            font-weight: bold;
-          }
+  td {
+    padding: 2px 0;
+  }
 
-          @page {
-            size: 80mm auto;
-            margin: 0;
-          }
-        </style>
+  @page {
+    size: 58mm auto;
+    margin: 0;
+  }
+</style>
       </head>
       <body>
         ${formatBillForPrint()}
