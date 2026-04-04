@@ -50,6 +50,9 @@ import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import { useRefreshData } from "@/hooks/useRefreshData";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { CircularProgress } from "@mui/material";
+
+
 export default function MenuManagement() {
   const { showSnackbar } = useAppSnackbar();
 
@@ -83,6 +86,8 @@ export default function MenuManagement() {
 
   const [openAdd, setOpenAdd] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
+
+  const [uploading, setUploading] = useState(false);
 
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState(null);
@@ -418,7 +423,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
     const isExcel =
       file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -433,6 +438,9 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
     if (!excelFile) return;
 
     try {
+
+      setUploading(true); // ✅ START LOADING
+
       const res = await uploadExcelFile(excelFile);
 
       showSnackbar(`Uploaded Successfully: ${res.data.inserted} items added`);
@@ -443,6 +451,8 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
     } catch (error) {
       console.error(error);
       showSnackbar("Upload Failed");
+    } finally {
+      setUploading(false); // ✅ STOP LOADING
     }
   };
 
@@ -877,7 +887,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => {}}
+        onSubmit={(data) => { }}
         onSuccess={handleFetchMenu}
       />
 
@@ -967,9 +977,12 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
           <Button
             variant="contained"
             onClick={handleUploadExcel}
-            disabled={!excelFile}
+            disabled={!excelFile || uploading}
+            startIcon={
+              uploading ? <CircularProgress size={20} color="inherit" /> : null
+            }
           >
-            Upload
+            {uploading ? "Uploading..." : "Upload"}
           </Button>
         </DialogActions>
       </Dialog>
