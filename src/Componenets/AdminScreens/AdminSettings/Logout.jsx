@@ -54,6 +54,7 @@ export default function Settings() {
 
   const [shopData, setShopData] = useState(null);
   const isBar = shopData?.businessCategory === "RESTO_BAR";
+  const isRetail = shopData?.businessCategory === "RETAIL";
 
   useEffect(() => {
     const fetchInfo = async () => {
@@ -319,10 +320,14 @@ export default function Settings() {
           </Box>
         </SettingsCard>
 
-        {/* FEEDBACK */}
-        <SettingsCard title="Feedback">
-          <FeedbackQRSection />
-        </SettingsCard>
+        {!isRetail && (
+          <>
+            {/* FEEDBACK */}
+            <SettingsCard title="Feedback">
+              <FeedbackQRSection />
+            </SettingsCard>
+          </>
+        )}
 
         {/* LOGOUT */}
         <Paper sx={{ p: 3, borderRadius: 3 }}>

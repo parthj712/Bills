@@ -385,22 +385,6 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
               <TextField
                 size="small"
                 fullWidth
-                label="Mobile Number"
-                placeholder="Enter mobile number"
-                value={customerMobile}
-                onChange={(e) => {
-                  const value = e.target.value;
-
-                  // Only numbers and max 10 digits
-                  if (/^\d{0,10}$/.test(value)) {
-                    setcustomerMobile(value);
-                  }
-                }}
-              />
-
-              <TextField
-                size="small"
-                fullWidth
                 type="date"
                 label="Birthdate"
                 InputLabelProps={{ shrink: true }}
