@@ -15,24 +15,28 @@ export const deleteMenuItem = async (id) => {
 };
 
 export const updateMenuItem = async (id, data) => {
-  // Build payload according to priceType
   const payload = {
     name: data.name,
-    categoryName: data.category,
+    categoryName: data.categoryName, // ✅ FIXED
     subCategory: data.subCategory,
     foodType: data.foodType,
     itemCode: data.itemCode,
     description: data.description,
-    price:
-      data.priceType === "HALF_FULL"
-        ? {
-            half: Number(data.priceHalf) || 0,
-            full: Number(data.priceFull) || 0,
-          }
-        : undefined,
-    variants: data.priceType === "VARIANT" ? data.variants : undefined,
     priceType: data.priceType,
   };
+
+  if (data.priceType === "HALF_FULL") {
+    payload.priceHalf = Number(data.priceHalf) || 0;
+    payload.priceFull = Number(data.priceFull) || 0;
+  }
+
+  if (data.priceType === "SINGLE") {
+    payload.priceFull = Number(data.priceFull) || 0;
+  }
+
+  if (data.priceType === "VARIANT") {
+    payload.variants = data.variants;
+  }
 
   const res = await API.put(`/menu/${id}`, payload);
   return res.data;
@@ -56,4 +60,8 @@ export const uploadExcelFile = async (file) => {
       "Content-Type": "multipart/form-data",
     },
   });
+};
+
+export const deleteAllMenu = async () => {
+  return await API.delete("/menu/all/delete-all");
 };

@@ -245,20 +245,16 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
 
     // 🚨 Takeaway name validation
     if (orderType === "TAKEAWAY") {
-      if (!customerName.trim()) {
-        setNameError("Customer name is required");
-
-        showSnackbar("Please add customer name first", "error");
-
-        document.querySelector("input[label='Customer Name']")?.focus();
-        return;
-      }
-
-      if (nameError) {
-        showSnackbar("Customer name is invalid", "error");
-
-        return;
-      }
+      // if (!customerName.trim()) {
+      //   setNameError("Customer name is required");
+      //   showSnackbar("Please add customer name first", "error");
+      //   document.querySelector("input[label='Customer Name']")?.focus();
+      //   return;
+      // }
+      // if (nameError) {
+      //   showSnackbar("Customer name is invalid", "error");
+      //   return;
+      // }
     }
 
     try {
@@ -342,17 +338,17 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
               label="Customer Name"
               placeholder="Enter customer name"
               value={customerName}
-              error={!!nameError}
-              helperText={nameError}
+              // error={!!nameError}
+              // helperText={nameError}
               onChange={(e) => {
                 const value = e.target.value;
 
                 // Allow only letters & spaces
-                if (value && !/^[A-Za-z\s]+$/.test(value)) {
-                  setNameError("Only letters allowed");
-                } else {
-                  setNameError("");
-                }
+                // if (value && !/^[A-Za-z\s]+$/.test(value)) {
+                //   setNameError("Only letters allowed");
+                // } else {
+                //   setNameError("");
+                // }
 
                 // Capitalize first letters
                 setCustomerName(

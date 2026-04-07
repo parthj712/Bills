@@ -57,7 +57,19 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
   if (!form) return null;
 
   const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+
+    if (name === "priceType") {
+      setForm((prev) => ({
+        ...prev,
+        priceType: value,
+        priceHalf: "",
+        priceFull: "",
+        variants: [],
+      }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleVariantChange = (index, field, value) => {
@@ -69,7 +81,10 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
   const addVariant = () => {
     setForm((prev) => ({
       ...prev,
-      variants: [...prev.variants, { name: "", price: "" }],
+      variants: [
+        ...prev.variants,
+        { name: `Variant ${prev.variants.length + 1}`, price: "" }, // ✅ default name
+      ],
     }));
   };
 
@@ -80,25 +95,52 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
   };
 
   const handleSubmit = async () => {
+    if (loading) return; // ✅ prevent multiple clicks
     try {
       setLoading(true);
 
       const payload = {
-        ...form,
+        name: form.name,
+        description: form.description,
         categoryName: form.category,
         subCategory: form.subCategory,
-        price:
-          form.priceType === "HALF_FULL"
-            ? {
-                half: form.priceHalf,
-                full: form.priceFull,
-              }
-            : form.priceType === "SINGLE"
-              ? { full: form.priceFull }
-              : undefined,
-        variants: form.priceType === "VARIANT" ? form.variants : undefined,
+        foodType: form.foodType,
+        priceType: form.priceType,
       };
 
+      // send only required fields
+      if (form.priceType === "HALF_FULL") {
+        payload.priceHalf = Number(form.priceHalf) || 0;
+        payload.priceFull = Number(form.priceFull) || 0;
+      }
+
+      if (form.priceType === "SINGLE") {
+        payload.priceFull = Number(form.priceFull) || 0;
+      }
+
+      if (form.priceType === "VARIANT") {
+        payload.variants = form.variants
+          .filter((v) => v.name && v.price) // ✅ remove empty
+          .map((v) => ({
+            name: v.name.trim(),
+            price: Number(v.price),
+          }));
+      }
+      if (form.priceType === "VARIANT") {
+        const hasInvalid = form.variants.some((v) => !v.name || !v.price);
+
+        if (hasInvalid) {
+          showSnackbar("Please fill all variant names and prices");
+          setLoading(false);
+          return;
+        }
+
+        if (form.variants.length === 0) {
+          showSnackbar("Add at least one variant");
+          setLoading(false);
+          return;
+        }
+      }
       await onUpdate(menu._id, payload);
 
       setSuccess(true);
@@ -365,13 +407,14 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                           className="flex flex-col md:flex-row gap-2 items-start md:items-center"
                         >
                           <TextField
-                            label="Variant Name"
+                            label="Variant Name (e.g. 500g, 1kg, Full, Half)"
                             value={v.name}
                             onChange={(e) =>
                               handleVariantChange(i, "name", e.target.value)
                             }
                             sx={{ flex: 1, ...fieldStyle }}
                           />
+
                           <TextField
                             label="Price"
                             type="number"
@@ -390,6 +433,7 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                             }}
                             sx={{ width: 140, ...fieldStyle }}
                           />
+
                           <Button
                             color="error"
                             variant="outlined"
@@ -400,10 +444,11 @@ export default function UpdateMenuItem({ open, onClose, menu, onUpdate }) {
                           </Button>
                         </Box>
                       ))}
+
                       <AppButton
                         label="Add Variant"
                         onClick={addVariant}
-                        x={{ alignSelf: "flex-start", mt: 1 }}
+                        sx={{ alignSelf: "flex-start", mt: 1 }}
                       />
                     </Box>
                   )}
