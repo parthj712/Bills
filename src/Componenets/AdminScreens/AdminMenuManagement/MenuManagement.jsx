@@ -30,7 +30,9 @@ import { Edit, Delete, Add, Search, Close } from "@mui/icons-material";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useEffect, useMemo, useState } from "react";
 import AddMenuItems from "./AddMenuItems";
+import DeleteSweepIcon from "@mui/icons-material/DeleteSweep";
 import {
+  deleteAllMenu,
   deleteMenuItem,
   getMenuItems,
   updateMenuAvailability,
@@ -51,7 +53,6 @@ import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/
 import { useRefreshData } from "@/hooks/useRefreshData";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { CircularProgress } from "@mui/material";
-
 
 export default function MenuManagement() {
   const { showSnackbar } = useAppSnackbar();
@@ -126,6 +127,7 @@ export default function MenuManagement() {
 
   const handleUpdate = async (id, data) => {
     await updateMenuItem(id, data);
+    setOpenEdit(false); // ✅ CLOSE FIRST
     handleFetchMenu();
   };
 
@@ -141,6 +143,23 @@ export default function MenuManagement() {
       );
     } catch (error) {
       console.log(error?.response?.data?.message || error?.message || error);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    const confirmDelete = confirm(
+      "⚠️ Are you sure you want to delete ALL menu items?\nThis action cannot be undone!",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteAllMenu();
+      showSnackbar("All menu items deleted successfully");
+      handleFetchMenu(); // refresh
+    } catch (error) {
+      console.error(error);
+      showSnackbar("Failed to delete all menu items");
     }
   };
 
@@ -423,7 +442,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
     const isExcel =
       file.type ===
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -438,7 +457,6 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
     if (!excelFile) return;
 
     try {
-
       setUploading(true); // ✅ START LOADING
 
       const res = await uploadExcelFile(excelFile);
@@ -617,6 +635,19 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
             }}
           >
             <Description />
+          </IconButton>
+        </Tooltip>
+
+        <Tooltip title="Delete All Menu">
+          <IconButton
+            onClick={handleDeleteAll}
+            sx={{
+              backgroundColor: "#ffebee",
+              color: "#d32f2f",
+              "&:hover": { backgroundColor: "#ffcdd2" },
+            }}
+          >
+            <DeleteSweepIcon />
           </IconButton>
         </Tooltip>
       </Box>
@@ -887,7 +918,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => { }}
+        onSubmit={(data) => {}}
         onSuccess={handleFetchMenu}
       />
 
