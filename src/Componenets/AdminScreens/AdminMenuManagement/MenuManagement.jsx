@@ -989,7 +989,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
               fontWeight: 600,
             }}
           >
-            {excelFile ? excelFile.name : "Click to select Excel file"}
+            {excelFile ? excelFile.name : "Click to select Excel file."}
             <input
               hidden
               type="file"
