@@ -1,7 +1,7 @@
 "use client";
 
 import AppButton from "@/Componenets/CommonComponents/AppButton";
-import { getTables } from "@/service/tableService";
+import { getTables, updateTableStatus } from "@/service/tableService";
 import {
   Box,
   Typography,
@@ -21,10 +21,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
 import { motion, AnimatePresence } from "framer-motion";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 
 import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
 import { getRecentBills } from "@/service/billsService";
 import { getShopInfo } from "@/service/shopService";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import IconButton from "@mui/material/IconButton";
+import Menu from "@mui/material/Menu";
 
 const tableStyles = {
   AVAILABLE: `
@@ -56,6 +61,8 @@ export default function WaiterHomePage() {
   const initialCount = 5;
   const [visibleCount, setVisibleCount] = useState(initialCount);
   const [expanded, setExpanded] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [selectedTable, setSelectedTable] = useState(null);
 
   const [shopData, setShopData] = useState(null);
 
@@ -84,6 +91,16 @@ export default function WaiterHomePage() {
     } catch (error) {
       console.log(error.message);
     }
+  };
+  const handleMenuOpen = (event, table) => {
+    event.stopPropagation(); // prevent table click
+    setMenuAnchor(event.currentTarget);
+    setSelectedTable(table);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+    setSelectedTable(null);
   };
 
   const fetchRecentBills = async (forceRefresh = false) => {
@@ -249,6 +266,25 @@ export default function WaiterHomePage() {
 
     return acc;
   }, {});
+
+  const handleTableStatus = async (tableId, newStatus) => {
+    try {
+      // Optimistic UI update (fast UX)
+      setTables((prev) =>
+        prev.map((t) => (t._id === tableId ? { ...t, status: newStatus } : t)),
+      );
+
+      await updateTableStatus(tableId, newStatus);
+
+      // Optional: re-fetch for accuracy
+      // await handleGetTables();
+    } catch (error) {
+      console.log("Failed to update status", error);
+
+      // rollback if error
+      handleGetTables();
+    }
+  };
 
   const sectionList = Object.keys(groupedTables);
   return (
@@ -467,14 +503,26 @@ export default function WaiterHomePage() {
                   transition-all duration-300
                   hover:shadow-lg hover:scale-[1.0]
                   ${tableStyles[table.status]}
-                  ${highlightTableNo === table.tableNo
-                                        ? table.status === "OCCUPIED"
-                                          ? "ring-4 ring-red-500 ring-offset-2"
-                                          : "ring-4 ring-green-500 ring-offset-2"
-                                        : ""
-                                      }
+                  ${
+                    highlightTableNo === table.tableNo
+                      ? table.status === "OCCUPIED"
+                        ? "ring-4 ring-red-500 ring-offset-2"
+                        : "ring-4 ring-green-500 ring-offset-2"
+                      : ""
+                  }
                 `}
                                   >
+                                    <IconButton
+                                      size="small"
+                                      onClick={(e) => handleMenuOpen(e, table)}
+                                      sx={{
+                                        position: "absolute",
+                                        top: 4,
+                                        right: 4,
+                                      }}
+                                    >
+                                      <MoreVertIcon fontSize="small" />
+                                    </IconButton>
                                     {/* Table Number */}
                                     <Typography
                                       fontSize={22}
@@ -497,10 +545,11 @@ export default function WaiterHomePage() {
                                         table.status === "OCCUPIED" ? 700 : 600
                                       }
                                       className={`px-2 py-[2px] rounded-full
-                    ${table.status === "OCCUPIED"
-                                          ? "bg-red-100 text-red-700 border border-red-500"
-                                          : "bg-green-100 text-green-700 border border-green-500"
-                                        }`}
+                    ${
+                      table.status === "OCCUPIED"
+                        ? "bg-red-100 text-red-700 border border-red-500"
+                        : "bg-green-100 text-green-700 border border-green-500"
+                    }`}
                                     >
                                       {table.status}
                                     </Typography>
@@ -523,6 +572,57 @@ export default function WaiterHomePage() {
                 </div>
               </Card>
             )}
+            <Menu
+              anchorEl={menuAnchor}
+              open={Boolean(menuAnchor)}
+              onClose={handleMenuClose}
+              PaperProps={{
+                elevation: 4,
+                sx: {
+                  borderRadius: 3,
+                  minWidth: 180,
+                  padding: "6px",
+                },
+              }}
+            >
+              {/* AVAILABLE */}
+              <MenuItem
+                disabled={selectedTable?.status === "AVAILABLE"}
+                onClick={() => {
+                  handleTableStatus(selectedTable._id, "AVAILABLE");
+                  handleMenuClose();
+                }}
+                sx={{
+                  borderRadius: 2,
+                  mb: 0.5,
+                  display: "flex",
+                  gap: 1,
+                  color:
+                    selectedTable?.status === "AVAILABLE" ? "gray" : "green",
+                }}
+              >
+                <CheckCircleIcon fontSize="small" />
+                Mark as Available
+              </MenuItem>
+
+              {/* OCCUPIED */}
+              <MenuItem
+                disabled={selectedTable?.status === "OCCUPIED"}
+                onClick={() => {
+                  handleTableStatus(selectedTable._id, "OCCUPIED");
+                  handleMenuClose();
+                }}
+                sx={{
+                  borderRadius: 2,
+                  display: "flex",
+                  gap: 1,
+                  color: selectedTable?.status === "OCCUPIED" ? "gray" : "red",
+                }}
+              >
+                <CancelIcon fontSize="small" />
+                Mark as Occupied
+              </MenuItem>
+            </Menu>
           </div>
         </Box>
       </div>

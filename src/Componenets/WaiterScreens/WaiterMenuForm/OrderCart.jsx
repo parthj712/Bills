@@ -56,6 +56,7 @@ export default function OrderCart() {
   const [customerName, setCustomerName] = useState("");
 
   const [openKOT, setOpenKOT] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("CASH");
 
   const currentDate = new Date().toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -217,8 +218,8 @@ export default function OrderCart() {
         </table>
       </div>
     `,
-        )
-        .join("")}
+    )
+    .join("")}
 
   <div class="divider"></div>
 
@@ -298,16 +299,16 @@ export default function OrderCart() {
     <div class="divider"></div>
 
     ${cartItems
-        .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
-        .map(
-          (item) => `
+      .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
+      .map(
+        (item) => `
         <div style="margin-bottom:6px;">
           <div class="bold">${item.name} (${item.portion})</div>
           <div>Qty: ${item.qty}</div>
         </div>
       `,
-        )
-        .join("")}
+      )
+      .join("")}
 
     <div class="divider"></div>
 
@@ -440,7 +441,7 @@ export default function OrderCart() {
     showSnackbar("Processing billing...", "info");
 
     try {
-      await finalizeBillAndOrder({ tableId, orderType });
+      await finalizeBillAndOrder({ tableId, orderType, paymentMethod });
 
       if (isDineIn) {
         await updateTableStatus(tableId, "AVAILABLE");
@@ -541,10 +542,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-              ...item,
-              kotPrinted: true,
-              kotNumber: kotNumber,
-            },
+                ...item,
+                kotPrinted: true,
+                kotNumber: kotNumber,
+              },
         ),
       );
     };
@@ -908,41 +909,160 @@ export default function OrderCart() {
         onClose={() => setOpenConfirm(false)}
         maxWidth="xs"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 4,
+            overflow: "hidden",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.15)",
+          },
+        }}
       >
+        {/* HEADER */}
         <DialogTitle
-          sx={{ fontWeight: 700, backgroundColor: "#0F172A", color: "white" }}
+          sx={{
+            fontWeight: 700,
+            fontSize: 18,
+            bgcolor: "#0F172A",
+            color: "#fff",
+            textAlign: "center",
+            py: 2,
+            letterSpacing: "0.5px",
+          }}
         >
           Confirm Billing
         </DialogTitle>
 
-        <Box>
-          <DialogContent>
-            <Typography>
-              Are you sure you want to finalize this bill?
+        {/* CONTENT */}
+        <DialogContent sx={{ py: 3 }}>
+          {/* MESSAGE */}
+          <Typography
+            textAlign="center"
+            fontSize={14}
+            color="text.secondary"
+            mb={2}
+          >
+            Review and finalize this bill
+          </Typography>
+
+          {/* TOTAL CARD */}
+          <Box
+            sx={{
+              background: "linear-gradient(135deg, #1E293B, #334155)",
+              color: "#fff",
+              borderRadius: 3,
+              p: 2,
+              textAlign: "center",
+              mb: 3,
+            }}
+          >
+            <Typography fontSize={13} sx={{ opacity: 0.8 }}>
+              Grand Total
             </Typography>
 
-            <Typography fontWeight={600}>
-              Grand Total: ₹ {grandTotal.toFixed(2)}
+            <Typography fontSize={26} fontWeight={700}>
+              ₹ {grandTotal.toFixed(2)}
             </Typography>
-          </DialogContent>
-        </Box>
+          </Box>
 
-        <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
+          {/* PAYMENT METHOD */}
+          <Typography
+            fontWeight={600}
+            mb={1.5}
+            sx={{ color: "#334155", fontSize: 14 }}
+          >
+            Payment Method
+          </Typography>
+
+          <Box display="flex" gap={2}>
+            {/* CASH */}
+            <Box
+              onClick={() => setPaymentMethod("CASH")}
+              sx={{
+                flex: 1,
+                cursor: "pointer",
+                borderRadius: 3,
+                p: 2,
+                textAlign: "center",
+                border:
+                  paymentMethod === "CASH"
+                    ? "2px solid #16a34a"
+                    : "1px solid #E5E7EB",
+                backgroundColor: paymentMethod === "CASH" ? "#ECFDF5" : "#fff",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: "0 6px 14px rgba(0,0,0,0.08)",
+                },
+              }}
+            >
+              <Typography fontSize={22}>💵</Typography>
+              <Typography fontWeight={600} fontSize={14}>
+                Cash
+              </Typography>
+            </Box>
+
+            {/* UPI */}
+            <Box
+              onClick={() => setPaymentMethod("UPI")}
+              sx={{
+                flex: 1,
+                cursor: "pointer",
+                borderRadius: 3,
+                p: 2,
+                textAlign: "center",
+                border:
+                  paymentMethod === "UPI"
+                    ? "2px solid #2563eb"
+                    : "1px solid #E5E7EB",
+                backgroundColor: paymentMethod === "UPI" ? "#EFF6FF" : "#fff",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: "0 6px 14px rgba(0,0,0,0.08)",
+                },
+              }}
+            >
+              <Typography fontSize={22}>📱</Typography>
+              <Typography fontWeight={600} fontSize={14}>
+                UPI
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+
+        {/* FOOTER */}
+        <DialogActions
+          sx={{
+            px: 3,
+            pb: 3,
+            pt: 1,
+            display: "flex",
+            justifyContent: "space-between",
+          }}
+        >
+          <Button
+            onClick={() => setOpenConfirm(false)}
+            sx={{
+              textTransform: "none",
+              fontWeight: 600,
+              color: "#64748B",
+            }}
+          >
+            Cancel
+          </Button>
 
           <Button
             variant="contained"
             onClick={handleConfirmBilling}
             disabled={loading}
             sx={{
-              backgroundColor: "#1E293B",
+              background: "linear-gradient(135deg, #0F172A, #1E293B)",
               color: "#fff",
               borderRadius: 2,
               fontWeight: 600,
               px: 4,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              textTransform: "none",
+              boxShadow: "0 6px 18px rgba(0,0,0,0.15)",
               "&:hover": {
-                backgroundColor: "#0F172A",
+                background: "linear-gradient(135deg, #020617, #0F172A)",
               },
             }}
           >

@@ -13,3 +13,7 @@ export const getDashboardSummary = async () => {
 export const getRecentBills = async () => {
   return await API("/bills/recent-bills");
 };
+
+export const deleteBills = async (id) => {
+  return await API.delete(`/bills/bill/${id}`);
+};
