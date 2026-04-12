@@ -16,26 +16,31 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
+import TablePagination from "@mui/material/TablePagination";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { getBills } from "@/service/billsService";
+import { deleteBills, getBills } from "@/service/billsService";
 import SearchIcon from "@mui/icons-material/Search";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import BillCard from "./BillCard";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { useRefreshData } from "@/hooks/useRefreshData";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import BillDetails from "../AdminBillsManagment/BillDetails"; // ✅ import modal
 
 const BillsMain = () => {
   const theme = useTheme();
 
-  // BREAKPOINTS
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const [billsData, setBillsData] = useState([]);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const [openBill, setOpenBill] = useState(false); // ✅ modal state
+  const [selectedBill, setSelectedBill] = useState(null); // ✅ selected bill
+
   const { showSnackbar } = useAppSnackbar();
   const { refresh } = useRefreshData(showSnackbar);
 
@@ -47,12 +52,34 @@ const BillsMain = () => {
     setRefreshing(false);
   };
 
-  console.log("bills", billsData);
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this bill?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await deleteBills(id);
+      setBillsData((prev) => prev.filter((b) => b._id !== id));
+      showSnackbar("Bill deleted successfully", "success");
+    } catch (error) {
+      showSnackbar("Failed to delete bill", "error");
+    }
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   const fetchBills = async () => {
     try {
       const res = await getBills();
-      // If your API returns { data: [...] } then use res.data.data
-      // If your API returns directly [...] then use res.data
       const bills = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setBillsData(bills);
     } catch (error) {
@@ -64,121 +91,30 @@ const BillsMain = () => {
     fetchBills();
   }, []);
 
-  // ---------- helpers ----------
+  // ---------- SEARCH ----------
   const normalize = (s) => (s || "").toString().trim().toLowerCase();
-
-  const monthIndexFromName = (name) => {
-    const months = [
-      "jan",
-      "feb",
-      "mar",
-      "apr",
-      "may",
-      "jun",
-      "jul",
-      "aug",
-      "sep",
-      "oct",
-      "nov",
-      "dec",
-    ];
-    const idx = months.findIndex((m) => name.startsWith(m));
-    return idx; // -1 if not found
-  };
-
-  // Accept: "2026-01" "2026/01" "01/2026" "01-2026" "jan 2026" "january 2026" "jan"
-  const parseMonthYearQuery = (q) => {
-    const s = normalize(q);
-    if (!s) return null;
-
-    // yyyy-mm or yyyy/mm
-    let m = s.match(/^(\d{4})[\/\-](\d{1,2})$/);
-    if (m) return { year: Number(m[1]), month: Number(m[2]) - 1 };
-
-    // mm-yyyy or mm/yyyy
-    m = s.match(/^(\d{1,2})[\/\-](\d{4})$/);
-    if (m) return { year: Number(m[2]), month: Number(m[1]) - 1 };
-
-    // "jan 2026" / "january 2026"
-    m = s.match(/^([a-z]+)\s+(\d{4})$/);
-    if (m) {
-      const mi = monthIndexFromName(m[1]);
-      if (mi >= 0) return { year: Number(m[2]), month: mi };
-    }
-
-    // only "jan" / "january"
-    const mi = monthIndexFromName(s);
-    if (mi >= 0) return { year: null, month: mi };
-
-    return null;
-  };
-
-  const isSameDay = (a, b) =>
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
 
   const filteredBills = useMemo(() => {
     const q = normalize(search);
     if (!q) return billsData;
 
-    const monthYear = parseMonthYearQuery(q);
-
-    // If query looks like month/year, filter by month/year
-    if (monthYear) {
-      return billsData.filter((bill) => {
-        const d = new Date(bill.createdAt);
-        if (Number.isNaN(d.getTime())) return false;
-
-        const monthOk = d.getMonth() === monthYear.month;
-        const yearOk =
-          monthYear.year == null ? true : d.getFullYear() === monthYear.year;
-
-        return monthOk && yearOk;
-      });
-    }
-
-    // Try parse as a full date (any browser supported format)
-    const parsed = new Date(search);
-    const parsedValid = !Number.isNaN(parsed.getTime());
-
     return billsData.filter((bill) => {
       const d = new Date(bill.createdAt);
-      if (Number.isNaN(d.getTime())) return false;
-
-      // If user entered a valid date, match exact day
-      if (parsedValid) return isSameDay(d, parsed);
-
-      // Fallback: string contains match on formatted date
       const formatted = d.toLocaleDateString("en-IN", {
         day: "2-digit",
         month: "short",
         year: "numeric",
       });
-      // Example formatted: "22 Jan 2026"
-      return normalize(formatted).includes(q);
+
+      return (
+        normalize(formatted).includes(q) || normalize(bill.billNo).includes(q)
+      );
     });
   }, [billsData, search]);
 
-  const totals = useMemo(() => {
-    const toNum = (v) => {
-      const n = Number(v);
-      return Number.isFinite(n) ? n : 0;
-    };
-
-    return filteredBills.reduce(
-      (acc, bill) => {
-        acc.subtotal += toNum(bill.subtotal);
-        acc.gstAmount += toNum(bill.gstAmount);
-        acc.grandTotal += toNum(bill.grandTotal);
-        return acc;
-      },
-      { subtotal: 0, gstAmount: 0, grandTotal: 0 },
-    );
-  }, [filteredBills]);
-
   return (
     <Box className="flex flex-col gap-6 px-4">
+      {/* HEADER */}
       <Box className="flex justify-between items-center w-full">
         <Typography
           fontSize={isMobile ? 24 : 30}
@@ -200,227 +136,144 @@ const BillsMain = () => {
         </IconButton>
       </Box>
 
-      <Box className="grid grid-cols-1 lg:grid-cols-1 gap-4 items-stretch">
-        {/* Search */}
-        <TextField
-          size="medium"
-          placeholder="Search by date or month (Jan 2026, 22/01/2026...)"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          InputProps={{
-            startAdornment: <SearchIcon sx={{ mr: 1, color: "#0b3c5d" }} />,
-          }}
-          // className="grid-cols-1"
-          sx={{
-            gridColumn: { lg: "span 3" },
-            backgroundColor: "#f9fafb",
-            borderRadius: 1.5,
-            height: 44,
-            "& .MuiInputBase-root": {
-              height: 44,
-            },
-            "& input": {
-              fontSize: 14,
-              padding: "8px 0",
-            },
-            "& fieldset": { border: "none" },
-            // boxShadow: "0 6px 10px rgba(0,0,0,0.06)",
-            border: "2px solid",
-            borderColor: "gray.200",
-            bgcolor: "white",
-          }}
-        />
+      {/* SEARCH */}
+      <TextField
+        placeholder="Search bill or date..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        InputProps={{
+          startAdornment: <SearchIcon sx={{ mr: 1 }} />,
+        }}
+        sx={{
+          backgroundColor: "#fff",
+          borderRadius: 2,
+        }}
+      />
 
-        {/* Subtotal */}
-        {/* <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-            transition: "0.3s",
-            "&:hover": { transform: "translateY(-3px)" },
-          }}
-        >
-          <Typography fontSize={13} color="text.secondary">
-            Subtotal
-          </Typography>
-          <Typography fontSize={22} fontWeight={700} color="#1976d2">
-            ₹ {totals.subtotal.toFixed(2)}
-          </Typography>
-        </Paper> */}
-
-        {/* GST */}
-        {/* <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-            transition: "0.3s",
-            "&:hover": { transform: "translateY(-3px)" },
-          }}
-        >
-          <Typography fontSize={13} color="text.secondary">
-            GST
-          </Typography>
-          <Typography fontSize={22} fontWeight={700} color="#ed6c02">
-            ₹ {totals.gstAmount.toFixed(2)}
-          </Typography>
-        </Paper> */}
-
-        {/* Grand Total */}
-        {/* <Paper
-          sx={{
-            p: 2,
-            borderRadius: 3,
-            boxShadow: "0 10px 25px rgba(0,0,0,0.08)",
-            transition: "0.3s",
-            "&:hover": { transform: "translateY(-3px)" },
-          }}
-        >
-          <Typography fontSize={13} color="text.secondary">
-            Grand Total
-          </Typography>
-          <Typography fontSize={22} fontWeight={700} color="#2e7d32">
-            ₹ {totals.grandTotal.toFixed(2)}
-          </Typography>
-        </Paper> */}
-      </Box>
+      {/* DESKTOP TABLE */}
       {isDesktop && (
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 2,
-            // boxShadow: "0 20px 40px rgba(0,0,0,0.08)",
-            alignItems: "left",
-          }}
-        >
+        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                {[
-                  "Date",
-                  "Bill No",
-                  "SubTotal",
-                  "GST Amount",
-                  "Grand Total",
-                  "Action",
-                ].map((head) => (
-                  <TableCell
-                    key={head}
-                    sx={{
-                      backgroundColor: "#0b3c5d",
-                      color: "white",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
-                  >
-                    {head}
-                  </TableCell>
-                ))}
+                {["Date", "Bill No", "SubTotal", "GST", "Total", "Action"].map(
+                  (h) => (
+                    <TableCell
+                      key={h}
+                      align="center"
+                      sx={{
+                        backgroundColor: "#0b3c5d",
+                        color: "#fff",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {h}
+                    </TableCell>
+                  ),
+                )}
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {filteredBills.map((bills, index) => (
-                <TableRow
-                  key={bills._id}
-                  sx={{
-                    backgroundColor: index % 2 === 0 ? "#f9fafb" : "white",
-                    "&:hover": { backgroundColor: "#eef6ff" },
-                    textAlign: "left",
-                  }}
-                >
-                  <TableCell align="center">
-                    {new Date(bills.createdAt).toLocaleDateString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </TableCell>
-                  <TableCell fontWeight={600} align="center">
-                    {bills.billNo}
-                  </TableCell>
-                  <TableCell align="center">₹ {bills.subtotal}</TableCell>
-                  <TableCell align="center">₹ {bills.gstAmount}</TableCell>
-                  <TableCell align="center" fontWeight={700}>
-                    ₹ {bills.grandTotal}
-                  </TableCell>
-                  <TableCell align="center">
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "center",
-                        gap: 1.5,
-                      }}
-                    >
-                      <Tooltip title="View">
-                        <IconButton
-                          size="small"
-                          sx={{
-                            backgroundColor: "#e3f2fd",
-                            "&:hover": { backgroundColor: "#bbdefb" },
-                          }}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+              {filteredBills
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((bill) => (
+                  <TableRow key={bill._id} hover>
+                    <TableCell align="center">
+                      {new Date(bill.createdAt).toLocaleDateString("en-IN")}
+                    </TableCell>
 
-                      <Tooltip title="Edit">
-                        <IconButton
-                          size="small"
-                          sx={{
-                            backgroundColor: "#e8f5e9",
-                            "&:hover": { backgroundColor: "#c8e6c9" },
-                          }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <TableCell align="center">{bill.billNo}</TableCell>
 
-                      <Tooltip title="Delete">
-                        <IconButton
-                          size="small"
-                          sx={{
-                            backgroundColor: "#ffebee",
-                            "&:hover": { backgroundColor: "#ffcdd2" },
-                          }}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Box>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    <TableCell align="center">₹ {bill.subtotal}</TableCell>
+
+                    <TableCell align="center">₹ {bill.gstAmount}</TableCell>
+
+                    <TableCell align="center" fontWeight={700}>
+                      ₹ {bill.grandTotal}
+                    </TableCell>
+
+                    <TableCell align="center">
+                      <Box display="flex" justifyContent="center" gap={1}>
+                        {/* 👁️ VIEW BUTTON */}
+                        <Tooltip title="View">
+                          <IconButton
+                            onClick={() => {
+                              setSelectedBill(bill);
+                              setOpenBill(true);
+                            }}
+                            sx={{
+                              backgroundColor: "#e3f2fd",
+                              "&:hover": { backgroundColor: "#bbdefb" },
+                            }}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+
+                        {/* ❌ DELETE ONLY */}
+                        <Tooltip title="Delete">
+                          <IconButton
+                            onClick={() => handleDelete(bill._id)}
+                            sx={{
+                              backgroundColor: "#ffebee",
+                              "&:hover": { backgroundColor: "#ffcdd2" },
+                            }}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))}
 
               {filteredBills.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                    <Typography color="text.secondary">
-                      No bills found
-                    </Typography>
+                  <TableCell colSpan={6} align="center">
+                    No bills found
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+          <TablePagination
+            component="div"
+            count={filteredBills.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25]}
+            sx={{
+              borderTop: "1px solid #e5e7eb",
+            }}
+          />
         </TableContainer>
       )}
 
-      {/* MOBILE + TABLET CARDS */}
+      {/* MOBILE */}
       {!isDesktop && (
-        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {filteredBills.map((bill) => (
-            <BillCard key={bill._id} bill={bill} />
+            <BillCard
+              key={bill._id}
+              bill={bill}
+              onView={(b) => {
+                setSelectedBill(b);
+                setOpenBill(true);
+              }}
+            />
           ))}
-
-          {filteredBills.length === 0 && (
-            <Box className="col-span-full text-center py-8">
-              <Typography color="text.secondary">No bills found</Typography>
-            </Box>
-          )}
         </Box>
       )}
+
+      {/* ✅ BILL DETAILS MODAL */}
+      <BillDetails
+        open={openBill}
+        onClose={() => setOpenBill(false)}
+        bill={selectedBill}
+      />
     </Box>
   );
 };

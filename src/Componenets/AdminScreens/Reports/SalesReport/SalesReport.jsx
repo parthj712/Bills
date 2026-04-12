@@ -49,6 +49,7 @@ export default function SalesReport() {
   const [fromDate, setFromDate] = useState(null);
   const [toDate, setToDate] = useState(null);
   const [shopData, setShopData] = useState([]);
+  const [paymentFilter, setPaymentFilter] = useState("ALL");
 
   const [openBill, setOpenBill] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
@@ -76,12 +77,12 @@ export default function SalesReport() {
     // show ONLY if shop supports tables
     ...(isDineIn
       ? [
-        {
-          label: "Dine-In",
-          value: "DINEIN",
-          icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
-        },
-      ]
+          {
+            label: "Dine-In",
+            value: "DINEIN",
+            icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
+          },
+        ]
       : []),
 
     {
@@ -111,6 +112,7 @@ export default function SalesReport() {
   useEffect(() => {
     fetchShopData();
   }, []);
+  console.log("billData", billsData);
 
   const filteredBills = useMemo(() => {
     return billsData.filter((b) => {
@@ -123,10 +125,12 @@ export default function SalesReport() {
       // Bill Type filter
       if (billType === "DINEIN" && !b.tableId) return false;
       if (billType === "TAKEAWAY" && b.tableId) return false;
+      if (paymentFilter !== "ALL" && b.paymentMethod !== paymentFilter)
+        return false;
 
       return true;
     });
-  }, [billsData, fromDate, toDate, billType]);
+  }, [billsData, fromDate, toDate, billType, paymentFilter]);
 
   const totals = useMemo(() => {
     return filteredBills.reduce(
@@ -137,6 +141,23 @@ export default function SalesReport() {
         return acc;
       },
       { subtotal: 0, gst: 0, total: 0 },
+    );
+  }, [filteredBills]);
+
+  const paymentSummary = useMemo(() => {
+    return filteredBills.reduce(
+      (acc, b) => {
+        const method = b.paymentMethod || "CASH"; // ✅ default fallback
+
+        if (method === "CASH") {
+          acc.cash += Number(b.grandTotal || 0);
+        } else if (method === "UPI") {
+          acc.upi += Number(b.grandTotal || 0);
+        }
+
+        return acc;
+      },
+      { cash: 0, upi: 0 },
     );
   }, [filteredBills]);
 
@@ -159,6 +180,7 @@ export default function SalesReport() {
       Date: new Date(b.createdAt).toLocaleDateString("en-IN"),
       BillNo: b.billNo,
       Subtotal: b.subtotal,
+      Payment: b.paymentMethod, // ✅ ADD
       GST: b.gstAmount,
       Total: b.grandTotal,
     }));
@@ -257,18 +279,16 @@ export default function SalesReport() {
                     fontSize: 14,
                     px: isMobile ? 0.5 : 1.5,
                     fontWeight: activeRange === range.label ? 600 : 500,
-                    borderRadius: 2
+                    borderRadius: 2,
                   }}
                 />
               ))}
             </Box>
 
-
             {/* Date Pickers */}
             <Box display="flex" gap={3} flexWrap="wrap">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-
                   label="From Date"
                   value={fromDate}
                   onChange={(val) => {
@@ -311,7 +331,6 @@ export default function SalesReport() {
           >
             Get Report
           </Button>
-
         </Box>
       </Paper>
 
@@ -415,6 +434,91 @@ export default function SalesReport() {
         )}
       </Box>
 
+      {/* PAYMENT FILTER */}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          flexWrap: "wrap",
+          mb: 2,
+        }}
+      >
+        {["ALL", "CASH", "UPI"].map((type) => (
+          <Chip
+            key={type}
+            label={type}
+            clickable
+            color={paymentFilter === type ? "primary" : "default"}
+            variant={paymentFilter === type ? "filled" : "outlined"}
+            onClick={() => {
+              setPaymentFilter(type);
+              setShowReport(false);
+            }}
+            sx={{
+              borderRadius: 2,
+              fontWeight: 600,
+              px: 2,
+            }}
+          />
+        ))}
+      </Box>
+
+      {showReport && (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)",
+            gap: 2,
+            mb: 3,
+          }}
+        >
+          {/* TOTAL SALES */}
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg,#0f172a,#1e293b)",
+              color: "#fff",
+            }}
+          >
+            <Typography fontSize={14}>Total Sales</Typography>
+            <Typography fontSize={22} fontWeight={700}>
+              ₹ {totals.total.toFixed(2)}
+            </Typography>
+          </Paper>
+
+          {/* CASH */}
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg,#065f46,#047857)",
+              color: "#fff",
+            }}
+          >
+            <Typography fontSize={14}>Cash Collection</Typography>
+            <Typography fontSize={22} fontWeight={700}>
+              ₹ {paymentSummary.cash.toFixed(2)}
+            </Typography>
+          </Paper>
+
+          {/* UPI */}
+          <Paper
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
+              color: "#fff",
+            }}
+          >
+            <Typography fontSize={14}>UPI Collection</Typography>
+            <Typography fontSize={22} fontWeight={700}>
+              ₹ {paymentSummary.upi.toFixed(2)}
+            </Typography>
+          </Paper>
+        </Box>
+      )}
+
       {/* Sales Table */}
       {showReport && isDesktop && (
         <Paper sx={{ borderRadius: 3, overflow: "hidden" }}>
@@ -426,6 +530,7 @@ export default function SalesReport() {
                     "Date",
                     "Bill No",
                     "Type",
+                    "Payment",
                     "Subtotal",
                     "GST",
                     "Total",
@@ -463,6 +568,19 @@ export default function SalesReport() {
                       ) : (
                         <Chip label="Takeaway" color="warning" size="small" />
                       )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={b.paymentMethod || "N/A"}
+                        color={
+                          b.paymentMethod === "CASH"
+                            ? "success"
+                            : b.paymentMethod === "UPI"
+                              ? "primary"
+                              : "default"
+                        }
+                        size="small"
+                      />
                     </TableCell>
 
                     <TableCell align="center">₹ {b.subtotal}</TableCell>
@@ -506,6 +624,7 @@ export default function SalesReport() {
                     <TableCell />
 
                     {/* Type */}
+                    <TableCell />
                     <TableCell />
 
                     {/* Subtotal */}
@@ -607,28 +726,6 @@ export default function SalesReport() {
           </Paper>
         </Box>
       )}
-
-      {/* MOBILE + TABLET MONTHLY SUMMARY */}
-      {/* {!isDesktop && (
-        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {Object.entries(monthlySummary).map(([month, v]) => (
-            <MonthlySummaryCard
-              key={month}
-              month={month}
-              gst={v.gst}
-              total={v.total}
-            />
-          ))}
-
-          {Object.keys(monthlySummary).length === 0 && (
-            <Box className="col-span-full text-center py-6">
-              <Typography color="text.secondary">
-                No summary data available
-              </Typography>
-            </Box>
-          )}
-        </Box>
-      )} */}
 
       {/* Bill Modal */}
       <BillDetails
