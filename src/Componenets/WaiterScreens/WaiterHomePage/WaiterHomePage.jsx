@@ -76,7 +76,7 @@ export default function WaiterHomePage() {
   const [keyBuffer, setKeyBuffer] = useState("");
   const [highlightTableNo, setHighlightTableNo] = useState(null);
   // const isDineIn = shopData?.businessCategory === "DINE_IN";
-  // const isBar = shopData?.businessCategory === "RESTO_BAR";
+  // const isBar = shopData?.businessCategory === "RESTO_BAR";.
 
   const showTables =
     shopData?.businessCategory === "DINE_IN" ||
