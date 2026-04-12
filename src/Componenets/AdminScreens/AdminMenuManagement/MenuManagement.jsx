@@ -442,7 +442,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
 
     const isExcel =
       file.type ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
       file.type === "application/vnd.ms-excel";
 
     if (!isExcel) {
@@ -918,7 +918,7 @@ ${m.variants?.map((v) => v.name + v.price).join(" ") || ""}`
       <AddMenuItems
         open={openAdd}
         onClose={() => setOpenAdd(false)}
-        onSubmit={(data) => {}}
+        onSubmit={(data) => { }}
         onSuccess={handleFetchMenu}
       />
 
