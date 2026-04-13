@@ -1,13 +1,19 @@
 "use client";
 
 import {
+  addOrUpdateFssai,
   addOrUpdateGST,
   addOrUpdateVAT,
   addTagline,
   addWebsite,
   getShopInfo,
+  removeFSSAI,
+  removeGST,
   removeShopLogo,
   removeShopQR,
+  removeTagline,
+  removeVAT,
+  removeWebsite,
   uploadShopLogo,
   uploadShopQR,
 } from "@/service/shopService";
@@ -33,6 +39,7 @@ import InfoRow from "./InfoCard";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import FeedbackQRSection from "./FeedbackQRSection";
 import API from "@/service/api";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 export default function Settings() {
   const { showSnackbar } = useAppSnackbar();
@@ -45,7 +52,8 @@ export default function Settings() {
   const [editTagline, setEditTagline] = useState(false);
   const [editGST, setEditGST] = useState(false);
   const [editVAT, setEditVAT] = useState(false);
-
+  const [editFssai, setEditFssai] = useState(false);
+  const [subscription, setSubscription] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
   const [qrPreview, setQrPreview] = useState("");
 
@@ -56,6 +64,18 @@ export default function Settings() {
   const isBar = shopData?.businessCategory === "RESTO_BAR";
   const isRetail = shopData?.businessCategory === "RETAIL";
 
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const res = await getSubscriptionExpiry(); // adjust API
+        setSubscription(res.data);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
   useEffect(() => {
     const fetchInfo = async () => {
       try {
@@ -109,6 +129,12 @@ export default function Settings() {
     setEditVAT(false);
   };
 
+  const handleSaveFssai = async () => {
+    await addOrUpdateFssai({ fssaiNumber: shopData.fssaiNumber });
+    showSnackbar("Fssai Saved ✅");
+    setEditFssai(false);
+  };
+
   const handleSaveWebsite = async () => {
     await addWebsite({ website: shopData.website });
     showSnackbar("Website Updated ✅");
@@ -154,7 +180,34 @@ export default function Settings() {
     await removeShopQR();
     setQrPreview("");
   };
+  const handleRemoveGST = async () => {
+    await removeGST();
+    setShopData({ ...shopData, gstNumber: "" });
+    showSnackbar("GST Removed 🗑️");
+  };
 
+  const handleRemoveFssai = async () => {
+    await removeFSSAI();
+    setShopData({ ...shopData, fssaiNumber: "" });
+    showSnackbar("FSSAI Removed 🗑️");
+  };
+
+  const handleRemoveVAT = async () => {
+    await removeVAT();
+    setShopData({ ...shopData, vatNumber: "" });
+    showSnackbar("VAT Removed 🗑️");
+  };
+
+  const handleRemoveTagline = async () => {
+    await removeTagline();
+    setShopData({ ...shopData, tagline: "" });
+    showSnackbar("Tagline Removed 🗑️");
+  };
+  const handleRemoveWebsite = async () => {
+    await removeWebsite();
+    setShopData({ ...shopData, website: "" });
+    showSnackbar("Website Removed 🗑️");
+  };
   if (loading) return <SettingsSkeleton />;
 
   return (
@@ -184,7 +237,7 @@ export default function Settings() {
           <InfoRow label="Address" value={shopData.address} multiline />
 
           <ModernInputCard title="GST">
-            {!shopData.gstNumber || editGST ? (
+            {editGST ? (
               <>
                 <TextField
                   fullWidth
@@ -194,24 +247,47 @@ export default function Settings() {
                     setShopData({ ...shopData, gstNumber: e.target.value })
                   }
                 />
-                {editGST && (
-                  <ActionButtons
-                    onCancel={() => setEditGST(false)}
-                    onSave={handleSaveGST}
-                  />
-                )}
+                <ActionButtons
+                  onCancel={() => setEditGST(false)}
+                  onSave={handleSaveGST}
+                />
               </>
             ) : (
               <DisplayValue
                 value={shopData.gstNumber}
                 onEdit={() => setEditGST(true)}
+                onDelete={handleRemoveGST}
+              />
+            )}
+          </ModernInputCard>
+          <ModernInputCard title="FSSAI">
+            {editFssai ? (
+              <>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={shopData.fssaiNumber || ""}
+                  onChange={(e) =>
+                    setShopData({ ...shopData, fssaiNumber: e.target.value })
+                  }
+                />
+                <ActionButtons
+                  onCancel={() => setEditFssai(false)}
+                  onSave={handleSaveFssai}
+                />
+              </>
+            ) : (
+              <DisplayValue
+                value={shopData.fssaiNumber}
+                onEdit={() => setEditFssai(true)}
+                onDelete={handleRemoveFssai}
               />
             )}
           </ModernInputCard>
 
           {isBar && (
             <ModernInputCard title="VAT">
-              {!shopData.vatNumber || editVAT ? (
+              {editVAT ? (
                 <>
                   <TextField
                     fullWidth
@@ -221,17 +297,16 @@ export default function Settings() {
                       setShopData({ ...shopData, vatNumber: e.target.value })
                     }
                   />
-                  {editVAT && (
-                    <ActionButtons
-                      onCancel={() => setEditVAT(false)}
-                      onSave={handleSaveVat}
-                    />
-                  )}
+                  <ActionButtons
+                    onCancel={() => setEditVAT(false)}
+                    onSave={handleSaveVat}
+                  />
                 </>
               ) : (
                 <DisplayValue
                   value={shopData.vatNumber}
                   onEdit={() => setEditVAT(true)}
+                  onDelete={handleRemoveVAT}
                 />
               )}
             </ModernInputCard>
@@ -241,7 +316,7 @@ export default function Settings() {
         {/* BRANDING */}
         <SettingsCard title="Branding">
           <ModernInputCard title="Website">
-            {!shopData.website || editWebsite ? (
+            {editWebsite ? (
               <>
                 <TextField
                   fullWidth
@@ -251,26 +326,25 @@ export default function Settings() {
                     setShopData({ ...shopData, website: e.target.value })
                   }
                 />
-                {editWebsite && (
-                  <ActionButtons
-                    onCancel={() => setEditWebsite(false)}
-                    onSave={() => {
-                      handleSaveWebsite();
-                      setEditWebsite(false);
-                    }}
-                  />
-                )}
+                <ActionButtons
+                  onCancel={() => setEditWebsite(false)}
+                  onSave={() => {
+                    handleSaveWebsite();
+                    setEditWebsite(false);
+                  }}
+                />
               </>
             ) : (
               <DisplayValue
                 value={shopData.website}
                 onEdit={() => setEditWebsite(true)}
+                onDelete={handleRemoveWebsite}
               />
             )}
           </ModernInputCard>
 
           <ModernInputCard title="Tagline">
-            {!shopData.tagline || editTagline ? (
+            {editTagline ? (
               <>
                 <TextField
                   fullWidth
@@ -280,20 +354,19 @@ export default function Settings() {
                     setShopData({ ...shopData, tagline: e.target.value })
                   }
                 />
-                {editTagline && (
-                  <ActionButtons
-                    onCancel={() => setEditTagline(false)}
-                    onSave={() => {
-                      handleSaveTagline();
-                      setEditTagline(false);
-                    }}
-                  />
-                )}
+                <ActionButtons
+                  onCancel={() => setEditTagline(false)}
+                  onSave={() => {
+                    handleSaveTagline();
+                    setEditTagline(false);
+                  }}
+                />
               </>
             ) : (
               <DisplayValue
                 value={shopData.tagline}
                 onEdit={() => setEditTagline(true)}
+                onDelete={handleRemoveTagline}
               />
             )}
           </ModernInputCard>
@@ -327,6 +400,96 @@ export default function Settings() {
               <FeedbackQRSection />
             </SettingsCard>
           </>
+        )}
+
+        {subscription && (
+          <Paper
+            sx={{
+              p: 3,
+              borderRadius: 4,
+              background: "linear-gradient(135deg, #f8fafc, #eef2ff)",
+              border: "1px solid #e2e8f0",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
+            }}
+          >
+            {/* HEADER */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={2}
+            >
+              <Typography fontWeight={700} fontSize={18}>
+                Subscription
+              </Typography>
+
+              {/* STATUS BADGE */}
+              <Box
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  background:
+                    subscription.status === "ACTIVE" ? "#dcfce7" : "#fee2e2",
+                  color:
+                    subscription.status === "ACTIVE" ? "#166534" : "#991b1b",
+                }}
+              >
+                {subscription.status}
+              </Box>
+            </Box>
+
+            {/* PLAN */}
+            <Typography fontSize={14} color="text.secondary">
+              Current Plan
+            </Typography>
+            <Typography fontWeight={700} fontSize={20} mb={2}>
+              {subscription.planType}
+            </Typography>
+
+            {/* DETAILS */}
+            <Box display="flex" justifyContent="space-between" mb={1}>
+              <Typography color="text.secondary">Days Remaining</Typography>
+              <Typography
+                fontWeight={600}
+                color={subscription.daysLeft <= 3 ? "error" : "text.primary"}
+              >
+                {subscription.daysLeft} days
+              </Typography>
+            </Box>
+
+            <Box display="flex" justifyContent="space-between">
+              <Typography color="text.secondary">Expires On</Typography>
+              <Typography fontWeight={600}>
+                {new Date(subscription.expiresAt).toLocaleDateString()}
+              </Typography>
+            </Box>
+
+            {/* PROGRESS BAR */}
+            <Box
+              mt={2}
+              sx={{
+                height: 6,
+                borderRadius: 10,
+                background: "#e5e7eb",
+                overflow: "hidden",
+              }}
+            >
+              <Box
+                sx={{
+                  height: "100%",
+                  width: `${Math.min(subscription.daysLeft * 10, 100)}%`,
+                  background:
+                    subscription.daysLeft <= 3 ? "#ef4444" : "#6366f1",
+                  transition: "0.4s",
+                }}
+              />
+            </Box>
+
+            {/* OPTIONAL CTA */}
+          </Paper>
         )}
 
         {/* LOGOUT */}
@@ -387,11 +550,15 @@ function ModernInputCard({ title, children }) {
   );
 }
 
-function DisplayValue({ value, onEdit }) {
+function DisplayValue({ value, onEdit, onDelete }) {
   return (
-    <Box display="flex" justifyContent="space-between">
-      <Typography fontWeight={600}>{value}</Typography>
-      <Button onClick={onEdit}>✏️</Button>
+    <Box display="flex" justifyContent="space-between" alignItems="center">
+      <Typography fontWeight={600}>{value || "— Not Added —"}</Typography>
+
+      <Box display="flex" gap={1}>
+        <Button onClick={onEdit}>✏️</Button>
+        {value && <Button onClick={onDelete}>🗑️</Button>}
+      </Box>
     </Box>
   );
 }

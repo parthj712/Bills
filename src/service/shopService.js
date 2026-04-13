@@ -51,6 +51,10 @@ export const removeShopQR = async () => {
 export const addOrUpdateGST = async (payload) => {
   return await API.post("/shops/gst-number", payload);
 };
+
+export const addOrUpdateFssai = async (payload) => {
+  return await API.post("/shops/fssai-number", payload);
+};
 export const addOrUpdateVAT = async (payload) => {
   return await API.post("/shops/vat-number", payload);
 };
@@ -61,4 +65,23 @@ export const generateFeedbackLink = async () => {
 
 export const getFeedbackLink = async () => {
   return API.get("/shops/feedback-link");
+};
+export const removeTagline = async () => {
+  return await API.delete("/shops/tagline");
+};
+
+export const removeGST = async () => {
+  return await API.delete("/shops/gst-number");
+};
+export const removeFSSAI = async () => {
+  return await API.delete("/shops/fssai-number");
+};
+export const removeVAT = async () => {
+  return await API.delete("/shops/vat-number");
+};
+export const removeWebsite = async () => {
+  return await API.delete("/shops/website");
+};
+export const removeFeedbackSlug = async () => {
+  return API.delete("/shops/feedback-slug");
 };
