@@ -14,7 +14,7 @@ import FeedbackIcon from "@mui/icons-material/Feedback";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Assessment, ExpandMore } from "@mui/icons-material";
+import { Assessment, ChevronRight } from "@mui/icons-material";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
@@ -85,9 +85,12 @@ export default function Sidebar() {
   const [loadingSub, setLoadingSub] = useState(true);
   const [openIncoming, setOpenIncoming] = useState(false);
   const [shopData, setShopData] = useState([]);
+
+  const [openReportsDialog, setOpenReportsDialog] = useState(false);
+
   const isDineIn = shopData?.businessCategory === "DINE_IN";
   const isBar = shopData?.businessCategory === "RESTO_BAR";
-  
+
   const showTables =
     shopData?.businessCategory === "DINE_IN" ||
     shopData?.businessCategory === "RESTO_BAR";
@@ -104,12 +107,12 @@ export default function Sidebar() {
     // show only for restaurants
     ...(showTables
       ? [
-          {
-            label: "Table Management",
-            href: "/admin/tables",
-            icon: <TableBar fontSize="small" />,
-          },
-        ]
+        {
+          label: "Table Management",
+          href: "/admin/tables",
+          icon: <TableBar fontSize="small" />,
+        },
+      ]
       : []),
 
     // change label dynamically
@@ -138,12 +141,12 @@ export default function Sidebar() {
 
     ...(isBar
       ? [
-          {
-            label: "Bar Inventory",
-            href: "/admin/bar-inventory",
-            icon: <LiquorIcon fontSize="small" />,
-          },
-        ]
+        {
+          label: "Bar Inventory",
+          href: "/admin/bar-inventory",
+          icon: <LiquorIcon fontSize="small" />,
+        },
+      ]
       : []),
 
     {
@@ -287,7 +290,7 @@ export default function Sidebar() {
         <motion.div
           onClick={() => {
             if (!hasAccess) return;
-            setOpenReports(!openReports);
+            setOpenReportsDialog(true);
           }}
           className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer
                    text-[15px] font-medium text-black hover:bg-gray-50"
@@ -298,18 +301,19 @@ export default function Sidebar() {
           </div>
 
           <motion.span
-            animate={hasAccess ? { rotate: openReports ? 180 : 0 } : {}}
-            transition={{ duration: 0.25 }}
+            initial={{ rotate: 90 }}
+            whileHover={hasAccess ? { rotate: 0, x: 2 } : {}}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
           >
             {hasAccess ? (
-              <ExpandMore fontSize="small" />
+              <ChevronRight fontSize="small" />
             ) : (
               <LockIcon fontSize="small" className="text-gray-400" />
             )}
           </motion.span>
         </motion.div>
 
-        <motion.div
+        {/* <motion.div
           initial={false}
           animate={{
             height: openReports ? "auto" : 0,
@@ -328,11 +332,10 @@ export default function Sidebar() {
                     whileHover={{ x: 6 }}
                     className={`relative flex items-center gap-3 px-3 py-1.5 ml-4 rounded-lg
                             text-[14px] cursor-pointer
-                            ${
-                              isActive
-                                ? "font-semibold text-orange-600"
-                                : "text-gray-700"
-                            }`}
+                            ${isActive
+                        ? "font-semibold text-orange-600"
+                        : "text-gray-700"
+                      }`}
                   >
                     {isActive && (
                       <motion.span
@@ -351,7 +354,7 @@ export default function Sidebar() {
               );
             })}
           </div>
-        </motion.div>
+        </motion.div> */}
       </div>
 
       {/* SETTINGS AT BOTTOM */}
@@ -425,11 +428,10 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 flex items-center gap-3 px-3 py-2 rounded-lg
       text-[14px] cursor-pointer
-      ${
-        pathname === helpItem.href
-          ? "font-semibold text-orange-600"
-          : "text-black"
-      }`}
+      ${pathname === helpItem.href
+                  ? "font-semibold text-orange-600"
+                  : "text-black"
+                }`}
             >
               {helpItem.icon}
               {helpItem.label}
@@ -441,11 +443,10 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[15px] cursor-pointer
-          ${
-            pathname === settingsItem.href
-              ? "font-semibold text-orange-600"
-              : "text-black"
-          }
+          ${pathname === settingsItem.href
+                  ? "font-semibold text-orange-600"
+                  : "text-black"
+                }
         `}
             >
               {settingsItem.icon}
@@ -529,6 +530,62 @@ export default function Sidebar() {
                   🚀 {feature}
                 </Typography>
               </Box>
+            ))}
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={openReportsDialog}
+        onClose={() => setOpenReportsDialog(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 2,
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography fontWeight={600} fontSize={20}>Reports</Typography>
+
+          <IconButton onClick={() => setOpenReportsDialog(false)}>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent>
+          <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2} mt={1}>
+            {reportItems.map((item) => (
+              <Link key={item.label} href={item.href}>
+                <Box
+                  onClick={() => setOpenReportsDialog(false)}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    border: "1px solid #e2e8f0",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    transition: "0.2s",
+                    "&:hover": {
+                      backgroundColor: "#f8fafc",
+                      borderColor: "#6366f1",
+                    },
+                  }}
+                >
+                  {item.icon}
+                  <Typography>{item.label}</Typography>
+                </Box>
+              </Link>
             ))}
           </Box>
         </DialogContent>

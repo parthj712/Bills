@@ -24,7 +24,7 @@ import { getShopInfo } from "@/service/shopService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import LockIcon from "@mui/icons-material/Lock";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import { Box, Typography } from "@mui/material";
+import { Box, Dialog, IconButton, Typography } from "@mui/material";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
 import LiquorIcon from "@mui/icons-material/Liquor";
 
@@ -55,6 +55,9 @@ export default function MobileSidebar({ open, onClose }) {
   const pathname = usePathname();
   const [openReports, setOpenReports] = useState(false);
   const [shopCategory, setShopCategory] = useState(null);
+
+  const [openReportsDialog, setOpenReportsDialog] = useState(false);
+
   const isDineIn = shopCategory === "DINE_IN";
   const isBar = shopCategory === "RESTO_BAR";
   const showTables = shopCategory === "DINE_IN" || shopCategory === "RESTO_BAR";
@@ -80,12 +83,12 @@ export default function MobileSidebar({ open, onClose }) {
     // Only restaurants should see tables
     ...(showTables
       ? [
-          {
-            label: "Table Management",
-            href: "/admin/tables",
-            icon: <TableBar fontSize="small" />,
-          },
-        ]
+        {
+          label: "Table Management",
+          href: "/admin/tables",
+          icon: <TableBar fontSize="small" />,
+        },
+      ]
       : []),
 
     // Dynamic naming
@@ -112,12 +115,12 @@ export default function MobileSidebar({ open, onClose }) {
     },
     ...(isBar
       ? [
-          {
-            label: "Bar Inventory",
-            href: "/admin/bar-inventory",
-            icon: <LiquorIcon fontSize="small" />,
-          },
-        ]
+        {
+          label: "Bar Inventory",
+          href: "/admin/bar-inventory",
+          icon: <LiquorIcon fontSize="small" />,
+        },
+      ]
       : []),
     {
       label: "Customers Info",
@@ -197,42 +200,6 @@ export default function MobileSidebar({ open, onClose }) {
               />
             </div>
 
-            <Box className="mb-4 px-2">
-              <motion.div className="relative overflow-hidden bg-orange-50 border-2 border-orange-200 rounded-xl p-2 text-center shadow-sm">
-                {/* ✨ SHIMMER / MIRROR REFLECTION */}
-                <motion.span
-                  initial={{ x: "-100%" }}
-                  animate={{ x: "120%" }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 1.5,
-                    ease: "linear",
-                  }}
-                  className="
-                          pointer-events-none
-                          absolute top-0 left-0
-                          h-full w-1/3
-                          bg-gradient-to-r
-                          from-transparent
-                          via-white/60
-                          to-transparent
-                          rotate-6
-                        "
-                />
-
-                {/* CONTENT */}
-                <Typography fontSize={14} color="black">
-                  Logged in Shop
-                </Typography>
-
-                <Typography
-                  fontWeight={600}
-                  className="text-lg font-semibold text-orange-600 mt-1 truncate"
-                >
-                  {shopData?.shopName || "Loading..."}
-                </Typography>
-              </motion.div>
-            </Box>
 
             {/* Main Nav */}
             <nav className="space-y-2">
@@ -241,7 +208,7 @@ export default function MobileSidebar({ open, onClose }) {
                 return (
                   <Link key={item.label} href={item.href}>
                     <div
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[14px]
                       ${isActive ? "text-orange-600 font-semibold" : "text-gray-800"}
                       `}
                     >
@@ -258,27 +225,29 @@ export default function MobileSidebar({ open, onClose }) {
               <div
                 onClick={() => {
                   if (!hasAccess) return;
-                  setOpenReports(!openReports);
+                  setOpenReportsDialog(true);
                 }}
                 className="flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer text-black"
               >
                 <div className="flex items-center gap-3">
                   <Assessment fontSize="small" />
-                  <span className="text-[16px]">Reports</span>
+                  <span className="test-[14px]">Reports</span>
                 </div>
 
-                <motion.span
-                  animate={hasAccess ? { rotate: openReports ? 180 : 0 } : {}}
+                {/* <motion.span
+                  initial={{ rotate: 0 }}
+                  whileHover={hasAccess ? { rotate: -90 } : {}}
+                  transition={{ duration: 0.2 }}
                 >
                   {hasAccess ? (
                     <ExpandMore fontSize="small" />
                   ) : (
                     <LockIcon fontSize="small" className="text-gray-400" />
                   )}
-                </motion.span>
+                </motion.span> */}
               </div>
 
-              <AnimatePresence>
+              {/* <AnimatePresence>
                 {openReports && hasAccess && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
@@ -302,19 +271,18 @@ export default function MobileSidebar({ open, onClose }) {
                     })}
                   </motion.div>
                 )}
-              </AnimatePresence>
+              </AnimatePresence> */}
             </div>
 
             {/* Settings */}
             <div className="mt-auto pt-4 border-t">
               <Link href="/admin/settings">
                 <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${
-        pathname === "/admin/settings"
-          ? "text-orange-600 font-semibold"
-          : "text-gray-800"
-      }
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg test-[14px]
+      ${pathname === "/admin/settings"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
       `}
                 >
                   <Settings fontSize="small" />
@@ -324,12 +292,11 @@ export default function MobileSidebar({ open, onClose }) {
 
               <Link href="/admin/help">
                 <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${
-        pathname === "/admin/help"
-          ? "text-orange-600 font-semibold"
-          : "text-gray-800"
-      }
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg test-[14px]
+      ${pathname === "/admin/help"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
       `}
                 >
                   <MenuBook fontSize="small" />
@@ -339,12 +306,11 @@ export default function MobileSidebar({ open, onClose }) {
 
               <Link href="/admin/incoming-changes">
                 <div
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-[16px]
-      ${
-        pathname === "/admin/help"
-          ? "text-orange-600 font-semibold"
-          : "text-gray-800"
-      }
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg test-[14px]
+      ${pathname === "/admin/help"
+                      ? "text-orange-600 font-semibold"
+                      : "text-gray-800"
+                    }
       `}
                 >
                   <NewReleasesIcon fontSize="small" />
@@ -355,6 +321,56 @@ export default function MobileSidebar({ open, onClose }) {
           </motion.aside>
         </>
       )}
+
+      <Dialog
+        open={openReportsDialog}
+        onClose={() => setOpenReportsDialog(false)}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 3,
+          },
+        }}
+      >
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography fontWeight={600} fontSize={16}>Reports</Typography>
+
+          <IconButton onClick={() => setOpenReportsDialog(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <Box mt={2} display="flex" flexDirection="column" gap={1}>
+          {reportItems.map((item) => (
+            <Link key={item.label} href={item.href}>
+              <Box
+                onClick={() => {
+                  setOpenReportsDialog(false);
+                  onClose(); // 👈 close sidebar also
+                }}
+                sx={{
+                  p: 2,
+                  borderRadius: 2,
+                  border: "1px solid #e2e8f0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "#f8fafc",
+                    borderColor: "#6366f1",
+                  },
+                }}
+              >
+                {item.icon}
+                <Typography>{item.label}</Typography>
+              </Box>
+            </Link>
+          ))}
+        </Box>
+      </Dialog>
     </AnimatePresence>
   );
 }

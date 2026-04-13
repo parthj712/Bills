@@ -20,6 +20,8 @@ import { useRouter } from "next/navigation";
 import API from "@/service/api";
 import RealStepper from "./RealStepper";
 import OtpBoxes from "../CommonComponents/OTPBoxes";
+import { IconButton, InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 //toast notification
 import { useAppSnackbar } from "../CommonComponents/SnackbarProvider/SnackbarProvider";
@@ -63,6 +65,9 @@ export default function RegisterScreen() {
   const [otpVerified, setOtpVerified] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
 
+  // Show password
+  const [showPassword, setShowPassword] = useState(false);
+
   const [otpDialogOpen, setOtpDialogOpen] = useState(false);
 
   // ✅ UI States
@@ -74,7 +79,13 @@ export default function RegisterScreen() {
   // ✅ Input Handler
   // -------------------------------
   const handleChange = (field) => (e) => {
-    setForm({ ...form, [field]: e.target.value });
+    let value = e.target.value;
+
+    if (field === "phone") {
+      value = value.replace(/\D/g, ""); // remove spaces & non-digits
+    }
+
+    setForm({ ...form, [field]: value });
   };
 
   // -------------------------------
@@ -101,38 +112,54 @@ export default function RegisterScreen() {
   // ✅ Send OTP
   // -------------------------------
   const sendOtp = useCallback(async () => {
-    if (!form.email) {
-      showSnackbar("Please enter your email address first", "warning");
+    const newErrors = {};
+
+    // ✅ Email validation
+    if (!form.email.trim()) {
+      newErrors.email = "Email required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = "Enter valid email";
+    }
+
+    // ✅ Phone validation (IMPORTANT)
+    if (!form.phone.trim()) {
+      newErrors.phone = "Phone number required";
+    } else if (!/^[6-9]\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Enter valid 10-digit mobile number";
+    }
+
+    // ✅ Show errors in UI
+    setErrors(newErrors);
+
+    // ❌ STOP here if errors exist
+    if (Object.keys(newErrors).length > 0) {
+      showSnackbar("Please fix errors before continuing", "warning");
       return;
     }
 
+    // ✅ Only runs if valid
     setOtpLoading(true);
-
-    setOtpSent(true);
-    // setResendTimer(30);
 
     try {
       await API.post("/auth/send-otp", { email: form.email });
 
       setOtpSent(true);
       setResendTimer(30);
-      setStep(1);
-
-      setOtpDialogOpen(true); // 👈 OPEN DIALOG
+      setStep(1); // ✅ Now safe
+      setOtpDialogOpen(true);
 
       showSnackbar(
-        resendTimer > 0 ? "OTP resent successfully" : "OTP sent to your email",
-        "success",
+        resendTimer > 0
+          ? "OTP resent successfully"
+          : "OTP sent to your email",
+        "success"
       );
     } catch (err) {
-      showSnackbar(
-        err.response?.data?.message || "Failed to send OTP. Try again",
-        "error",
-      );
+      showSnackbar(getErrorMessage(err), "error");
     } finally {
       setOtpLoading(false);
     }
-  }, [form.email]);
+  }, [form.email, form.phone, resendTimer]);
 
   // -------------------------------
   // ✅ Verify OTP
@@ -156,7 +183,7 @@ export default function RegisterScreen() {
 
       showSnackbar("Email verified successfully", "success");
     } catch (err) {
-      showSnackbar(err.response?.data?.message || "Invalid OTP", "warning");
+      showSnackbar(getErrorMessage(err), "warning");
     } finally {
       setOtpLoading(false);
     }
@@ -190,10 +217,7 @@ export default function RegisterScreen() {
 
       router.push("/login");
     } catch (err) {
-      showSnackbar(
-        err.response?.data?.message || "Registration failed. Please try again ",
-        "error",
-      );
+     showSnackbar(getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -274,70 +298,19 @@ export default function RegisterScreen() {
     );
   };
 
-  // const OtpBoxes = ({ otp, setOtp }) => {
-  //   const inputsRef = useRef([]);
+  const getErrorMessage = (err) => {
+    if (err.response) {
+      // Backend responded with error
+      return err.response.data?.message || "Something went wrong";
+    } else if (err.request) {
+      // No response from server
+      return "Server not responding. Check your internet";
+    } else {
+      // Other errors
+      return err.message || "Unexpected error occurred";
+    }
+  };
 
-  //   const handleChange = (value, index) => {
-  //     if (!/^\d?$/.test(value)) return;
-
-  //     const otpArr = otp.padEnd(6, "").split("");
-  //     otpArr[index] = value;
-  //     const newOtp = otpArr.join("");
-  //     setOtp(newOtp);
-
-  //     // 👉 move forward
-  //     if (value && index < 5) {
-  //       inputsRef.current[index + 1]?.focus();
-  //     }
-
-  //     // ✅ auto-submit (safe)
-  //     if (newOtp.length === 6 && !newOtp.includes("") && onComplete) {
-  //       onComplete(newOtp);
-  //     }
-  //   };
-
-  //   const handleKeyDown = (e, index) => {
-  //     if (e.key === "Backspace" && !otp[index] && index > 0) {
-  //       inputsRef.current[index - 1]?.focus();
-  //     }
-  //   };
-
-  //   return (
-  //     <Box display="flex" gap={2} justifyContent="center">
-  //       {[...Array(6)].map((_, i) => (
-  //         <TextField
-  //           key={i}
-  //           value={otp.padEnd(6, "")[i]}
-  //           inputRef={(el) => (inputsRef.current[i] = el)}
-  //           onChange={(e) => handleChange(e.target.value, i)}
-  //           onKeyDown={(e) => handleKeyDown(e, i)}
-  //           inputProps={{
-  //             maxLength: 1,
-  //             inputMode: "numeric",
-  //             pattern: "[0-9]*",
-  //             style: {
-  //               textAlign: "center",
-  //               fontSize: 18,
-  //             },
-  //           }}
-  //           sx={{ width: 48 }}
-  //         />
-  //       ))}
-  //     </Box>
-  //   );
-  // };
-
-  // const StepWrapper = ({ children, step }) => (
-  //   <motion.div
-  //     key={step}
-  //     initial={{ x: 50, opacity: 0 }}
-  //     animate={{ x: 0, opacity: 1 }}
-  //     exit={{ x: -50, opacity: 0 }}
-  //     transition={{ duration: 0.35, ease: "easeOut" }}
-  //   >
-  //     {children}
-  //   </motion.div>
-  // );
 
   return (
     <Box
@@ -408,17 +381,25 @@ export default function RegisterScreen() {
                   error={!!errors.phone}
                   helperText={errors.phone}
                   disabled={otpVerified}
+                  inputProps={{ maxLength: 10 }}
+                  InputProps={{
+                    startAdornment: <Typography sx={{ mr: 1, fontWeight: 500 }}>+91</Typography>,
+                  }}
                 />
 
                 <Box display="flex" justifyContent="space-between" gap={4}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
+
+                  <AppButton
+                    label="Back To Home"
                     onClick={() => router.push("/")}
-                    sx={{ color: "#64748b" }}
-                  >
-                    ← Back
-                  </Button>
+                    className="
+                      !bg-gray-200
+                      hover:!bg-gray-300
+                      !text-gray-700
+                      px-8
+                      !rounded-md
+                    "
+                  />
 
                   <AppButton
                     label={otpLoading ? "Sending OTP..." : "Send OTP"}
@@ -463,14 +444,21 @@ export default function RegisterScreen() {
                 />
 
                 <Box display="flex" justifyContent="space-between" gap={4}>
-                  <Button
-                    variant="outlined"
-                    fullWidth
+
+
+                  <AppButton
+                    label="Back"
                     onClick={() => setStep(0)}
-                    sx={{ color: "#64748b" }}
-                  >
-                    Back
-                  </Button>
+                    className="
+                      !bg-gray-200
+                      hover:!bg-gray-300
+                      !text-gray-700
+                      px-8
+                      !rounded-md
+                    "
+                  />
+
+
 
                   <AppButton
                     label={otpLoading ? "Verifying..." : "Verify OTP"}
@@ -571,17 +559,37 @@ export default function RegisterScreen() {
 
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={form.password}
                   onChange={handleChange("password")}
                   error={!!errors.password}
                   helperText={errors.password}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
 
-                <Box display="flex" justifyContent="space-between" mt={3}>
-                  <Button onClick={() => setStep(1)} sx={{ color: "#64748b" }}>
-                    Back
-                  </Button>
+                <Box display="flex" gap={2} mt={3}>
+                  <AppButton
+                    label="Back"
+                    onClick={() => setStep(1)}
+                    className="
+                      !bg-gray-200
+                      hover:!bg-gray-300
+                      !text-gray-700
+                      px-8
+                      !rounded-md
+                    "
+                  />
 
                   <AppButton
                     label={loading ? "Creating Account..." : "Create Account"}
