@@ -292,7 +292,7 @@ const BillsMain = () => {
               onDelete={(id) => {
                 setSelectedDeleteId(id);
                 setDeleteDialog(true);
-              }}  // ✅ ADD THIS
+              }} 
             />
           ))}
         </Box>
