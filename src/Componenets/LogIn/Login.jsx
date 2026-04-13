@@ -13,7 +13,8 @@ import {
   DialogTitle,
   Slide,
 } from "@mui/material";
-import Image from "next/image";
+import { InputAdornment } from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 import AppButton from "../CommonComponents/AppButton";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
@@ -49,6 +50,10 @@ export default function Login() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  // show password
+  const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const { showSnackbar } = useAppSnackbar();
 
@@ -98,15 +103,21 @@ export default function Login() {
       } else {
         router.push("/welcome");
       }
-    } catch (err) {
-      const message = err?.response?.data?.message || "Something went wrong";
+    }
+    catch (err) {
+      const message = getErrorMessage(err);
 
-      if (message === "Invalid credentials") {
-        showSnackbar("Invalid Email, Phone or Password", "error");
+      if (message.toLowerCase().includes("invalid")) {
+        showSnackbar("Invalid Email or Password", "error");
+      } else if (message.toLowerCase().includes("not found")) {
+        showSnackbar("User not found", "error");
       } else {
-        showSnackbar("Server Error. Try again.", "error");
+        showSnackbar(message, "error");
       }
-    } finally {
+
+      console.log("LOGIN ERROR:", err.response || err);
+    }
+    finally {
       setLoading(false);
     }
   };
@@ -124,10 +135,7 @@ export default function Login() {
       showSnackbar("OTP sent successfully 📩", "success");
       setStep("otp");
     } catch (err) {
-      showSnackbar(
-        err?.response?.data?.message || "Failed to send OTP",
-        "error",
-      );
+       showSnackbar(getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -146,7 +154,7 @@ export default function Login() {
       showSnackbar("OTP Verified ✅", "success");
       setStep("reset");
     } catch (err) {
-      showSnackbar(err?.response?.data?.message || "Invalid OTP", "error");
+       showSnackbar(getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
@@ -171,11 +179,26 @@ export default function Login() {
       setOtp("");
       setNewPassword("");
     } catch (err) {
-      showSnackbar(err?.response?.data?.message || "Reset failed", "error");
+      showSnackbar(getErrorMessage(err), "error");
     } finally {
       setLoading(false);
     }
   };
+
+  const getErrorMessage = (err) => {
+    if (err.response) {
+      return (
+        err.response.data?.message ||
+        err.response.data?.error ||
+        "Something went wrong"
+      );
+    } else if (err.request) {
+      return "Server not responding. Check your internet";
+    } else {
+      return err.message || "Unexpected error occurred";
+    }
+  };
+
   return (
     <>
       <Box
@@ -253,13 +276,26 @@ export default function Login() {
 
           {/* Password */}
           <TextField
-            type="password"
+            type={showPassword ? "text" : "password"}
             fullWidth
             placeholder="Password"
             value={formData.password}
             onChange={handleChange("password")}
             error={!!errors.password}
             helperText={errors.password}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
@@ -287,7 +323,7 @@ export default function Login() {
             label={loading ? "Signing In..." : "Log In"}
             disabled={loading}
             sx={{
-              mt: 2,
+
               py: 1.5,
               fontWeight: 600,
               borderRadius: 2,
@@ -355,7 +391,8 @@ export default function Login() {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            p: 2,
+            px: 4,
+            py: 3,
             boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
           },
         }}
@@ -476,11 +513,24 @@ export default function Login() {
         {step === "reset" && (
           <>
             <TextField
-              type="password"
+              type={showNewPassword ? "text" : "password"}
               fullWidth
               label="New Password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowNewPassword((prev) => !prev)}
+                      edge="end"
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,

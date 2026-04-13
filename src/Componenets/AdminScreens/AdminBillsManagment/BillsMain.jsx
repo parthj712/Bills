@@ -14,6 +14,8 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  Dialog,
+  Button,
 } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import TablePagination from "@mui/material/TablePagination";
@@ -38,6 +40,9 @@ const BillsMain = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [selectedDeleteId, setSelectedDeleteId] = useState(null);
+
   const [openBill, setOpenBill] = useState(false); // ✅ modal state
   const [selectedBill, setSelectedBill] = useState(null); // ✅ selected bill
 
@@ -52,19 +57,37 @@ const BillsMain = () => {
     setRefreshing(false);
   };
 
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this bill?",
-    );
+  // const handleDelete = async (id) => {
 
-    if (!confirmDelete) return;
+  //   const confirmDelete = window.confirm(
+  //     "Are you sure you want to delete this bill?",
+  //   );
 
+  //   if (!confirmDelete) return;
+
+  //   try {
+  //     await deleteBills(id);
+  //     setBillsData((prev) => prev.filter((b) => b._id !== id));
+  //     showSnackbar("Bill deleted successfully", "success");
+  //   } catch (error) {
+  //     showSnackbar("Failed to delete bill", "error");
+  //   }
+  // };
+
+  const handleDelete = async () => {
     try {
-      await deleteBills(id);
-      setBillsData((prev) => prev.filter((b) => b._id !== id));
+      await deleteBills(selectedDeleteId);
+
+      setBillsData((prev) =>
+        prev.filter((b) => b._id !== selectedDeleteId)
+      );
+
       showSnackbar("Bill deleted successfully", "success");
     } catch (error) {
       showSnackbar("Failed to delete bill", "error");
+    } finally {
+      setDeleteDialog(false);
+      setSelectedDeleteId(null);
     }
   };
 
@@ -214,7 +237,10 @@ const BillsMain = () => {
                         {/* ❌ DELETE ONLY */}
                         <Tooltip title="Delete">
                           <IconButton
-                            onClick={() => handleDelete(bill._id)}
+                            onClick={() => {
+                              setSelectedDeleteId(bill._id);
+                              setDeleteDialog(true);
+                            }}
                             sx={{
                               backgroundColor: "#ffebee",
                               "&:hover": { backgroundColor: "#ffcdd2" },
@@ -263,6 +289,10 @@ const BillsMain = () => {
                 setSelectedBill(b);
                 setOpenBill(true);
               }}
+              onDelete={(id) => {
+                setSelectedDeleteId(id);
+                setDeleteDialog(true);
+              }}  // ✅ ADD THIS
             />
           ))}
         </Box>
@@ -274,6 +304,56 @@ const BillsMain = () => {
         onClose={() => setOpenBill(false)}
         bill={selectedBill}
       />
+
+
+      <Dialog
+        open={deleteDialog}
+        onClose={() => setDeleteDialog(false)}
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 3,
+            textAlign: "center",
+          },
+        }}
+      >
+        {/* ICON */}
+        <Box mb={2}>
+          <Typography fontSize={40}>⚠️</Typography>
+        </Box>
+
+        {/* TITLE */}
+        <Typography fontWeight={700} fontSize={18}>
+          Delete Bill?
+        </Typography>
+
+        {/* DESCRIPTION */}
+        <Typography fontSize={14} color="text.secondary" mt={1}>
+          This action cannot be undone. The bill will be permanently removed.
+        </Typography>
+
+        {/* ACTIONS */}
+        <Box mt={3} display="flex" gap={2}>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => setDeleteDialog(false)}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+          >
+            Delete
+          </Button>
+        </Box>
+      </Dialog>
     </Box>
   );
 };
