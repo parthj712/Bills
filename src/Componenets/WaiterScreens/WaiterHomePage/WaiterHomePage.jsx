@@ -66,7 +66,7 @@ export default function WaiterHomePage() {
 
   const [shopData, setShopData] = useState(null);
 
-  const [selectedSection, setSelectedSection] = useState("Foor 1");
+  const [selectedSection, setSelectedSection] = useState("ALL");
 
   const [billsLoading, setBillsLoading] = useState(false);
   const [billsLoaded, setBillsLoaded] = useState(false);
@@ -427,6 +427,8 @@ export default function WaiterHomePage() {
                     label="Section"
                     onChange={(e) => setSelectedSection(e.target.value)}
                   >
+                    <MenuItem value="ALL">All</MenuItem>
+
                     {sectionList.map((section) => (
                       <MenuItem key={section} value={section}>
                         {section}

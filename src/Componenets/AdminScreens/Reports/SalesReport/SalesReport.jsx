@@ -715,7 +715,7 @@ export default function SalesReport() {
                 {Object.entries(monthlySummary).map(([m, v]) => (
                   <TableRow key={m} hover>
                     <TableCell>{m}</TableCell>
-                    <TableCell align="right">₹ {v.gst}</TableCell>
+                    <TableCell align="right">₹ {v.gst.toFixed(2)}</TableCell>
                     <TableCell align="right" fontWeight={600}>
                       ₹ {v.total}
                     </TableCell>

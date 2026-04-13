@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 
 import { updateTableStatus } from "@/service/tableService";
@@ -35,7 +35,7 @@ import { getShopInfo } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
 import BillPreviewKOT from "./BillPreviewKOT";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
-
+import CircularProgress from "@mui/material/CircularProgress";
 export default function OrderCart() {
   const { showSnackbar } = useAppSnackbar();
 
@@ -62,7 +62,7 @@ export default function OrderCart() {
     dateStyle: "medium",
     timeStyle: "short",
   });
-
+  const [loadingItems, setLoadingItems] = useState({});
   const [loading, setLoading] = useState(false);
 
   const GST_PERCENT = 5;
@@ -91,8 +91,12 @@ export default function OrderCart() {
   const subtotal = foodSubtotal + liquorSubtotal;
   const hasGST = !!shopInfo?.gstNumber;
   const hasVAT = !!shopInfo?.vatNumber;
-  const gstAmount = hasGST ? foodSubtotal * (GST_PERCENT / 100) : 0;
-  console.log("hasVat", hasVAT);
+
+  const cgst = hasGST ? foodSubtotal * (GST_PERCENT / 2 / 100) : 0;
+  const sgst = hasGST ? foodSubtotal * (GST_PERCENT / 2 / 100) : 0;
+
+  const gstAmount = cgst + sgst; // total GST (same as before)
+
   const vatAmount = hasVAT ? liquorSubtotal * (VAT_PERCENT / 100) : 0;
 
   const grandTotal = subtotal + gstAmount + vatAmount;
@@ -157,21 +161,31 @@ export default function OrderCart() {
     };
   }, [tableId, orderType]);
 
-  const handleIncrease = async (item) => {
-    await itemIncrement({
-      tableId,
-      menuItemId: item.menuItemId,
-      portion: item.portion || null,
-      variantName: item.variantName || null,
-    });
-  };
+  // const handleIncrease = async (item) => {
+  //   await itemIncrement({
+  //     tableId,
+  //     menuItemId: item.menuItemId,
+  //     portion: item.portion || null,
+  //     variantName: item.variantName || null,
+  //   });
+  // };
   const handleDecrease = async (item) => {
-    await itemDecrement({
-      tableId,
-      menuItemId: item.menuItemId,
-      portion: item.portion || null,
-      variantName: item.variantName || null,
-    });
+    const key = item.menuItemId + "_" + item.addedAt;
+
+    setLoadingItems((prev) => ({ ...prev, [key]: true }));
+
+    try {
+      await itemDecrement({
+        tableId,
+        menuItemId: item.menuItemId,
+        portion: item.portion || null,
+        variantName: item.variantName || null,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingItems((prev) => ({ ...prev, [key]: false }));
+    }
   };
   const handleOpenConfirm = () => {
     if (!cartItems.length || loading) return;
@@ -230,16 +244,20 @@ export default function OrderCart() {
       <td style="text-align:right;">₹${Number(subtotal.toFixed(2))}</td>
     </tr>
 
-    ${
-      foodSubtotal > 0 && hasGST
-        ? `
-        <tr>
-          <td>GST (5%)</td>
-          <td style="text-align:right;">₹${gstAmount.toFixed(2)}</td>
-        </tr>
-      `
-        : ""
-    }
+   ${
+     foodSubtotal > 0 && hasGST
+       ? `
+    <tr>
+      <td>CGST (2.5%)</td>
+      <td style="text-align:right;">₹${cgst.toFixed(2)}</td>
+    </tr>
+    <tr>
+      <td>SGST (2.5%)</td>
+      <td style="text-align:right;">₹${sgst.toFixed(2)}</td>
+    </tr>
+  `
+       : ""
+   }
 
     ${
       liquorSubtotal > 0 && hasVAT
@@ -557,40 +575,62 @@ export default function OrderCart() {
     };
   }, [tableId, orderType]);
 
-  const renderItem = (item, highlight = false) => (
-    <div
-      key={item.menuItemId + item.portion + item.addedAt}
-      className="flex justify-between items-center my-3"
-    >
-      <div>
-        <Typography fontSize={16} fontWeight={600}>
-          {item.name}
-          {item.variantName && ` (${item.variantName})`}
-          {item.portion && ` (${item.portion})`}
-        </Typography>
+  const renderItem = (item, highlight = false) => {
+    const key = item.menuItemId + "_" + item.addedAt;
 
-        <Typography fontSize={14}>₹ {item.price}/-</Typography>
-
-        {highlight && (
-          <Typography fontSize={12} sx={{ color: "red", fontWeight: 700 }}>
-            NEW ITEM
+    return (
+      <div key={key} className="flex justify-between items-center my-3">
+        <div>
+          <Typography fontSize={16} fontWeight={600}>
+            {item.name}
+            {item.variantName && ` (${item.variantName})`}
+            {item.portion && ` (${item.portion})`}
           </Typography>
-        )}
+
+          <Typography fontSize={14}>₹ {item.price}/-</Typography>
+
+          {highlight && (
+            <Typography fontSize={12} sx={{ color: "red", fontWeight: 700 }}>
+              NEW ITEM
+            </Typography>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Typography
+            fontWeight={700}
+            sx={{
+              backgroundColor: "#F1F5F9",
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 1,
+              minWidth: 32,
+              textAlign: "center",
+              display: "inline-block",
+            }}
+          >
+            {item.qty}
+          </Typography>
+
+          <IconButton
+            size="small"
+            onClick={() => handleDecrease(item)}
+            disabled={loadingItems[key]}
+            sx={{
+              color: "#dc2626",
+              "&:hover": { backgroundColor: "#fee2e2" },
+            }}
+          >
+            {loadingItems[key] ? (
+              <CircularProgress size={16} />
+            ) : (
+              <DeleteIcon fontSize="small" />
+            )}
+          </IconButton>
+        </div>
       </div>
-
-      <div className="flex items-center gap-3">
-        <IconButton size="small" onClick={() => handleDecrease(item)}>
-          <RemoveIcon fontSize="small" />
-        </IconButton>
-
-        <Typography fontWeight={700}>{item.qty}</Typography>
-
-        <IconButton size="small" onClick={() => handleIncrease(item)}>
-          <AddIcon fontSize="small" />
-        </IconButton>
-      </div>
-    </div>
-  );
+    );
+  };
   return (
     <Suspense fallback={<div>Loading order...</div>}>
       <Card
@@ -655,10 +695,17 @@ export default function OrderCart() {
           </div>
 
           {foodSubtotal > 0 && hasGST && (
-            <div className="flex justify-between">
-              <span>GST (5%)</span>
-              <span>₹ {gstAmount.toFixed(2)}</span>
-            </div>
+            <>
+              <div className="flex justify-between">
+                <span>CGST (2.5%)</span>
+                <span>₹ {cgst.toFixed(2)}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>SGST (2.5%)</span>
+                <span>₹ {sgst.toFixed(2)}</span>
+              </div>
+            </>
           )}
 
           {liquorSubtotal > 0 && hasVAT && (
@@ -777,6 +824,8 @@ export default function OrderCart() {
         <BillPreview
           items={cartItems}
           subtotal={subtotal}
+          cgst={cgst}
+          sgst={sgst}
           gst={gstAmount}
           vat={vatAmount}
           total={grandTotal}

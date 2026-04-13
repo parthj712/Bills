@@ -4,7 +4,8 @@ import { Box, Divider, Typography } from "@mui/material";
 const BillPreview = ({
   items,
   subtotal,
-  gst = 0,
+  cgst = 0,
+  sgst = 0,
   vat = 0,
   total,
   shopInfo,
@@ -125,12 +126,22 @@ const BillPreview = ({
         </Box>
 
         {/* GST */}
-        {gst > 0 && (
+        {cgst > 0 && (
           <Box display="flex" justifyContent="space-between" mb={1}>
             <Typography fontSize={13} color="#64748B">
-              GST (5%)
+              CGST (2.5%)
             </Typography>
-            <Typography fontSize={13}>₹ {gst.toFixed(2)}</Typography>
+            <Typography fontSize={13}>₹ {Number(cgst).toFixed(2)}</Typography>
+          </Box>
+        )}
+
+        {/* SGST */}
+        {sgst > 0 && (
+          <Box display="flex" justifyContent="space-between" mb={1}>
+            <Typography fontSize={13} color="#64748B">
+              SGST (2.5%)
+            </Typography>
+            <Typography fontSize={13}>₹ {Number(sgst).toFixed(2)}</Typography>
           </Box>
         )}
 
@@ -140,7 +151,7 @@ const BillPreview = ({
             <Typography fontSize={13} color="#64748B">
               VAT (10%)
             </Typography>
-            <Typography fontSize={13}>₹ {vat.toFixed(2)}</Typography>
+            <Typography fontSize={13}>₹ {Number(vat).toFixed(2)}</Typography>
           </Box>
         )}
 

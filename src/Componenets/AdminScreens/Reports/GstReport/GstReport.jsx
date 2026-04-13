@@ -35,7 +35,6 @@ const GstReport = () => {
   const [data, setData] = useState(null);
   const [shopData, setShopData] = useState(null);
 
-
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
@@ -92,44 +91,134 @@ const GstReport = () => {
 
   const downloadPdf = () => {
     if (!data) return;
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text(shopData?.shopName || "Shop Name", 14, 15);
-    doc.setFontSize(10);
-    doc.text(`GSTIN: ${shopData?.gstNumber}`, 14, 22);
-    doc.text(`Period: ${fromDate} to ${toDate}`, 14, 28);
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 14, 34);
 
+    const doc = new jsPDF();
+
+    // 🎨 Colors
+    const primary = [30, 41, 59];
+    const gray = [100, 116, 139];
+
+    // 💰 Format currency (Indian)
+    const format = (val) =>
+      Number(val).toLocaleString("en-IN", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+
+    // 🏷️ HEADER (Centered)
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.setTextColor(...primary);
+    doc.text(shopData?.shopName || "Shop Name", 105, 15, {
+      align: "center",
+    });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...gray);
+
+    doc.text(`GSTIN: ${shopData?.gstNumber || "-"}`, 14, 25);
+    doc.text(`Period: ${fromDate} to ${toDate}`, 14, 31);
+    doc.text(`Generated: ${new Date().toLocaleDateString("en-IN")}`, 14, 37);
+
+    // 📊 TABLE HEADERS (clean)
     const tableColumn = [
-      "GST %",
+      "GST%",
       "Taxable",
       "CGST",
       "SGST",
       "IGST",
-      "Total GST",
-      "Total Sales",
+      "GST",
+      "Total ",
     ];
 
     const tableRows = [];
 
+    let totalTaxable = 0;
+    let totalGST = 0;
+    let totalSales = 0;
+
     data.slabs.forEach((slab) => {
+      totalTaxable += slab.taxable;
+      totalGST += slab.totalGST;
+      totalSales += slab.grandTotal;
+
       tableRows.push([
-        slab._id,
-        slab.taxable.toFixed(2),
-        slab.cgst.toFixed(2),
-        slab.sgst.toFixed(2),
-        slab.igst.toFixed(2),
-        slab.totalGST.toFixed(2),
-        slab.grandTotal.toFixed(2),
+        slab._id + "%",
+        format(slab.taxable),
+        format(slab.cgst),
+        format(slab.sgst),
+        format(slab.igst),
+        format(slab.totalGST),
+        format(slab.grandTotal),
       ]);
     });
 
+    // ➕ TOTAL ROW
+    tableRows.push([
+      "TOTAL",
+      format(totalTaxable),
+      "",
+      "",
+      "",
+      format(totalGST),
+      format(totalSales),
+    ]);
+
+    // 🧾 TABLE
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 40,
+      startY: 45,
+
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+        valign: "middle",
+      },
+
+      headStyles: {
+        fillColor: primary,
+        textColor: 255,
+        halign: "center",
+        fontStyle: "bold",
+      },
+
+      columnStyles: {
+        0: { halign: "center", cellWidth: 18 },
+        1: { halign: "center" },
+        2: { halign: "center" },
+        3: { halign: "center" },
+        4: { halign: "center" },
+        5: { halign: "center" },
+        6: { halign: "center" },
+      },
+
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+
+      didParseCell: function (data) {
+        // 🎯 Highlight TOTAL row
+        if (data.row.index === tableRows.length - 1) {
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.fillColor = [226, 232, 240];
+        }
+      },
+
+      margin: { left: 10, right: 10 },
     });
 
+    // 📌 FOOTER
+    const pageHeight = doc.internal.pageSize.height;
+
+    doc.setFontSize(9);
+    doc.setTextColor(...gray);
+    doc.text("This is a system generated GST report", 105, pageHeight - 10, {
+      align: "center",
+    });
+
+    // 💾 SAVE
     doc.save(`GST_Report_${fromDate}_to_${toDate}.pdf`);
   };
 
@@ -137,7 +226,6 @@ const GstReport = () => {
 
   return (
     <Box className="min-h-screen p-2 md:p-5 bg-[#f5f7fb]">
-
       {/* PAGE HEADER */}
       <Box
         sx={{
@@ -212,7 +300,7 @@ const GstReport = () => {
             justifyContent: "space-between",
             // flexWrap: "wrap",
             gap: isMobile ? 2 : 4,
-            alignItems: isMobile ? "stretch" : "center"
+            alignItems: isMobile ? "stretch" : "center",
           }}
         >
           <TextField
@@ -285,155 +373,153 @@ const GstReport = () => {
 
       {/* TABLE */}
       {data && (
-        <>{isMobile ? (
-          <Box>
-            {data.slabs.map((slab, index) => (
-              <Card
-                key={index}
-                sx={{
-                  mb: 2,
-                  borderRadius: 3,
-                  boxShadow: 2,
-                }}
-              >
-                <CardContent>
-                  <Typography fontWeight={700} color="#0b3c5d" mb={1}>
-                    GST {slab._id}%
-                  </Typography>
-
-                  <Divider sx={{ mb: 1 }} />
-
-                  <Box display="flex" justifyContent="space-between" mb={0.5}>
-                    <Typography variant="body2">Taxable</Typography>
-                    <Typography>₹{slab.taxable.toFixed(2)}</Typography>
-                  </Box>
-
-                  <Box display="flex" justifyContent="space-between" mb={0.5}>
-                    <Typography variant="body2">CGST</Typography>
-                    <Typography>₹{slab.cgst.toFixed(2)}</Typography>
-                  </Box>
-
-                  <Box display="flex" justifyContent="space-between" mb={0.5}>
-                    <Typography variant="body2">SGST</Typography>
-                    <Typography>₹{slab.sgst.toFixed(2)}</Typography>
-                  </Box>
-
-                  <Box display="flex" justifyContent="space-between" mb={0.5}>
-                    <Typography variant="body2">IGST</Typography>
-                    <Typography>₹{slab.igst.toFixed(2)}</Typography>
-                  </Box>
-
-                  <Box display="flex" justifyContent="space-between" mb={0.5}>
-                    <Typography variant="body2">Total GST</Typography>
-                    <Typography>₹{slab.totalGST.toFixed(2)}</Typography>
-                  </Box>
-
-                  <Divider sx={{ my: 1 }} />
-
-                  <Box display="flex" justifyContent="space-between">
-                    <Typography fontWeight={700}>Total Sales</Typography>
-                    <Typography fontWeight={700} color="#0b3c5d">
-                      ₹{slab.grandTotal.toFixed(2)}
+        <>
+          {isMobile ? (
+            <Box>
+              {data.slabs.map((slab, index) => (
+                <Card
+                  key={index}
+                  sx={{
+                    mb: 2,
+                    borderRadius: 3,
+                    boxShadow: 2,
+                  }}
+                >
+                  <CardContent>
+                    <Typography fontWeight={700} color="#0b3c5d" mb={1}>
+                      GST {slab._id}%
                     </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
-        ) : (
-          <Paper
-            elevation={3}
-            sx={{
-              borderRadius: 3,
-              overflow: "hidden",
-              mb: 4,
-            }}
-          >
-            <Box sx={{ overflowX: "auto" }}>
 
-              <Table>
+                    <Divider sx={{ mb: 1 }} />
 
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      backgroundColor: "#0b3c5d",
-                    }}
-                  >
-                    {[
-                      "GST %",
-                      "Taxable",
-                      "CGST",
-                      "SGST",
-                      "IGST",
-                      "Total GST",
-                      "Total Sales",
-                    ].map((head) => (
-                      <TableCell
-                        key={head}
-                        sx={{
-                          color: "#fff",
-                          fontWeight: 700,
-                          textAlign: "center",
-                          fontSize: 14,
-                        }}
-                      >
-                        {head}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="body2">Taxable</Typography>
+                      <Typography>₹{slab.taxable.toFixed(2)}</Typography>
+                    </Box>
 
-                <TableBody>
-                  {data.slabs.map((slab, index) => (
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="body2">CGST</Typography>
+                      <Typography>₹{slab.cgst.toFixed(2)}</Typography>
+                    </Box>
+
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="body2">SGST</Typography>
+                      <Typography>₹{slab.sgst.toFixed(2)}</Typography>
+                    </Box>
+
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="body2">IGST</Typography>
+                      <Typography>₹{slab.igst.toFixed(2)}</Typography>
+                    </Box>
+
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="body2">Total GST</Typography>
+                      <Typography>₹{slab.totalGST.toFixed(2)}</Typography>
+                    </Box>
+
+                    <Divider sx={{ my: 1 }} />
+
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography fontWeight={700}>Total Sales</Typography>
+                      <Typography fontWeight={700} color="#0b3c5d">
+                        ₹{slab.grandTotal.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))}
+            </Box>
+          ) : (
+            <Paper
+              elevation={3}
+              sx={{
+                borderRadius: 3,
+                overflow: "hidden",
+                mb: 4,
+              }}
+            >
+              <Box sx={{ overflowX: "auto" }}>
+                <Table>
+                  <TableHead>
                     <TableRow
-                      key={index}
                       sx={{
-                        backgroundColor:
-                          index % 2 === 0 ? "#f9fafb" : "#ffffff",
-                        "&:hover": {
-                          backgroundColor: "#eef5ff",
-                        },
+                        backgroundColor: "#0b3c5d",
                       }}
                     >
-                      <TableCell align="center">{slab._id}%</TableCell>
+                      {[
+                        "GST %",
+                        "Taxable",
+                        "CGST",
+                        "SGST",
+                        "IGST",
+                        "Total GST",
+                        "Total Sales",
+                      ].map((head) => (
+                        <TableCell
+                          key={head}
+                          sx={{
+                            color: "#fff",
+                            fontWeight: 700,
+                            textAlign: "center",
+                            fontSize: 14,
+                          }}
+                        >
+                          {head}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  </TableHead>
 
-                      <TableCell align="center">
-                        ₹{slab.taxable.toFixed(2)}
-                      </TableCell>
-
-                      <TableCell align="center">
-                        ₹{slab.cgst.toFixed(2)}
-                      </TableCell>
-
-                      <TableCell align="center">
-                        ₹{slab.sgst.toFixed(2)}
-                      </TableCell>
-
-                      <TableCell align="center">
-                        ₹{slab.igst.toFixed(2)}
-                      </TableCell>
-
-                      <TableCell align="center">
-                        ₹{slab.totalGST.toFixed(2)}
-                      </TableCell>
-
-                      <TableCell
-                        align="center"
+                  <TableBody>
+                    {data.slabs.map((slab, index) => (
+                      <TableRow
+                        key={index}
                         sx={{
-                          fontWeight: 700,
-                          color: "#0b3c5d",
+                          backgroundColor:
+                            index % 2 === 0 ? "#f9fafb" : "#ffffff",
+                          "&:hover": {
+                            backgroundColor: "#eef5ff",
+                          },
                         }}
                       >
-                        ₹{slab.grandTotal.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
+                        <TableCell align="center">{slab._id}%</TableCell>
 
-              </Table>
-            </Box>
-          </Paper>
-        )}
+                        <TableCell align="center">
+                          ₹{slab.taxable.toFixed(2)}
+                        </TableCell>
+
+                        <TableCell align="center">
+                          ₹{slab.cgst.toFixed(2)}
+                        </TableCell>
+
+                        <TableCell align="center">
+                          ₹{slab.sgst.toFixed(2)}
+                        </TableCell>
+
+                        <TableCell align="center">
+                          ₹{slab.igst.toFixed(2)}
+                        </TableCell>
+
+                        <TableCell align="center">
+                          ₹{slab.totalGST.toFixed(2)}
+                        </TableCell>
+
+                        <TableCell
+                          align="center"
+                          sx={{
+                            fontWeight: 700,
+                            color: "#0b3c5d",
+                          }}
+                        >
+                          ₹{slab.grandTotal.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Paper>
+          )}
 
           {/* SUMMARY */}
           <Card
@@ -444,12 +530,7 @@ const GstReport = () => {
               background: "linear-gradient(135deg,#eef3ff,#f7f9ff)",
             }}
           >
-            <Typography
-              fontSize={20}
-              fontWeight={700}
-              mb={2}
-              color="#0b3c5d"
-            >
+            <Typography fontSize={20} fontWeight={700} mb={2} color="#0b3c5d">
               Overall Summary
             </Typography>
 
@@ -480,11 +561,7 @@ const GstReport = () => {
                     {item.label}
                   </Typography>
 
-                  <Typography
-                    fontSize={18}
-                    fontWeight={700}
-                    color="#0b3c5d"
-                  >
+                  <Typography fontSize={18} fontWeight={700} color="#0b3c5d">
                     ₹{item.value.toFixed(2)}
                   </Typography>
                 </Box>

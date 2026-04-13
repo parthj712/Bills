@@ -136,7 +136,9 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
       const firstVariant = item.variants[0];
 
       setSelectedItems((prev) => {
-        const existing = prev.find((x) => x.item._id === item._id);
+        const existing = prev.find(
+          (x) => x.item._id === item._id && x.variantName === firstVariant.name,
+        );
 
         if (existing) {
           return prev.map((x) =>
