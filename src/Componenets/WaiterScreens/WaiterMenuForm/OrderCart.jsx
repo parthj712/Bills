@@ -12,6 +12,7 @@ import {
   Button,
   Box,
   TextField,
+  Chip,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -47,6 +48,7 @@ export default function OrderCart() {
   const isDineIn = orderType === "DINE-IN";
   const [shopInfo, setShopInfo] = useState([]);
   const [orderId, setOrderId] = useState(null);
+  const [discountPercent, setDiscountPercent] = useState(0);
 
   // ✅ cartKey: tableId for DINE-IN, else orderType
   const cartKey = isDineIn ? tableId : orderType;
@@ -99,7 +101,9 @@ export default function OrderCart() {
 
   const vatAmount = hasVAT ? liquorSubtotal * (VAT_PERCENT / 100) : 0;
 
-  const grandTotal = subtotal + gstAmount + vatAmount;
+  const discountAmount = subtotal * (discountPercent / 100);
+
+  const grandTotal = subtotal + gstAmount + vatAmount - discountAmount;
 
   const handleFecthShopInfo = async () => {
     try {
@@ -267,6 +271,19 @@ export default function OrderCart() {
           <td style="text-align:right;">₹${vatAmount.toFixed(2)}</td>
         </tr>
       `
+        : ""
+    }
+
+    ${
+      discountPercent > 0
+        ? `
+    <tr>
+      <td style="color:red;">Discount (${discountPercent}%)</td>
+      <td style="text-align:right; color:red;">
+        -₹${discountAmount.toFixed(2)}
+      </td>
+    </tr>
+  `
         : ""
     }
   </table>
@@ -459,7 +476,12 @@ export default function OrderCart() {
     showSnackbar("Processing billing...", "info");
 
     try {
-      await finalizeBillAndOrder({ tableId, orderType, paymentMethod });
+      await finalizeBillAndOrder({
+        tableId,
+        orderType,
+        paymentMethod,
+        discountPercent,
+      });
 
       if (isDineIn) {
         await updateTableStatus(tableId, "AVAILABLE");
@@ -833,6 +855,7 @@ export default function OrderCart() {
           orderType={orderType}
           date={currentDate}
           customerName={customerName}
+          discountPercent={discountPercent}
         />
       </div>
 
@@ -984,14 +1007,36 @@ export default function OrderCart() {
         {/* CONTENT */}
         <DialogContent sx={{ py: 3 }}>
           {/* MESSAGE */}
+
           <Typography
-            textAlign="center"
-            fontSize={14}
-            color="text.secondary"
-            mb={2}
+            fontWeight={600}
+            mb={1.5}
+            sx={{ color: "#334155", fontSize: 14 }}
           >
-            Review and finalize this bill
+            Select Discount
           </Typography>
+
+          <Box display="flex" gap={1} flexWrap="wrap" mb={3}>
+            {[0, 5, 10, 15].map((percent) => (
+              <Chip
+                key={percent}
+                label={percent === 0 ? "No Discount" : `${percent}% OFF`}
+                clickable
+                onClick={() => setDiscountPercent(percent)}
+                sx={{
+                  fontWeight: 600,
+                  borderRadius: "10px",
+                  backgroundColor:
+                    discountPercent === percent ? "#0F172A" : "#F1F5F9",
+                  color: discountPercent === percent ? "#fff" : "#334155",
+                  "&:hover": {
+                    backgroundColor:
+                      discountPercent === percent ? "#0F172A" : "#E2E8F0",
+                  },
+                }}
+              />
+            ))}
+          </Box>
 
           {/* TOTAL CARD */}
           <Box
@@ -1005,8 +1050,14 @@ export default function OrderCart() {
             }}
           >
             <Typography fontSize={13} sx={{ opacity: 0.8 }}>
-              Grand Total
+              Final Bill
             </Typography>
+
+            {/* {discountPercent > 0 && (
+              <Typography fontSize={14}>
+                Discount ({discountPercent}%): -₹ {discountAmount.toFixed(2)}
+              </Typography>
+            )} */}
 
             <Typography fontSize={26} fontWeight={700}>
               ₹ {grandTotal.toFixed(2)}
@@ -1022,7 +1073,7 @@ export default function OrderCart() {
             Payment Method
           </Typography>
 
-          <Box display="flex" gap={2}>
+          <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap={2}>
             {/* CASH */}
             <Box
               onClick={() => setPaymentMethod("CASH")}
@@ -1072,6 +1123,33 @@ export default function OrderCart() {
               <Typography fontSize={22}>📱</Typography>
               <Typography fontWeight={600} fontSize={14}>
                 UPI
+              </Typography>
+            </Box>
+
+            {/* CARD */}
+            <Box
+              onClick={() => setPaymentMethod("CARD")}
+              sx={{
+                flex: 1,
+                cursor: "pointer",
+                borderRadius: 3,
+                p: 2,
+                textAlign: "center",
+                border:
+                  paymentMethod === "CARD"
+                    ? "2px solid #7c3aed"
+                    : "1px solid #E5E7EB",
+                backgroundColor: paymentMethod === "CARD" ? "#F5F3FF" : "#fff",
+                transition: "all 0.2s ease",
+                "&:hover": {
+                  boxShadow: "0 6px 14px rgba(0,0,0,0.08)",
+                },
+              }}
+            >
+              <Typography fontSize={22}>💳</Typography>
+
+              <Typography fontWeight={600} fontSize={14}>
+                Card
               </Typography>
             </Box>
           </Box>

@@ -7,6 +7,7 @@ const BillPreview = ({
   cgst = 0,
   sgst = 0,
   vat = 0,
+  discountPercent = 0,
   total,
   shopInfo,
   orderType,
@@ -152,6 +153,14 @@ const BillPreview = ({
               VAT (10%)
             </Typography>
             <Typography fontSize={13}>₹ {Number(vat).toFixed(2)}</Typography>
+          </Box>
+        )}
+
+        {discountPercent > 0 && (
+          <Box display="flex" justifyContent="space-between" mb={2}>
+            <Typography fontSize={13} color="#dc2626" fontWeight={600}>
+              Discount ({discountPercent}%)
+            </Typography>
           </Box>
         )}
 

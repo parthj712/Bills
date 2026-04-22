@@ -79,6 +79,11 @@ export default function BillDetails({ open, onClose, bill }) {
             color={payment === "CASH" ? "success" : "primary"}
           />
         </Box>
+        <Box mt={2}>
+          <Typography fontSize={12} sx={{ opacity: 0.9 }}>
+            👨‍🍳 Served by: <b>{bill.staffId?.name || "-"}</b>
+          </Typography>
+        </Box>
       </DialogTitle>
 
       <DialogContent sx={{ p: 2 }}>
