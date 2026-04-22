@@ -221,8 +221,8 @@ export default function OrderCart() {
 
   <!-- ITEMS -->
   ${cartItems
-    .map(
-      (item) => `
+        .map(
+          (item) => `
       <div style="margin-bottom:6px;">
         <div>${item.name}</div>
 
@@ -236,8 +236,8 @@ export default function OrderCart() {
         </table>
       </div>
     `,
-    )
-    .join("")}
+        )
+        .join("")}
 
   <div class="divider"></div>
 
@@ -248,9 +248,8 @@ export default function OrderCart() {
       <td style="text-align:right;">₹${Number(subtotal.toFixed(2))}</td>
     </tr>
 
-   ${
-     foodSubtotal > 0 && hasGST
-       ? `
+   ${foodSubtotal > 0 && hasGST
+        ? `
     <tr>
       <td>CGST (2.5%)</td>
       <td style="text-align:right;">₹${cgst.toFixed(2)}</td>
@@ -260,11 +259,10 @@ export default function OrderCart() {
       <td style="text-align:right;">₹${sgst.toFixed(2)}</td>
     </tr>
   `
-       : ""
-   }
+        : ""
+      }
 
-    ${
-      liquorSubtotal > 0 && hasVAT
+    ${liquorSubtotal > 0 && hasVAT
         ? `
         <tr>
           <td>VAT (10%)</td>
@@ -272,10 +270,9 @@ export default function OrderCart() {
         </tr>
       `
         : ""
-    }
+      }
 
-    ${
-      discountPercent > 0
+    ${discountPercent > 0
         ? `
     <tr>
       <td style="color:red;">Discount (${discountPercent}%)</td>
@@ -285,7 +282,7 @@ export default function OrderCart() {
     </tr>
   `
         : ""
-    }
+      }
   </table>
 
   <div class="divider"></div>
@@ -334,16 +331,16 @@ export default function OrderCart() {
     <div class="divider"></div>
 
     ${cartItems
-      .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
-      .map(
-        (item) => `
+        .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
+        .map(
+          (item) => `
         <div style="margin-bottom:6px;">
           <div class="bold">${item.name} (${item.portion})</div>
           <div>Qty: ${item.qty}</div>
         </div>
       `,
-      )
-      .join("")}
+        )
+        .join("")}
 
     <div class="divider"></div>
 
@@ -582,10 +579,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-                ...item,
-                kotPrinted: true,
-                kotNumber: kotNumber,
-              },
+              ...item,
+              kotPrinted: true,
+              kotNumber: kotNumber,
+            },
         ),
       );
     };
