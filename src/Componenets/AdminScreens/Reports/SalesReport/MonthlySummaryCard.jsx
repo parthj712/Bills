@@ -32,7 +32,7 @@ export default function MonthlySummaryCard({ month, gst, total }) {
               Total
             </Typography>
             <Typography fontWeight={800} fontSize={15} color="#2e7d32">
-              ₹ {total}
+              ₹ {total.toFixed(2)}
             </Typography>
           </Box>
         </Box>

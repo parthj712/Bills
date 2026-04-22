@@ -94,17 +94,31 @@ export default function OrderCart() {
   const hasGST = !!shopInfo?.gstNumber;
   const hasVAT = !!shopInfo?.vatNumber;
 
-  const cgst = hasGST ? foodSubtotal * (GST_PERCENT / 2 / 100) : 0;
-  const sgst = hasGST ? foodSubtotal * (GST_PERCENT / 2 / 100) : 0;
-
-  const gstAmount = cgst + sgst; // total GST (same as before)
-
-  const vatAmount = hasVAT ? liquorSubtotal * (VAT_PERCENT / 100) : 0;
-
   const discountAmount = subtotal * (discountPercent / 100);
 
-  const grandTotal = subtotal + gstAmount + vatAmount - discountAmount;
+  // split discount proportionally like backend
+  const foodRatio = subtotal > 0 ? foodSubtotal / subtotal : 0;
+  const liquorRatio = subtotal > 0 ? liquorSubtotal / subtotal : 0;
 
+  const foodDiscount = discountAmount * foodRatio;
+  const liquorDiscount = discountAmount * liquorRatio;
+
+  // discounted subtotals
+  const discountedFoodSubtotal = foodSubtotal - foodDiscount;
+  const discountedLiquorSubtotal = liquorSubtotal - liquorDiscount;
+
+  // tax AFTER discount
+  const cgst = hasGST ? discountedFoodSubtotal * (GST_PERCENT / 2 / 100) : 0;
+
+  const sgst = hasGST ? discountedFoodSubtotal * (GST_PERCENT / 2 / 100) : 0;
+
+  const gstAmount = cgst + sgst;
+
+  const vatAmount = hasVAT ? discountedLiquorSubtotal * (VAT_PERCENT / 100) : 0;
+
+  // final total
+  const grandTotal =
+    discountedFoodSubtotal + discountedLiquorSubtotal + gstAmount + vatAmount;
   const handleFecthShopInfo = async () => {
     try {
       const res = await getShopInfo();

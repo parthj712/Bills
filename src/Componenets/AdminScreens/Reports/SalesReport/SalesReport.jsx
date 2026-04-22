@@ -136,11 +136,18 @@ export default function SalesReport() {
     return filteredBills.reduce(
       (acc, b) => {
         acc.subtotal += Number(b.subtotal || 0);
+        acc.discount += Number(b.discountAmount || 0); // NEW
         acc.gst += Number(b.gstAmount || 0);
         acc.total += Number(b.grandTotal || 0);
+
         return acc;
       },
-      { subtotal: 0, gst: 0, total: 0 },
+      {
+        subtotal: 0,
+        discount: 0, // NEW
+        gst: 0,
+        total: 0,
+      },
     );
   }, [filteredBills]);
 
@@ -180,7 +187,8 @@ export default function SalesReport() {
       Date: new Date(b.createdAt).toLocaleDateString("en-IN"),
       BillNo: b.billNo,
       Subtotal: b.subtotal,
-      Payment: b.paymentMethod, // ✅ ADD
+      Discount: b.discountAmount || 0, // NEW
+      Payment: b.paymentMethod,
       GST: b.gstAmount,
       Total: b.grandTotal,
     }));
@@ -532,6 +540,7 @@ export default function SalesReport() {
                     "Type",
                     "Payment",
                     "Subtotal",
+                    "Discount",
                     "GST",
                     "Total",
                     "Action",
@@ -584,6 +593,17 @@ export default function SalesReport() {
                     </TableCell>
 
                     <TableCell align="center">₹ {b.subtotal}</TableCell>
+
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: b.discountAmount > 0 ? "#d32f2f" : "inherit",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {b.discountAmount > 0 ? `-₹ ${b.discountAmount}` : "₹ 0"}
+                    </TableCell>
+
                     <TableCell align="center">₹ {b.gstAmount}</TableCell>
                     <TableCell align="center" fontWeight={700}>
                       ₹ {b.grandTotal}
@@ -631,6 +651,19 @@ export default function SalesReport() {
                     <TableCell align="center" sx={{ color: "#0f172a" }}>
                       ₹{" "}
                       {totals.subtotal.toLocaleString("en-IN", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </TableCell>
+
+                    {/* Discount */}
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: "#d32f2f",
+                      }}
+                    >
+                      -₹{" "}
+                      {totals.discount.toLocaleString("en-IN", {
                         minimumFractionDigits: 2,
                       })}
                     </TableCell>
@@ -717,7 +750,7 @@ export default function SalesReport() {
                     <TableCell>{m}</TableCell>
                     <TableCell align="right">₹ {v.gst.toFixed(2)}</TableCell>
                     <TableCell align="right" fontWeight={600}>
-                      ₹ {v.total}
+                      ₹ {v.total.toFixed(2)}
                     </TableCell>
                   </TableRow>
                 ))}

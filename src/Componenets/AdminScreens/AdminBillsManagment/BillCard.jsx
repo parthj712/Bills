@@ -1,135 +1,150 @@
-import {
-    Box,
-    Typography,
-    IconButton,
-    Chip,
-    Divider,
-} from "@mui/material";
-import { Visibility, Edit, Delete } from "@mui/icons-material";
+import { Box, Typography, IconButton, Chip, Divider } from "@mui/material";
+import { Visibility, Delete } from "@mui/icons-material";
 import { motion } from "framer-motion";
 
-export default function BillCard({ bill, onView,onDelete  }) {
-    return (
-        <>
-            <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileHover={{ y: -4 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-            >
-                <Box
-                    sx={{
-                        p: 2.5,
-                        borderRadius: "18px",
-                        backgroundColor: "#fff",
-                        boxShadow: "0 12px 30px rgba(0,0,0,0.08)",
-                    }}
-                    className="flex flex-col gap-2"
-                >
-                    {/* HEADER */}
-                    <Box className="flex justify-between items-center">
-                        <Box>
-                            <Typography fontWeight={700} fontSize={15} color="black">
-                                Bill #{bill.billNo}
-                            </Typography>
-                            <Typography fontSize={12} color="text.secondary">
-                                Generated bill
-                            </Typography>
-                        </Box>
+export default function BillCard({ bill, onView, onDelete }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -4 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Box
+        sx={{
+          p: 2.5,
+          borderRadius: "20px",
+          background: "#fff",
+          border: "1px solid #f1f5f9",
+          boxShadow: "0px 8px 24px rgba(15,23,42,0.06)",
+        }}
+      >
+        {/* HEADER */}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="flex-start"
+        >
+          <Box>
+            <Typography fontWeight={700} fontSize={15} color="#0f172a">
+              {bill.billNo}
+            </Typography>
 
-                        <Chip
-                            size="small"
-                            label={new Date(bill.createdAt).toLocaleDateString("en-IN", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                            })}
-                            sx={{
-                                backgroundColor: "#e3f2fd",
-                                color: "#0b3c5d",
-                                fontWeight: 600,
-                                borderRadius: "12px",
-                            }}
-                        />
-                    </Box>
+            <Typography fontSize={12} color="text.secondary">
+              Generated bill
+            </Typography>
+          </Box>
 
-                    <Divider sx={{ my: 1 }} />
+          <Chip
+            size="small"
+            label={new Date(bill.createdAt).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+            sx={{
+              backgroundColor: "#eff6ff",
+              color: "#2563eb",
+              fontWeight: 600,
+              borderRadius: "10px",
+            }}
+          />
+        </Box>
 
-                    {/* AMOUNTS */}
-                    <Box className="grid grid-cols-3 text-center">
-                        <Box>
-                            <Typography fontSize={12} color="text.primary" fontWeight={600}>
-                                Subtotal
-                            </Typography>
-                            <Typography fontWeight={600} color="#616161">
-                                ₹ {bill.subtotal}
-                            </Typography>
-                        </Box>
+        <Divider sx={{ my: 2 }} />
 
-                        <Box>
-                            <Typography fontSize={12} color="text.primary" fontWeight={600}>
-                                GST
-                            </Typography>
-                            <Typography fontWeight={600} color="#616161">
-                                ₹ {bill.gstAmount}
-                            </Typography>
-                        </Box>
+        {/* GRAND TOTAL */}
+        <Box textAlign="center" mb={2}>
+          <Typography fontSize={12} color="text.secondary">
+            Grand Total
+          </Typography>
 
-                        <Box>
-                            <Typography fontSize={12} color="text.primary" fontWeight={600}>
-                                Total
-                            </Typography>
-                            <Typography
-                                fontWeight={800}
-                                fontSize={16}
-                                color="#2e7d32"
-                            >
-                                ₹ {bill.grandTotal}
-                            </Typography>
-                        </Box>
-                    </Box>
+          <Typography fontWeight={800} fontSize={24} color="#16a34a">
+            ₹ {bill.grandTotal}
+          </Typography>
+        </Box>
 
-                    <Divider sx={{ my: 1 }} />
+        <Divider sx={{ my: 2 }} />
 
-                    {/* ACTION BAR */}
-                    <Box className="flex justify-end gap-3">
-                        <IconButton
-                            onClick={() => onView?.(bill)}
-                            size="small"
-                            sx={{
-                                backgroundColor: "#e3f2fd",
-                                "&:hover": { backgroundColor: "#bbdefb" },
-                            }}
-                        >
-                            <Visibility fontSize="small" />
-                        </IconButton>
+        {/* BILL BREAKDOWN */}
+        <Box display="flex" flexDirection="column" gap={1}>
+          <Box display="flex" justifyContent="space-between">
+            <Typography fontSize={13} color="text.secondary">
+              Subtotal
+            </Typography>
+            <Typography fontWeight={600} color="black">
+              ₹ {bill.subtotal}
+            </Typography>
+          </Box>
 
-                        {/* <IconButton
-                        size="small"
-                        sx={{
-                            backgroundColor: "#e8f5e9",
-                            "&:hover": { backgroundColor: "#c8e6c9" },
-                        }}
-                    >
-                        <Edit fontSize="small" />
-                    </IconButton> */}
+          {bill.discountAmount > 0 && (
+            <Box display="flex" justifyContent="space-between">
+              <Typography fontSize={13} color="text.secondary">
+                Discount
+              </Typography>
 
-                        <IconButton
-                            onClick={() => onDelete?.(bill._id)}    
-                            size="small"
-                            sx={{
-                                backgroundColor: "#ffebee",
-                                color: "#d32f2f",
-                                "&:hover": { backgroundColor: "#ffcdd2" },
-                            }}
-                        >
-                            <Delete fontSize="small" />
-                        </IconButton>
-                    </Box>
-                </Box>
-            </motion.div>
+              <Typography fontWeight={600} color="#dc2626">
+                -₹ {bill.discountAmount}
+              </Typography>
+            </Box>
+          )}
 
+          <Box display="flex" justifyContent="space-between">
+            <Typography fontSize={13} color="text.secondary">
+              GST
+            </Typography>
 
-        </>
-    );
+            <Typography fontWeight={600} color="black">
+              ₹ {bill.gstAmount}
+            </Typography>
+          </Box>
+
+          {bill.vatAmount > 0 && (
+            <Box display="flex" justifyContent="space-between">
+              <Typography fontSize={13} color="text.secondary">
+                VAT
+              </Typography>
+
+              <Typography fontWeight={600} color="black">
+                ₹ {bill.vatAmount}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* ACTIONS */}
+        <Box display="flex" justifyContent="flex-end" gap={1.5}>
+          <IconButton
+            onClick={() => onView?.(bill)}
+            size="small"
+            sx={{
+              backgroundColor: "#eff6ff",
+              color: "#2563eb",
+              "&:hover": {
+                backgroundColor: "#dbeafe",
+              },
+            }}
+          >
+            <Visibility fontSize="small" />
+          </IconButton>
+
+          <IconButton
+            onClick={() => onDelete?.(bill._id)}
+            size="small"
+            sx={{
+              backgroundColor: "#fef2f2",
+              color: "#dc2626",
+              "&:hover": {
+                backgroundColor: "#fee2e2",
+              },
+            }}
+          >
+            <Delete fontSize="small" />
+          </IconButton>
+        </Box>
+      </Box>
+    </motion.div>
+  );
 }
