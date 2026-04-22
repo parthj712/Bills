@@ -76,6 +76,7 @@ const GstReport = () => {
     const worksheetData = data.slabs.map((slab) => ({
       "GST%": slab._id,
       Taxable: slab.taxable,
+      Discount: slab.discount || 0,
       CGST: slab.cgst,
       SGST: slab.sgst,
       IGST: slab.igst,
@@ -125,6 +126,7 @@ const GstReport = () => {
     const tableColumn = [
       "GST%",
       "Taxable",
+      "Discount",
       "CGST",
       "SGST",
       "IGST",
@@ -146,6 +148,7 @@ const GstReport = () => {
       tableRows.push([
         slab._id + "%",
         format(slab.taxable),
+        format(slab.discount || 0),
         format(slab.cgst),
         format(slab.sgst),
         format(slab.igst),
@@ -396,6 +399,12 @@ const GstReport = () => {
                       <Typography variant="body2">Taxable</Typography>
                       <Typography>₹{slab.taxable.toFixed(2)}</Typography>
                     </Box>
+                    <Box display="flex" justifyContent="space-between" mb={0.5}>
+                      <Typography variant="body2">Discount</Typography>
+                      <Typography color="error">
+                        -₹{(slab.discount || 0).toFixed(2)}
+                      </Typography>
+                    </Box>
 
                     <Box display="flex" justifyContent="space-between" mb={0.5}>
                       <Typography variant="body2">CGST</Typography>
@@ -449,6 +458,7 @@ const GstReport = () => {
                       {[
                         "GST %",
                         "Taxable",
+                        "Discount",
                         "CGST",
                         "SGST",
                         "IGST",
@@ -486,6 +496,10 @@ const GstReport = () => {
 
                         <TableCell align="center">
                           ₹{slab.taxable.toFixed(2)}
+                        </TableCell>
+
+                        <TableCell align="center" sx={{ color: "#d32f2f" }}>
+                          -₹{(slab.discount || 0).toFixed(2)}
                         </TableCell>
 
                         <TableCell align="center">
@@ -543,6 +557,7 @@ const GstReport = () => {
             >
               {[
                 { label: "Taxable", value: data.overall.taxable },
+                { label: "Discount", value: data.overall.discount || 0 },
                 { label: "CGST", value: data.overall.cgst },
                 { label: "SGST", value: data.overall.sgst },
                 { label: "IGST", value: data.overall.igst },

@@ -145,15 +145,47 @@ export default function BillDetails({ open, onClose, bill }) {
             <Typography>₹ {bill.subtotal}</Typography>
           </Box>
 
-          <Box display="flex" justifyContent="space-between" mb={1}>
-            <Typography color="text.secondary">GST</Typography>
-            <Typography>₹ {bill.gstAmount}</Typography>
-          </Box>
+          {bill.gstAmount > 0 && (
+            <Box display="flex" justifyContent="space-between" mb={1}>
+              <Typography color="text.secondary">GST</Typography>
+              <Typography>₹ {bill.gstAmount}</Typography>
+            </Box>
+          )}
+
+          {bill.vatAmount > 0 && (
+            <Box display="flex" justifyContent="space-between" mb={1}>
+              <Typography color="text.secondary">VAT</Typography>
+              <Typography>₹ {bill.vatAmount}</Typography>
+            </Box>
+          )}
+
+          {bill.discountAmount > 0 && (
+            <Box display="flex" justifyContent="space-between" mb={1}>
+              <Typography
+                sx={{
+                  color: "#dc2626",
+                  fontWeight: 600,
+                }}
+              >
+                Discount ({bill.discountPercent}%)
+              </Typography>
+
+              <Typography
+                sx={{
+                  color: "#dc2626",
+                  fontWeight: 600,
+                }}
+              >
+                - ₹ {bill.discountAmount}
+              </Typography>
+            </Box>
+          )}
 
           <Divider sx={{ my: 1 }} />
 
           <Box display="flex" justifyContent="space-between">
             <Typography fontWeight={700}>Grand Total</Typography>
+
             <Typography fontWeight={700} color="#047857">
               ₹ {bill.grandTotal}
             </Typography>

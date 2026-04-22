@@ -78,9 +78,7 @@ const BillsMain = () => {
     try {
       await deleteBills(selectedDeleteId);
 
-      setBillsData((prev) =>
-        prev.filter((b) => b._id !== selectedDeleteId)
-      );
+      setBillsData((prev) => prev.filter((b) => b._id !== selectedDeleteId));
 
       showSnackbar("Bill deleted successfully", "success");
     } catch (error) {
@@ -134,6 +132,7 @@ const BillsMain = () => {
       );
     });
   }, [billsData, search]);
+  console.log("billsdata", billsData);
 
   return (
     <Box className="flex flex-col gap-6 px-4">
@@ -179,21 +178,27 @@ const BillsMain = () => {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                {["Date", "Bill No", "SubTotal", "GST", "Total", "Action"].map(
-                  (h) => (
-                    <TableCell
-                      key={h}
-                      align="center"
-                      sx={{
-                        backgroundColor: "#0b3c5d",
-                        color: "#fff",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {h}
-                    </TableCell>
-                  ),
-                )}
+                {[
+                  "Date",
+                  "Bill No",
+                  "SubTotal",
+                  "Discount",
+                  "GST/VAT",
+                  "Total",
+                  "Action",
+                ].map((h) => (
+                  <TableCell
+                    key={h}
+                    align="center"
+                    sx={{
+                      backgroundColor: "#0b3c5d",
+                      color: "#fff",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {h}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
 
@@ -208,12 +213,31 @@ const BillsMain = () => {
 
                     <TableCell align="center">{bill.billNo}</TableCell>
 
-                    <TableCell align="center">₹ {bill.subtotal}</TableCell>
+                    <TableCell align="center">
+                      ₹ {bill.subtotal?.toFixed(2)}
+                    </TableCell>
 
-                    <TableCell align="center">₹ {bill.gstAmount}</TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        color: bill.discountAmount > 0 ? "#dc2626" : "inherit",
+                        fontWeight: 600,
+                      }}
+                    >
+                      {bill.discountAmount > 0
+                        ? `-₹ ${bill.discountAmount?.toFixed(2)}`
+                        : "₹ 0.00"}
+                    </TableCell>
+
+                    <TableCell align="center">
+                      ₹{" "}
+                      {((bill.gstAmount || 0) + (bill.vatAmount || 0)).toFixed(
+                        2,
+                      )}
+                    </TableCell>
 
                     <TableCell align="center" fontWeight={700}>
-                      ₹ {bill.grandTotal}
+                      ₹ {bill.grandTotal?.toFixed(2)}
                     </TableCell>
 
                     <TableCell align="center">
@@ -280,22 +304,44 @@ const BillsMain = () => {
 
       {/* MOBILE */}
       {!isDesktop && (
-        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {filteredBills.map((bill) => (
-            <BillCard
-              key={bill._id}
-              bill={bill}
-              onView={(b) => {
-                setSelectedBill(b);
-                setOpenBill(true);
-              }}
-              onDelete={(id) => {
-                setSelectedDeleteId(id);
-                setDeleteDialog(true);
-              }}  // ✅ ADD THIS
-            />
-          ))}
-        </Box>
+        <>
+          <Box className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {filteredBills
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((bill) => (
+                <BillCard
+                  key={bill._id}
+                  bill={bill}
+                  onView={(b) => {
+                    setSelectedBill(b);
+                    setOpenBill(true);
+                  }}
+                  onDelete={(id) => {
+                    setSelectedDeleteId(id);
+                    setDeleteDialog(true);
+                  }}
+                />
+              ))}
+          </Box>
+
+          {filteredBills.length === 0 && (
+            <Typography textAlign="center">No bills found</Typography>
+          )}
+
+          <TablePagination
+            component="div"
+            count={filteredBills.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25]}
+            sx={{
+              mt: 2,
+              borderTop: "1px solid #e5e7eb",
+            }}
+          />
+        </>
       )}
 
       {/* ✅ BILL DETAILS MODAL */}
@@ -304,7 +350,6 @@ const BillsMain = () => {
         onClose={() => setOpenBill(false)}
         bill={selectedBill}
       />
-
 
       <Dialog
         open={deleteDialog}
