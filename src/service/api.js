@@ -28,7 +28,7 @@ API.interceptors.request.use((config) => {
 //       localStorage.removeItem("user");
 
 //       // Show message (you can replace with snackbar)
-//       // alert("Session expired. Please login again.");
+//       alert("Session expired. Please login again.");
 
 //       // Redirect to login
 //       window.location.href = "/login";

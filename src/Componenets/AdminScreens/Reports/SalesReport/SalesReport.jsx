@@ -116,17 +116,31 @@ export default function SalesReport() {
 
   const filteredBills = useMemo(() => {
     return billsData.filter((b) => {
-      const d = new Date(b.createdAt);
+      const billDate = dayjs(b.createdAt);
 
-      // Date filter
-      if (fromDate && d < new Date(fromDate)) return false;
-      if (toDate && d > new Date(toDate)) return false;
+      // From date → start of selected day
+      if (fromDate && billDate.isBefore(dayjs(fromDate).startOf("day"))) {
+        return false;
+      }
+
+      // To date → end of selected day
+      if (toDate && billDate.isAfter(dayjs(toDate).endOf("day"))) {
+        return false;
+      }
 
       // Bill Type filter
-      if (billType === "DINEIN" && !b.tableId) return false;
-      if (billType === "TAKEAWAY" && b.tableId) return false;
-      if (paymentFilter !== "ALL" && b.paymentMethod !== paymentFilter)
+      if (billType === "DINEIN" && !b.tableId) {
         return false;
+      }
+
+      if (billType === "TAKEAWAY" && b.tableId) {
+        return false;
+      }
+
+      // Payment filter
+      if (paymentFilter !== "ALL" && b.paymentMethod !== paymentFilter) {
+        return false;
+      }
 
       return true;
     });

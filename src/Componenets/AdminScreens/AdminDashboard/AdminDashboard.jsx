@@ -100,40 +100,52 @@ export default function AdminDashboard() {
     }
   };
 
-  const calcGrowth = (today, yesterday) => {
-    if (!yesterday) return 0; // avoid divide by 0
+  const calcGrowth = (todayRevenue, yesterdayRevenue) => {
+    if (yesterdayRevenue === 0) return null;
 
-    return Math.round(((today - yesterday) / yesterday) * 100);
+    return Math.round(
+      ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100,
+    );
   };
 
   const revenueGrowth = calcGrowth(
-    summary.todayRevenue,
-    summary.yesterdayRevenue,
+    summary.todayRevenue || 0,
+    summary.yesterdayRevenue || 0,
   );
-  const performanceText =
-    summary.yesterdayRevenue === 0
-      ? "No data yesterday"
-      : `${revenueGrowth >= 0 ? "▲" : "▼"} ${Math.abs(revenueGrowth)}%`;
 
+  let performanceText = "";
   let performanceBg = "bg-gray-100";
   let performanceColor = "text-gray-600";
+  let performanceIcon = <TrendingFlatIcon fontSize="large" />;
 
-  if (revenueGrowth > 0) {
+  // Case 1 → no sales yesterday but sales today
+  if (summary.yesterdayRevenue === 0 && summary.todayRevenue > 0) {
+    performanceText = "New Sales 🚀";
     performanceBg = "bg-green-100";
     performanceColor = "text-green-600";
-  } else if (revenueGrowth < 0) {
-    performanceBg = "bg-red-100";
-    performanceColor = "text-red-600";
+    performanceIcon = <TrendingUpIcon fontSize="large" />;
   }
 
-  let performanceIcon;
+  // Case 2 → no sales today
+  else if (summary.yesterdayRevenue === 0 && summary.todayRevenue === 0) {
+    performanceText = "No Sales Today";
+  }
 
-  if (revenueGrowth > 0) {
-    performanceIcon = <TrendingUpIcon fontSize="large" />;
-  } else if (revenueGrowth < 0) {
-    performanceIcon = <TrendingDownIcon fontSize="large" />;
-  } else {
-    performanceIcon = <TrendingFlatIcon fontSize="large" />;
+  // Case 3 → normal growth comparison
+  else {
+    performanceText = `${
+      revenueGrowth >= 0 ? "▲" : "▼"
+    } ${Math.abs(revenueGrowth)}%`;
+
+    if (revenueGrowth > 0) {
+      performanceBg = "bg-green-100";
+      performanceColor = "text-green-600";
+      performanceIcon = <TrendingUpIcon fontSize="large" />;
+    } else if (revenueGrowth < 0) {
+      performanceBg = "bg-red-100";
+      performanceColor = "text-red-600";
+      performanceIcon = <TrendingDownIcon fontSize="large" />;
+    }
   }
 
   const stats = [
@@ -183,6 +195,7 @@ export default function AdminDashboard() {
 
     setUnreadCount(res.unreadCount); // ✅ correct
   };
+  console.log("summary", summary);
 
   const handleRead = async (id) => {
     try {
