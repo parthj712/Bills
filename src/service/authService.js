@@ -13,7 +13,7 @@ export const verifyForgotOtp = async (email, otp) => {
   });
 };
 
-// ---------------- RESET PASSWORD ----------------
+// ---------------- RESET PASSWORD -----------------
 export const resetPassword = async (email, newPassword) => {
   return await API.post("/auth/reset-password", {
     email,
