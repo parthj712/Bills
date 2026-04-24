@@ -16,25 +16,25 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // 🔥 Token expired or invalid
+// API.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       // 🔥 Token expired or invalid
 
-      localStorage.removeItem("token");
+//       localStorage.removeItem("token");
 
-      // Optional: clear other data
-      localStorage.removeItem("user");
+//       // Optional: clear other data
+//       localStorage.removeItem("user");
 
-      // Show message (you can replace with snackbar)
-      alert("Session expired. Please login again.");
+//       // Show message (you can replace with snackbar)
+//       alert("Session expired. Please login again.");
 
-      // Redirect to login
-      window.location.href = "/login";
-    }
+//       // Redirect to login
+//       window.location.href = "/login";
+//     }
 
-    return Promise.reject(error);
-  },
-);
+//     return Promise.reject(error);
+//   },
+// );
 export default API;
