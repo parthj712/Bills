@@ -99,9 +99,22 @@ export const filterBillsByRange = (bills, range, customFrom, customTo) => {
     }
 
     if (range === "week") {
-      const last7 = new Date();
-      last7.setDate(now.getDate() - 7);
-      return billDate >= last7;
+      const startOfWeek = new Date(now);
+
+      // JS: Sunday = 0
+      const day = now.getDay();
+
+      // Convert to Monday-first week
+      const diff = day === 0 ? 6 : day - 1;
+
+      startOfWeek.setDate(now.getDate() - diff);
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      endOfWeek.setHours(23, 59, 59, 999);
+
+      return billDate >= startOfWeek && billDate <= endOfWeek;
     }
 
     if (range === "month") {

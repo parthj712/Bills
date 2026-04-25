@@ -45,6 +45,8 @@ const IncomeExpenseDonutGraph = ({ bills }) => {
     const fetchExpense = async () => {
       try {
         const res = await getExpense();
+        console.log(res);
+
         setExpenseList(res.data || []);
       } catch (error) {
         console.log(error.message);

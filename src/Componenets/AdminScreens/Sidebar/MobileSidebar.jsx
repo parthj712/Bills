@@ -49,6 +49,16 @@ const reportItems = [
     href: "/admin/reports/gstreport",
     icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
+  {
+    label: "Daily Sales Report",
+    href: "/admin/reports/dailyreport",
+    icon: <Assessment fontSize="small" />,
+  },
+  {
+    label: "Profit Report",
+    href: "/admin/reports/profitreport",
+    icon: <Assessment fontSize="small" />,
+  },
 ];
 
 export default function MobileSidebar({ open, onClose }) {
@@ -83,12 +93,12 @@ export default function MobileSidebar({ open, onClose }) {
     // Only restaurants should see tables
     ...(showTables
       ? [
-        {
-          label: "Table Management",
-          href: "/admin/tables",
-          icon: <TableBar fontSize="small" />,
-        },
-      ]
+          {
+            label: "Table Management",
+            href: "/admin/tables",
+            icon: <TableBar fontSize="small" />,
+          },
+        ]
       : []),
 
     // Dynamic naming
@@ -115,12 +125,12 @@ export default function MobileSidebar({ open, onClose }) {
     },
     ...(isBar
       ? [
-        {
-          label: "Bar Inventory",
-          href: "/admin/bar-inventory",
-          icon: <LiquorIcon fontSize="small" />,
-        },
-      ]
+          {
+            label: "Bar Inventory",
+            href: "/admin/bar-inventory",
+            icon: <LiquorIcon fontSize="small" />,
+          },
+        ]
       : []),
     {
       label: "Customers Info",
@@ -200,7 +210,6 @@ export default function MobileSidebar({ open, onClose }) {
               />
             </div>
 
-
             {/* Main Nav */}
             <nav className="space-y-2">
               {mainItems.map((item) => {
@@ -279,10 +288,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/settings">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg test-[14px]
-      ${pathname === "/admin/settings"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/settings"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <Settings fontSize="small" />
@@ -293,10 +303,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/help">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg test-[14px]
-      ${pathname === "/admin/help"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/help"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <MenuBook fontSize="small" />
@@ -307,10 +318,11 @@ export default function MobileSidebar({ open, onClose }) {
               <Link href="/admin/incoming-changes">
                 <div
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg test-[14px]
-      ${pathname === "/admin/help"
-                      ? "text-orange-600 font-semibold"
-                      : "text-gray-800"
-                    }
+      ${
+        pathname === "/admin/help"
+          ? "text-orange-600 font-semibold"
+          : "text-gray-800"
+      }
       `}
                 >
                   <NewReleasesIcon fontSize="small" />
@@ -335,7 +347,9 @@ export default function MobileSidebar({ open, onClose }) {
         }}
       >
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography fontWeight={600} fontSize={16}>Reports</Typography>
+          <Typography fontWeight={600} fontSize={16}>
+            Reports
+          </Typography>
 
           <IconButton onClick={() => setOpenReportsDialog(false)}>
             <CloseIcon />
