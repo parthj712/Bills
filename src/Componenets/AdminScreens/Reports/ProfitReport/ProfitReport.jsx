@@ -12,6 +12,8 @@ import {
   Card,
   CardContent,
   Stack,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 
 import {
@@ -36,6 +38,12 @@ import { getBills } from "@/service/billsService";
 import { getExpense } from "@/service/expenseService";
 
 export default function ProfitReport() {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
   const [billsData, setBillsData] = useState([]);
   const [expensesData, setExpensesData] = useState([]);
 
@@ -209,9 +217,8 @@ export default function ProfitReport() {
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
 
-    const dateRangeText = `Date Range: ${
-      fromDate ? dayjs(fromDate).format("DD MMM YYYY") : "All Time"
-    } to ${toDate ? dayjs(toDate).format("DD MMM YYYY") : "All Time"}`;
+    const dateRangeText = `Date Range: ${fromDate ? dayjs(fromDate).format("DD MMM YYYY") : "All Time"
+      } to ${toDate ? dayjs(toDate).format("DD MMM YYYY") : "All Time"}`;
     doc.text(dateRangeText, 14, 40);
 
     doc.text(`Generated On: ${dayjs().format("DD MMM YYYY hh:mm A")}`, 14, 47);
@@ -335,7 +342,11 @@ export default function ProfitReport() {
 
   return (
     <Box className="p-4 min-h-screen bg-[#f8fafc]">
-      <Typography fontSize={30} fontWeight={700} mb={3} color="#111827">
+      <Typography
+        fontSize={isMobile ? 24 : 30}
+        fontWeight={isMobile ? 600 : 700}
+        className="text-[#000C5A]"
+      >
         Profit Analytics
       </Typography>
 
@@ -344,128 +355,178 @@ export default function ProfitReport() {
         sx={{
           p: 3,
           mb: 4,
-          borderRadius: 4,
-          boxShadow: 2,
+          borderRadius: "20px",
+          background: "linear-gradient(135deg, #ffffff, #f8fafc)",
+          boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+          border: "1px solid #e2e8f0",
         }}
       >
-        <Typography fontWeight={600} mb={2}>
+        <Typography fontWeight={700} mb={2} className="text-slate-800">
           Select Date Range
         </Typography>
 
-        <Stack direction="row" spacing={2} flexWrap="wrap" mb={3}>
+        {/* QUICK FILTERS */}
+        <Box className="flex flex-wrap gap-2 mb-4">
           {quickRanges.map((range) => (
-            <Chip
+            <Box
               key={range.label}
-              label={range.label}
-              clickable
-              color={activeRange === range.label ? "primary" : "default"}
               onClick={() => handleQuickRange(range)}
-            />
+              className={`
+          px-4 py-1.5 rounded-full text-sm cursor-pointer transition-all
+          ${activeRange === range.label
+                  ? "bg-blue-600 text-white shadow-md"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }
+        `}
+            >
+              {range.label}
+            </Box>
           ))}
-        </Stack>
+        </Box>
 
+        {/* DATE + ACTIONS */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={3}>
+          <Box className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+
+            {/* FROM DATE */}
+            <Box className="bg-white rounded-xl border border-slate-200 px-3 py-2 shadow-sm">
+              <Typography className="text-xs text-slate-400 mb-1">
+                From Date
+              </Typography>
               <DatePicker
-                label="From Date"
                 value={fromDate}
                 onChange={(val) => setFromDate(val)}
+                slotProps={{
+                  textField: {
+                    variant: "standard",
+                    InputProps: { disableUnderline: true },
+                  },
+                }}
               />
-            </Grid>
+            </Box>
 
-            <Grid item xs={12} md={3}>
+            {/* TO DATE */}
+            <Box className="bg-white rounded-xl border border-slate-200 px-3 py-2 shadow-sm">
+              <Typography className="text-xs text-slate-400 mb-1">
+                To Date
+              </Typography>
               <DatePicker
-                label="To Date"
                 value={toDate}
                 onChange={(val) => setToDate(val)}
+                slotProps={{
+                  textField: {
+                    variant: "standard",
+                    InputProps: { disableUnderline: true },
+                  },
+                }}
               />
-            </Grid>
+            </Box>
 
-            <Grid item xs={12} md={6}>
-              <Box display="flex" gap={2}>
-                <Button
-                  variant="contained"
-                  onClick={() => setShowReport(true)}
-                  sx={{
-                    height: 55,
-                    borderRadius: 3,
-                  }}
-                >
-                  Generate Report
-                </Button>
+            {/* GENERATE BUTTON */}
+            <Button
+              onClick={() => setShowReport(true)}
+              className="h-[50px] rounded-xl font-semibold normal-case"
+              sx={{
+                background: "linear-gradient(135deg,#2563eb,#1e3a8a)",
+                color: "#fff",
+                boxShadow: "0 6px 20px rgba(37,99,235,0.3)",
+                "&:hover": {
+                  background: "linear-gradient(135deg,#1e3a8a,#2563eb)",
+                },
+              }}
+            >
+              Generate Report
+            </Button>
 
-                <Button
-                  variant="outlined"
-                  color="success"
-                  startIcon={<FileDownload />}
-                  onClick={exportToPDF}
-                  disabled={!showReport}
-                  sx={{
-                    height: 55,
-                    borderRadius: 3,
-                  }}
-                >
-                  Export PDF
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
+            {/* EXPORT BUTTON */}
+            <Button
+              onClick={exportToPDF}
+              disabled={!showReport}
+              startIcon={<FileDownload />}
+              className="h-[50px] rounded-xl font-semibold normal-case"
+              sx={{
+                border: "1px solid #e2e8f0",
+                color: showReport ? "#0f172a" : "#94a3b8",
+                background: "#fff",
+              }}
+            >
+              Export PDF
+            </Button>
+
+          </Box>
         </LocalizationProvider>
       </Paper>
 
       {showReport && (
         <>
           {/* Summary Cards */}
-          <Grid container spacing={3}>
+          <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+
             {reportCards.map((card, index) => (
-              <Grid item xs={12} md={4} lg={2.4} key={index}>
-                <Card
+              <Box
+                key={index}
+                className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 
+      hover:shadow-lg transition-all duration-300 flex items-center justify-between"
+              >
+                {/* LEFT */}
+                <Box>
+                  <Typography className="text-sm text-slate-500">
+                    {card.title}
+                  </Typography>
+
+                  <Typography
+                    className="text-xl font-bold mt-1"
+                    sx={{ color: card.color }}
+                  >
+                    ₹{card.value.toFixed(2)}
+                  </Typography>
+                </Box>
+
+                {/* ICON */}
+                <Box
+                  className="h-10 w-10 flex items-center justify-center rounded-xl"
                   sx={{
-                    borderRadius: 4,
-                    boxShadow: 3,
+                    background: `${card.color}15`,
+                    color: card.color,
                   }}
                 >
-                  <CardContent>
-                    <Box display="flex" justifyContent="space-between">
-                      <Box>
-                        <Typography color="gray">{card.title}</Typography>
-
-                        <Typography
-                          fontSize={24}
-                          fontWeight={700}
-                          color={card.color}
-                        >
-                          ₹{card.value.toFixed(2)}
-                        </Typography>
-                      </Box>
-
-                      <Box color={card.color}>{card.icon}</Box>
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  {card.icon}
+                </Box>
+              </Box>
             ))}
-          </Grid>
+
+          </Box>
 
           {/* Profit Margin */}
           <Paper
             sx={{
-              p: 3,
               mt: 4,
-              borderRadius: 4,
+              p: 4,
+              borderRadius: "20px",
+              background: "linear-gradient(135deg, #f8fafc, #ffffff)",
+              border: "1px solid #e2e8f0",
               textAlign: "center",
             }}
           >
-            <Typography color="gray">Profit Margin</Typography>
+            <Typography fontSize={20} fontWeight={600} className="text-slate-500 mb-2">
+              Profit Margin
+            </Typography>
 
             <Typography
-              fontSize={38}
-              fontWeight={700}
-              color={profitSummary.netProfit >= 0 ? "green" : "red"}
+              fontWeight={600}
+              className="text-5xl font-extrabold"
+              sx={{
+                color:
+                  profitSummary.netProfit >= 0 ? "#16a34a" : "#dc2626",
+              }}
             >
               {profitSummary.profitMargin}%
             </Typography>
+
+            {/* Optional subtle line */}
+            <Box fontSize={16} className="mt-3 text-xs text-slate-400">
+              Based on revenue vs expenses
+            </Box>
           </Paper>
 
           {/* Expense Breakdown */}
@@ -473,33 +534,38 @@ export default function ProfitReport() {
             sx={{
               p: 3,
               mt: 4,
-              borderRadius: 4,
+              borderRadius: "20px",
+              border: "1px solid #e2e8f0",
+              background: "#ffffff",
             }}
           >
-            <Typography fontSize={22} fontWeight={700} mb={3}>
-              Expense Breakdown
+            <Typography fontSize={20} fontWeight={600} mb={3}>
+              💸 Expense Breakdown
             </Typography>
 
             {Object.keys(expenseCategorySummary).length === 0 ? (
-              <Typography>No expenses found</Typography>
+              <Box className="flex flex-col items-center justify-center py-10 text-slate-400">
+                <Typography>No expenses found</Typography>
+              </Box>
             ) : (
-              Object.entries(expenseCategorySummary).map(
-                ([category, amount]) => (
-                  <Box
-                    key={category}
-                    display="flex"
-                    justifyContent="space-between"
-                    py={1.5}
-                    borderBottom="1px solid #eee"
-                  >
-                    <Typography>{category}</Typography>
+              <Box className="flex flex-col divide-y divide-slate-100">
+                {Object.entries(expenseCategorySummary).map(
+                  ([category, amount]) => (
+                    <Box
+                      key={category}
+                      className="flex justify-between items-center py-3 hover:bg-slate-50 px-2 rounded-lg transition"
+                    >
+                      <Typography className="text-slate-600">
+                        {category}
+                      </Typography>
 
-                    <Typography fontWeight={600}>
-                      ₹{amount.toFixed(2)}
-                    </Typography>
-                  </Box>
-                ),
-              )
+                      <Typography className="font-semibold text-red-500">
+                        ₹{amount.toFixed(2)}
+                      </Typography>
+                    </Box>
+                  )
+                )}
+              </Box>
             )}
           </Paper>
         </>

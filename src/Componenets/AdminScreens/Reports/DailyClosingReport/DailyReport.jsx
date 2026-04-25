@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, CardContent } from "@mui/material";
+import { Card, CardContent, useMediaQuery, useTheme } from "@mui/material";
 import {
   Box,
   Typography,
@@ -22,6 +22,7 @@ import {
   Percent,
   PictureAsPdf,
 } from "@mui/icons-material";
+import { motion } from "framer-motion";
 
 import { getBills } from "@/service/billsService";
 import dayjs from "dayjs";
@@ -38,6 +39,12 @@ const cardStyle = {
 };
 
 export default function DailyReport() {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
   const [billsData, setBillsData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -275,6 +282,20 @@ export default function DailyReport() {
     );
   }
 
+
+  const breakdownCardStyle = {
+    p: 3,
+    borderRadius: "20px",
+    background: "linear-gradient(135deg, #ffffff, #f8fafc)",
+    boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
+    border: "1px solid #e2e8f0",
+    transition: "0.3s",
+    "&:hover": {
+      transform: "translateY(-5px)",
+      boxShadow: "0 12px 25px rgba(0,0,0,0.1)",
+    },
+  };
+
   return (
     <Box
       sx={{
@@ -296,11 +317,9 @@ export default function DailyReport() {
       >
         <Box>
           <Typography
-            sx={{
-              fontSize: "42px",
-              fontWeight: 700,
-              color: "#0f172a",
-            }}
+            fontSize={isMobile ? 24 : 30}
+            fontWeight={isMobile ? 600 : 700}
+            className="text-[#000C5A]"
           >
             Daily Report
           </Typography>
@@ -315,139 +334,164 @@ export default function DailyReport() {
             Analyze your daily sales performance
           </Typography>
         </Box>
-
+ {isDesktop && (
         <Button
           startIcon={<PictureAsPdf />}
           variant="contained"
           onClick={handleExportPDF}
           sx={{
-            background: "#1976d2",
-            borderRadius: "12px",
-            px: 3,
-            py: 1.2,
+            borderRadius: 2,
             textTransform: "none",
-            boxShadow: "0px 4px 12px rgba(25,118,210,0.25)",
+            background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
+            px: 3,
+            py: 1
           }}
         >
           Export PDF
         </Button>
+      )}
       </Box>
 
-      {/* MAIN SUMMARY CARD */}
       <Paper
         elevation={0}
         sx={{
-          p: 4,
-          borderRadius: "16px",
-          border: "1px solid #e2e8f0",
+          ...breakdownCardStyle,
+          p: 3,
+          borderRadius: "20px",
+          background: "linear-gradient(135deg, #ffffff, #f1f5f9)",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.05)",
+          border: "1px solid rgba(255,255,255,0.3)",
+          backdropFilter: "blur(10px)",
           mb: 4,
         }}
       >
-        <Grid container spacing={4}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography color="#64748b">Total Sales</Typography>
-            <Typography fontSize={32} fontWeight={700} color="#16a34a">
-              ₹{summary.totalSales.toFixed(2)}
-            </Typography>
-          </Grid>
+        <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography color="#64748b">Orders</Typography>
-            <Typography fontSize={32} fontWeight={700} color="#2563eb">
-              {summary.totalOrders}
-            </Typography>
-          </Grid>
+          {[
+            {
+              label: "Total Sales",
+              value: `₹${summary.totalSales.toFixed(2)}`,
+              color: "#16a34a",
+              icon: <CurrencyRupee />,
+            },
+            {
+              label: "Orders",
+              value: summary.totalOrders,
+              color: "#2563eb",
+              icon: <ShoppingCart />,
+            },
+            {
+              label: "Discount",
+              value: `₹${summary.discount.toFixed(2)}`,
+              color: "#dc2626",
+              icon: <Percent />,
+            },
+            {
+              label: "GST",
+              value: `₹${summary.gst.toFixed(2)}`,
+              color: "#f59e0b",
+              icon: <Payments />,
+            },
+          ].map((item, i) => (
+            <Box
+              key={i}
+              className="flex items-center gap-3 p-3 rounded-xl "
+            >
+              {/* Icon */}
+              <Avatar
+                sx={{
+                  bgcolor: item.color,
+                  width: 44,
+                  height: 44,
+                }}
+              >
+                {item.icon}
+              </Avatar>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography color="#64748b">Discount</Typography>
-            <Typography fontSize={32} fontWeight={700} color="#dc2626">
-              ₹{summary.discount.toFixed(2)}
-            </Typography>
-          </Grid>
+              {/* Text */}
+              <Box>
+                <Typography fontSize={20} fontWeight={600} className="text-slate-500">
+                  {item.label}
+                </Typography>
 
-          <Grid item xs={12} sm={6} md={3}>
-            <Typography color="#64748b">GST</Typography>
-            <Typography fontSize={32} fontWeight={700} color="#f59e0b">
-              ₹{summary.gst.toFixed(2)}
-            </Typography>
-          </Grid>
-        </Grid>
+                <Typography
+                  className="font-bold text-lg"
+                  sx={{ color: item.color }}
+                >
+                  {item.value}
+                </Typography>
+              </Box>
+            </Box>
+          ))}
+
+        </Box>
       </Paper>
 
       {/* BREAKDOWN CARDS */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              borderRadius: "16px",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <Typography fontSize={22} fontWeight={600} mb={3}>
-              Payment Breakdown
-            </Typography>
+      <Box className="grid grid-cols-1 gap-4">
 
-            <Divider sx={{ mb: 2 }} />
+        {/* PAYMENT BREAKDOWN */}
+        <Paper elevation={0} sx={{ ...breakdownCardStyle, cursor: 'default' }}>
+          <Typography fontSize={20} fontWeight={600} mb={2}>
+            💳 Payment Breakdown
+          </Typography>
 
-            {[
-              { label: "Cash", value: summary.cash },
-              { label: "Card", value: summary.card },
-              { label: "UPI", value: summary.upi },
-            ].map((item, index) => (
-              <Box
-                key={index}
-                display="flex"
-                justifyContent="space-between"
-                py={1.5}
-              >
-                <Typography color="#64748b">{item.label}</Typography>
-                <Typography fontWeight={600}>
-                  ₹{item.value.toFixed(2)}
-                </Typography>
-              </Box>
-            ))}
-          </Paper>
-        </Grid>
+          <Divider sx={{ mb: 2 }} />
 
-        <Grid item xs={12} md={6}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              borderRadius: "16px",
-              border: "1px solid #e2e8f0",
-            }}
-          >
-            <Typography fontSize={22} fontWeight={600} mb={3}>
-              Order Breakdown
-            </Typography>
+          {[
+            { label: "Cash", value: summary.cash, icon: "💵" },
+            { label: "Card", value: summary.card, icon: "💳" },
+            { label: "UPI", value: summary.upi, icon: "📱" },
+          ].map((item, index) => (
+            <Box
+              key={index}
+              className="flex justify-between items-center py-2"
+            >
+              <Typography className="text-slate-600">
+                {item.icon} {item.label}
+              </Typography>
 
-            <Divider sx={{ mb: 2 }} />
+              <Typography className="font-bold text-slate-900">
+                ₹{item.value.toFixed(2)}
+              </Typography>
+            </Box>
+          ))}
+        </Paper>
 
-            {[
-              { label: "Dine-In", value: summary.dineIn },
-              { label: "Takeaway", value: summary.takeaway },
-            ].map((item, index) => (
-              <Box
-                key={index}
-                display="flex"
-                justifyContent="space-between"
-                py={1.5}
-              >
-                <Typography color="#64748b">{item.label}</Typography>
-                <Typography fontWeight={600}>{item.value}</Typography>
-              </Box>
-            ))}
-          </Paper>
-        </Grid>
-      </Grid>
+        {/* ORDER BREAKDOWN */}
+        <Paper elevation={0} sx={{ ...breakdownCardStyle, cursor: 'default' }}>
+          <Typography fontSize={20} fontWeight={600} mb={2}>
+            🍽️ Order Breakdown
+          </Typography>
+
+          <Divider sx={{ mb: 2 }} />
+
+          {[
+            { label: "Dine-In", value: summary.dineIn, icon: "🍴" },
+            { label: "Takeaway", value: summary.takeaway, icon: "🥡" },
+          ].map((item, index) => (
+            <Box
+              key={index}
+              className="flex justify-between items-center py-2"
+            >
+              <Typography className="text-slate-600">
+                {item.icon} {item.label}
+              </Typography>
+
+              <Typography className="font-bold text-slate-900">
+                {item.value}
+              </Typography>
+            </Box>
+          ))}
+        </Paper>
+
+      </Box>
 
       {/* HOURLY SALES */}
       <Paper
         elevation={0}
         sx={{
+          ...breakdownCardStyle,
           mt: 4,
           p: 4,
           borderRadius: "16px",
@@ -455,7 +499,7 @@ export default function DailyReport() {
         }}
       >
         <Typography fontSize={22} fontWeight={600} mb={3}>
-          Hourly Sales
+          📊 Hourly Sales
         </Typography>
 
         <Divider sx={{ mb: 2 }} />
@@ -473,10 +517,50 @@ export default function DailyReport() {
           >
             <Typography color="#64748b">{item.hour}</Typography>
 
-            <Typography fontWeight={600}>₹{item.sales.toFixed(2)}</Typography>
+            <Box className="flex items-center gap-3">
+              <Box className="w-24 bg-slate-200 rounded-full h-2 overflow-hidden">
+                <Box
+                  className="bg-blue-500 h-full"
+                  style={{
+                    width: `${Math.min(item.sales / 1000 * 100, 100)}%`,
+                  }}
+                />
+              </Box>
+
+              <Typography className="font-semibold text-slate-900">
+                ₹{item.sales.toFixed(2)}
+              </Typography>
+            </Box>
           </Box>
         ))}
       </Paper>
+
+
+      {(isMobile || isTablet) && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          className="fixed bottom-6 right-6 z-50"
+        >
+          <Box
+            onClick={handleExportPDF}
+            className="
+        h-14 w-14
+        rounded-full
+        bg-gradient-to-br from-[#2563eb] to-[#1e3a8a]
+        flex items-center justify-center
+        shadow-xl
+        cursor-pointer
+        active:scale-95
+        transition-all duration-300
+        hover:shadow-2xl
+      "
+          >
+            <PictureAsPdf sx={{ color: "#fff", fontSize: 26 }} />
+          </Box>
+        </motion.div>
+      )}
     </Box>
   );
 }
