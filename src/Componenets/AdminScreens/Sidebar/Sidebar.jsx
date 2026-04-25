@@ -60,6 +60,16 @@ const reportItems = [
     href: "/admin/reports/gstreport",
     icon: <AccountBalanceWalletIcon fontSize="small" />,
   },
+  {
+    label: "Daily Sales Report",
+    href: "/admin/reports/dailyreport",
+    icon: <Assessment fontSize="small" />,
+  },
+  {
+    label: "Profit Report",
+    href: "/admin/reports/profitreport",
+    icon: <Assessment fontSize="small" />,
+  },
 ];
 
 const settingsItem = {
@@ -107,12 +117,12 @@ export default function Sidebar() {
     // show only for restaurants
     ...(showTables
       ? [
-        {
-          label: "Table Management",
-          href: "/admin/tables",
-          icon: <TableBar fontSize="small" />,
-        },
-      ]
+          {
+            label: "Table Management",
+            href: "/admin/tables",
+            icon: <TableBar fontSize="small" />,
+          },
+        ]
       : []),
 
     // change label dynamically
@@ -141,12 +151,12 @@ export default function Sidebar() {
 
     ...(isBar
       ? [
-        {
-          label: "Bar Inventory",
-          href: "/admin/bar-inventory",
-          icon: <LiquorIcon fontSize="small" />,
-        },
-      ]
+          {
+            label: "Bar Inventory",
+            href: "/admin/bar-inventory",
+            icon: <LiquorIcon fontSize="small" />,
+          },
+        ]
       : []),
 
     {
@@ -428,10 +438,11 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 flex items-center gap-3 px-3 py-2 rounded-lg
       text-[14px] cursor-pointer
-      ${pathname === helpItem.href
-                  ? "font-semibold text-orange-600"
-                  : "text-black"
-                }`}
+      ${
+        pathname === helpItem.href
+          ? "font-semibold text-orange-600"
+          : "text-black"
+      }`}
             >
               {helpItem.icon}
               {helpItem.label}
@@ -443,10 +454,11 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[15px] cursor-pointer
-          ${pathname === settingsItem.href
-                  ? "font-semibold text-orange-600"
-                  : "text-black"
-                }
+          ${
+            pathname === settingsItem.href
+              ? "font-semibold text-orange-600"
+              : "text-black"
+          }
         `}
             >
               {settingsItem.icon}
@@ -554,7 +566,9 @@ export default function Sidebar() {
             alignItems: "center",
           }}
         >
-          <Typography fontWeight={600} fontSize={20}>Reports</Typography>
+          <Typography fontWeight={600} fontSize={20}>
+            Reports
+          </Typography>
 
           <IconButton onClick={() => setOpenReportsDialog(false)}>
             <CloseIcon />
