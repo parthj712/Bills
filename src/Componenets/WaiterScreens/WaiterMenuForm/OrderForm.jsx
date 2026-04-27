@@ -245,20 +245,6 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
   const handleAddAllToOrder = async () => {
     if (!selectedItems.length) return;
 
-    // 🚨 Takeaway name validation
-    if (orderType === "TAKEAWAY") {
-      // if (!customerName.trim()) {
-      //   setNameError("Customer name is required");
-      //   showSnackbar("Please add customer name first", "error");
-      //   document.querySelector("input[label='Customer Name']")?.focus();
-      //   return;
-      // }
-      // if (nameError) {
-      //   showSnackbar("Customer name is invalid", "error");
-      //   return;
-      // }
-    }
-
     try {
       const payload = {
         orderType,
@@ -280,7 +266,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
         })),
         kotMessage,
       };
-      console.log(payload);
+      console.log("payload", payload);
 
       if (orderType === "TAKEAWAY") {
         console.log("hellp");
@@ -697,7 +683,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
                   })}
 
                   {/* Message for Kitchen */}
-                  <TextField
+                  {/* <TextField
                     // inputRef={kotRef}
                     label="KOT Message"
                     placeholder="Ex: No onion, extra spicy..."
@@ -707,7 +693,7 @@ export default function OrderForm({ category, subCategory, setSubCategory }) {
                     onChange={(e) => setKotMessage(e.target.value)}
                     multiline
                     minRows={2}
-                  />
+                  /> */}
 
                   <Box
                     sx={{
