@@ -44,6 +44,8 @@ export default function OrderCart() {
   const searchParams = useSearchParams();
   const [openConfirm, setOpenConfirm] = useState(false);
   const tableId = searchParams.get("tableId");
+  const tableNo = searchParams.get("tableNo");
+
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const isDineIn = orderType === "DINE-IN";
   const [shopInfo, setShopInfo] = useState([]);
@@ -54,6 +56,7 @@ export default function OrderCart() {
   const cartKey = isDineIn ? tableId : orderType;
 
   const [cartItems, setCartItems] = useState([]);
+  const [kotMessage, setKotMessage] = useState("");
 
   const [customerName, setCustomerName] = useState("");
 
@@ -235,8 +238,8 @@ export default function OrderCart() {
 
   <!-- ITEMS -->
   ${cartItems
-        .map(
-          (item) => `
+    .map(
+      (item) => `
       <div style="margin-bottom:6px;">
         <div>${item.name}</div>
 
@@ -250,8 +253,8 @@ export default function OrderCart() {
         </table>
       </div>
     `,
-        )
-        .join("")}
+    )
+    .join("")}
 
   <div class="divider"></div>
 
@@ -262,8 +265,9 @@ export default function OrderCart() {
       <td style="text-align:right;">₹${Number(subtotal.toFixed(2))}</td>
     </tr>
 
-   ${foodSubtotal > 0 && hasGST
-        ? `
+   ${
+     foodSubtotal > 0 && hasGST
+       ? `
     <tr>
       <td>CGST (2.5%)</td>
       <td style="text-align:right;">₹${cgst.toFixed(2)}</td>
@@ -273,10 +277,11 @@ export default function OrderCart() {
       <td style="text-align:right;">₹${sgst.toFixed(2)}</td>
     </tr>
   `
-        : ""
-      }
+       : ""
+   }
 
-    ${liquorSubtotal > 0 && hasVAT
+    ${
+      liquorSubtotal > 0 && hasVAT
         ? `
         <tr>
           <td>VAT (10%)</td>
@@ -284,9 +289,10 @@ export default function OrderCart() {
         </tr>
       `
         : ""
-      }
+    }
 
-    ${discountPercent > 0
+    ${
+      discountPercent > 0
         ? `
     <tr>
       <td style="color:red;">Discount (${discountPercent}%)</td>
@@ -296,7 +302,7 @@ export default function OrderCart() {
     </tr>
   `
         : ""
-      }
+    }
   </table>
 
   <div class="divider"></div>
@@ -318,52 +324,101 @@ export default function OrderCart() {
   };
 
   const formatKOTForPrint = () => {
+    const newItems = cartItems.filter(
+      (item) => !item.kotPrinted && item.qty > 0,
+    );
+
     return `
-    <div style="font-size:18px; font-weight:bold; text-align:center;">
+    <div class="center bold" style="font-size:20px;">
       🔥 KOT
     </div>
 
-
-    <div class="center bold" style="font-size:16px;">
+    <div class="center bold" style="font-size:16px; margin-top:4px;">
       ${shopInfo?.shopName || ""}
     </div>
 
     <div class="divider"></div>
 
-     <div class="center bold" style="font-size:15px;">
-      ${isDineIn ? `TABLE NO: ${tableId}` : "TAKEAWAY ORDER"}
+    <div class="center bold" style="font-size:15px;">
+      ${
+        isDineIn
+          ? `TABLE NO: ${tableNo}`
+          : orderType === "TAKEAWAY"
+            ? "TAKEAWAY ORDER"
+            : "QUICK ORDER"
+      }
     </div>
 
-    <div class="center">
+    <div class="center" style="margin-top:4px;">
       ${orderType}
     </div>
 
-    <div class="center">
+    <div class="center" style="font-size:12px;">
       ${new Date().toLocaleString("en-IN")}
     </div>
 
     <div class="divider"></div>
 
-    ${cartItems
-        .filter((item) => !item.kotPrinted && item.qty > 0) // only new items
-        .map(
-          (item) => `
-        <div style="margin-bottom:6px;">
-          <div class="bold">${item.name} (${item.portion})</div>
-          <div>Qty: ${item.qty}</div>
+    ${newItems
+      .map((item) => {
+        const itemDetails = [
+          item.variantName,
+          item.portion && item.portion !== "full" && item.portion !== "null"
+            ? item.portion
+            : null,
+        ]
+          .filter(Boolean)
+          .join(" • ");
+
+        return `
+          <div style="margin-bottom:10px;">
+            <div class="bold" style="font-size:15px;">
+              ${item.name}
+              ${
+                itemDetails
+                  ? `<span style="font-size:12px;">(${itemDetails})</span>`
+                  : ""
+              }
+            </div>
+
+            <div style="font-size:14px;">
+              Qty: ${item.qty}
+            </div>
+          </div>
+        `;
+      })
+      .join("")}
+
+    ${
+      kotMessage?.trim()
+        ? `
+        <div class="divider"></div>
+
+        <div class="bold center" style="font-size:14px;">
+          SPECIAL INSTRUCTION
         </div>
-      `,
-        )
-        .join("")}
+
+        <div 
+          style="
+            text-align:center;
+            font-size:14px;
+            font-weight:bold;
+            margin-top:6px;
+          "
+        >
+          ${kotMessage}
+        </div>
+      `
+        : ""
+    }
 
     <div class="divider"></div>
 
-    <div class="center">
+    <div class="center" style="font-size:12px;">
       --- END OF KOT ---
     </div>
   `;
   };
-
   const printThermalKOT = () => {
     const printWindow = window.open("", "_blank", "width=400,height=600");
 
@@ -539,9 +594,15 @@ export default function OrderCart() {
 
   const handlePrintKOT = async () => {
     try {
-      await printKot(tableId); // backend update
+      await printKot({
+        tableId,
+        kotMessage,
+      });
 
-      printThermalKOT(); // frontend thermal print
+      printThermalKOT();
+
+      setKotMessage("");
+      setOpenKOT(false);
 
       showSnackbar("KOT Printed", "success");
     } catch (err) {
@@ -593,10 +654,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-              ...item,
-              kotPrinted: true,
-              kotNumber: kotNumber,
-            },
+                ...item,
+                kotPrinted: true,
+                kotNumber: kotNumber,
+              },
         ),
       );
     };
@@ -810,7 +871,7 @@ export default function OrderCart() {
                 fontWeight: 600,
                 "&:hover": { backgroundColor: "#E2E8F0" },
               }}
-              onClick={handlePrintKOT}
+              onClick={() => setOpenKOT(true)}
             />
           ) : (
             <AppButton
@@ -939,6 +1000,16 @@ export default function OrderCart() {
               boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
             }}
           >
+            <TextField
+              fullWidth
+              label="Kitchen Message"
+              placeholder="Example: Less spicy / No onion / Urgent"
+              value={kotMessage}
+              onChange={(e) => setKotMessage(e.target.value)}
+              multiline
+              rows={3}
+              sx={{ mb: 3 }}
+            />
             <BillPreviewKOT
               items={cartItems}
               shopInfo={shopInfo}
