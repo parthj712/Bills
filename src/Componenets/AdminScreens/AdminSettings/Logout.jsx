@@ -53,6 +53,7 @@ export default function Settings() {
   const [editGST, setEditGST] = useState(false);
   const [editVAT, setEditVAT] = useState(false);
   const [editFssai, setEditFssai] = useState(false);
+
   const [subscription, setSubscription] = useState(null);
   const [logoPreview, setLogoPreview] = useState("");
   const [qrPreview, setQrPreview] = useState("");
@@ -61,13 +62,14 @@ export default function Settings() {
   const [qrLoading, setQrLoading] = useState(false);
 
   const [shopData, setShopData] = useState(null);
+
   const isBar = shopData?.businessCategory === "RESTO_BAR";
   const isRetail = shopData?.businessCategory === "RETAIL";
 
   useEffect(() => {
     const fetchSubscription = async () => {
       try {
-        const res = await getSubscriptionExpiry(); // adjust API
+        const res = await getSubscriptionExpiry();
         setSubscription(res.data);
       } catch (err) {
         console.log(err);
@@ -76,6 +78,7 @@ export default function Settings() {
 
     fetchSubscription();
   }, []);
+
   useEffect(() => {
     const fetchInfo = async () => {
       try {
@@ -87,6 +90,7 @@ export default function Settings() {
         setLoading(false);
       }
     };
+
     fetchInfo();
   }, []);
 
@@ -100,19 +104,13 @@ export default function Settings() {
   const handleLogout = async () => {
     try {
       await API.post("/auth/logout");
-
       localStorage.removeItem("token");
-
       showSnackbar("Logout Successful", "success");
-
       router.push("/login");
     } catch (error) {
-      console.error("Logout error:", error);
-
+      console.error(error);
       localStorage.removeItem("token");
-
-      showSnackbar("Logged out (local)", "warning");
-
+      showSnackbar("Logged out locally", "warning");
       router.push("/login");
     }
   };
@@ -131,23 +129,26 @@ export default function Settings() {
 
   const handleSaveFssai = async () => {
     await addOrUpdateFssai({ fssaiNumber: shopData.fssaiNumber });
-    showSnackbar("Fssai Saved ✅");
+    showSnackbar("FSSAI Saved ✅");
     setEditFssai(false);
   };
 
   const handleSaveWebsite = async () => {
     await addWebsite({ website: shopData.website });
     showSnackbar("Website Updated ✅");
+    setEditWebsite(false);
   };
 
   const handleSaveTagline = async () => {
     await addTagline({ tagline: shopData.tagline });
     showSnackbar("Tagline Updated ✅");
+    setEditTagline(false);
   };
 
   const handleLogoChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setLogoLoading(true);
 
     const preview = URL.createObjectURL(file);
@@ -155,12 +156,14 @@ export default function Settings() {
 
     const res = await uploadShopLogo(file);
     setLogoPreview(res.data.logo);
+
     setLogoLoading(false);
   };
 
   const handleQrChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setQrLoading(true);
 
     const preview = URL.createObjectURL(file);
@@ -168,6 +171,7 @@ export default function Settings() {
 
     const res = await uploadShopQR(file);
     setQrPreview(res.data.qr);
+
     setQrLoading(false);
   };
 
@@ -180,6 +184,7 @@ export default function Settings() {
     await removeShopQR();
     setQrPreview("");
   };
+
   const handleRemoveGST = async () => {
     await removeGST();
     setShopData({ ...shopData, gstNumber: "" });
@@ -203,11 +208,13 @@ export default function Settings() {
     setShopData({ ...shopData, tagline: "" });
     showSnackbar("Tagline Removed 🗑️");
   };
+
   const handleRemoveWebsite = async () => {
     await removeWebsite();
     setShopData({ ...shopData, website: "" });
     showSnackbar("Website Removed 🗑️");
   };
+
   if (loading) return <SettingsSkeleton />;
 
   return (
@@ -216,7 +223,7 @@ export default function Settings() {
         minHeight: "100vh",
         px: { xs: 1.5, sm: 3 },
         py: { xs: 2, sm: 3 },
-        // background: "linear-gradient(180deg,#f8fafc,#eef2ff)",
+        width: "100%",
       }}
     >
       <Typography
@@ -228,7 +235,14 @@ export default function Settings() {
         ⚙️ Settings
       </Typography>
 
-      <Box display="flex" flexDirection="column" gap={3} maxWidth={900}>
+      <Box
+        display="flex"
+        flexDirection="column"
+        gap={3}
+        maxWidth={900}
+        mx="auto"
+        width="100%"
+      >
         {/* BUSINESS */}
         <SettingsCard title="Business Info">
           <InfoRow label="Business Name" value={shopData.shopName} />
@@ -236,140 +250,70 @@ export default function Settings() {
           <InfoRow label="Email" value={shopData.email} />
           <InfoRow label="Address" value={shopData.address} multiline />
 
-          <ModernInputCard title="GST">
-            {editGST ? (
-              <>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={shopData.gstNumber || ""}
-                  onChange={(e) =>
-                    setShopData({ ...shopData, gstNumber: e.target.value })
-                  }
-                />
-                <ActionButtons
-                  onCancel={() => setEditGST(false)}
-                  onSave={handleSaveGST}
-                />
-              </>
-            ) : (
-              <DisplayValue
-                value={shopData.gstNumber}
-                onEdit={() => setEditGST(true)}
-                onDelete={handleRemoveGST}
-              />
-            )}
-          </ModernInputCard>
-          <ModernInputCard title="FSSAI">
-            {editFssai ? (
-              <>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={shopData.fssaiNumber || ""}
-                  onChange={(e) =>
-                    setShopData({ ...shopData, fssaiNumber: e.target.value })
-                  }
-                />
-                <ActionButtons
-                  onCancel={() => setEditFssai(false)}
-                  onSave={handleSaveFssai}
-                />
-              </>
-            ) : (
-              <DisplayValue
-                value={shopData.fssaiNumber}
-                onEdit={() => setEditFssai(true)}
-                onDelete={handleRemoveFssai}
-              />
-            )}
-          </ModernInputCard>
+          <EditableField
+            title="GST"
+            value={shopData.gstNumber}
+            edit={editGST}
+            setEdit={setEditGST}
+            onSave={handleSaveGST}
+            onDelete={handleRemoveGST}
+            field="gstNumber"
+            shopData={shopData}
+            setShopData={setShopData}
+          />
+
+          <EditableField
+            title="FSSAI"
+            value={shopData.fssaiNumber}
+            edit={editFssai}
+            setEdit={setEditFssai}
+            onSave={handleSaveFssai}
+            onDelete={handleRemoveFssai}
+            field="fssaiNumber"
+            shopData={shopData}
+            setShopData={setShopData}
+          />
 
           {isBar && (
-            <ModernInputCard title="VAT">
-              {editVAT ? (
-                <>
-                  <TextField
-                    fullWidth
-                    size="small"
-                    value={shopData.vatNumber || ""}
-                    onChange={(e) =>
-                      setShopData({ ...shopData, vatNumber: e.target.value })
-                    }
-                  />
-                  <ActionButtons
-                    onCancel={() => setEditVAT(false)}
-                    onSave={handleSaveVat}
-                  />
-                </>
-              ) : (
-                <DisplayValue
-                  value={shopData.vatNumber}
-                  onEdit={() => setEditVAT(true)}
-                  onDelete={handleRemoveVAT}
-                />
-              )}
-            </ModernInputCard>
+            <EditableField
+              title="VAT"
+              value={shopData.vatNumber}
+              edit={editVAT}
+              setEdit={setEditVAT}
+              onSave={handleSaveVat}
+              onDelete={handleRemoveVAT}
+              field="vatNumber"
+              shopData={shopData}
+              setShopData={setShopData}
+            />
           )}
         </SettingsCard>
 
         {/* BRANDING */}
         <SettingsCard title="Branding">
-          <ModernInputCard title="Website">
-            {editWebsite ? (
-              <>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={shopData.website || ""}
-                  onChange={(e) =>
-                    setShopData({ ...shopData, website: e.target.value })
-                  }
-                />
-                <ActionButtons
-                  onCancel={() => setEditWebsite(false)}
-                  onSave={() => {
-                    handleSaveWebsite();
-                    setEditWebsite(false);
-                  }}
-                />
-              </>
-            ) : (
-              <DisplayValue
-                value={shopData.website}
-                onEdit={() => setEditWebsite(true)}
-                onDelete={handleRemoveWebsite}
-              />
-            )}
-          </ModernInputCard>
+          <EditableField
+            title="Website"
+            value={shopData.website}
+            edit={editWebsite}
+            setEdit={setEditWebsite}
+            onSave={handleSaveWebsite}
+            onDelete={handleRemoveWebsite}
+            field="website"
+            shopData={shopData}
+            setShopData={setShopData}
+          />
 
-          <ModernInputCard title="Tagline">
-            {editTagline ? (
-              <>
-                <TextField
-                  fullWidth
-                  size="small"
-                  value={shopData.tagline || ""}
-                  onChange={(e) =>
-                    setShopData({ ...shopData, tagline: e.target.value })
-                  }
-                />
-                <ActionButtons
-                  onCancel={() => setEditTagline(false)}
-                  onSave={() => {
-                    handleSaveTagline();
-                    setEditTagline(false);
-                  }}
-                />
-              </>
-            ) : (
-              <DisplayValue
-                value={shopData.tagline}
-                onEdit={() => setEditTagline(true)}
-                onDelete={handleRemoveTagline}
-              />
-            )}
-          </ModernInputCard>
+          <EditableField
+            title="Tagline"
+            value={shopData.tagline}
+            edit={editTagline}
+            setEdit={setEditTagline}
+            onSave={handleSaveTagline}
+            onDelete={handleRemoveTagline}
+            field="tagline"
+            shopData={shopData}
+            setShopData={setShopData}
+          />
 
           <Box
             display="grid"
@@ -383,6 +327,7 @@ export default function Settings() {
               onRemove={handleRemoveLogo}
               onUpload={handleLogoChange}
             />
+
             <UploadCard
               title="QR Code"
               preview={qrPreview}
@@ -394,101 +339,63 @@ export default function Settings() {
         </SettingsCard>
 
         {!isRetail && (
-          <>
-            {/* FEEDBACK */}
-            <SettingsCard title="Feedback">
-              <FeedbackQRSection />
-            </SettingsCard>
-          </>
+          <SettingsCard title="Feedback">
+            <FeedbackQRSection />
+          </SettingsCard>
         )}
 
+        {/* SUBSCRIPTION */}
         {subscription && (
           <Paper
             sx={{
-              p: 3,
+              p: { xs: 2, sm: 3 },
               borderRadius: 4,
               background: "linear-gradient(135deg, #f8fafc, #eef2ff)",
               border: "1px solid #e2e8f0",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
             }}
           >
-            {/* HEADER */}
             <Box
               display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
               justifyContent="space-between"
-              alignItems="center"
+              gap={1}
               mb={2}
             >
-              <Typography fontWeight={700} fontSize={18}>
-                Subscription
-              </Typography>
+              <Typography fontWeight={700}>Subscription</Typography>
 
-              {/* STATUS BADGE */}
-              <Box
-                sx={{
-                  px: 1.5,
-                  py: 0.5,
-                  borderRadius: 2,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  background:
-                    subscription.status === "ACTIVE" ? "#dcfce7" : "#fee2e2",
-                  color:
-                    subscription.status === "ACTIVE" ? "#166534" : "#991b1b",
-                }}
-              >
-                {subscription.status}
-              </Box>
+              <Typography fontWeight={600}>{subscription.status}</Typography>
             </Box>
 
-            {/* PLAN */}
-            <Typography fontSize={14} color="text.secondary">
-              Current Plan
-            </Typography>
-            <Typography fontWeight={700} fontSize={20} mb={2}>
+            <Typography color="text.secondary">Current Plan</Typography>
+
+            <Typography fontWeight={700} mb={2}>
               {subscription.planType}
             </Typography>
 
-            {/* DETAILS */}
-            <Box display="flex" justifyContent="space-between" mb={1}>
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+              mb={1}
+            >
               <Typography color="text.secondary">Days Remaining</Typography>
-              <Typography
-                fontWeight={600}
-                color={subscription.daysLeft <= 3 ? "error" : "text.primary"}
-              >
+
+              <Typography fontWeight={600}>
                 {subscription.daysLeft} days
               </Typography>
             </Box>
 
-            <Box display="flex" justifyContent="space-between">
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
+              justifyContent="space-between"
+            >
               <Typography color="text.secondary">Expires On</Typography>
+
               <Typography fontWeight={600}>
                 {new Date(subscription.expiresAt).toLocaleDateString()}
               </Typography>
             </Box>
-
-            {/* PROGRESS BAR */}
-            <Box
-              mt={2}
-              sx={{
-                height: 6,
-                borderRadius: 10,
-                background: "#e5e7eb",
-                overflow: "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  height: "100%",
-                  width: `${Math.min(subscription.daysLeft * 10, 100)}%`,
-                  background:
-                    subscription.daysLeft <= 3 ? "#ef4444" : "#6366f1",
-                  transition: "0.4s",
-                }}
-              />
-            </Box>
-
-            {/* OPTIONAL CTA */}
           </Paper>
         )}
 
@@ -513,8 +420,10 @@ export default function Settings() {
             Are you sure you want to logout?
           </DialogContentText>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={() => setOpenLogoutDialog(false)}>Cancel</Button>
+
           <Button color="error" onClick={handleLogout}>
             Logout
           </Button>
@@ -524,14 +433,21 @@ export default function Settings() {
   );
 }
 
-/* ---------- UI COMPONENTS ---------- */
+/* ---------------- COMPONENTS ---------------- */
 
 function SettingsCard({ title, children }) {
   return (
-    <Paper sx={{ p: 3, borderRadius: 3 }}>
+    <Paper
+      sx={{
+        p: { xs: 2, sm: 3 },
+        borderRadius: 3,
+        width: "100%",
+      }}
+    >
       <Typography fontWeight={700} mb={2}>
         {title}
       </Typography>
+
       <Box display="flex" flexDirection="column" gap={2}>
         {children}
       </Box>
@@ -539,25 +455,84 @@ function SettingsCard({ title, children }) {
   );
 }
 
-function ModernInputCard({ title, children }) {
+function EditableField({
+  title,
+  value,
+  edit,
+  setEdit,
+  onSave,
+  onDelete,
+  field,
+  shopData,
+  setShopData,
+}) {
   return (
-    <Box sx={{ p: 2, border: "1px solid #e2e8f0", borderRadius: 3 }}>
+    <Box
+      sx={{
+        p: { xs: 1.5, sm: 2 },
+        border: "1px solid #e2e8f0",
+        borderRadius: 3,
+      }}
+    >
       <Typography fontSize={13} fontWeight={600} mb={1}>
         {title}
       </Typography>
-      {children}
+
+      {edit ? (
+        <>
+          <TextField
+            fullWidth
+            size="small"
+            value={value || ""}
+            onChange={(e) =>
+              setShopData({
+                ...shopData,
+                [field]: e.target.value,
+              })
+            }
+          />
+
+          <ActionButtons onCancel={() => setEdit(false)} onSave={onSave} />
+        </>
+      ) : (
+        <DisplayValue
+          value={value}
+          onEdit={() => setEdit(true)}
+          onDelete={onDelete}
+        />
+      )}
     </Box>
   );
 }
 
 function DisplayValue({ value, onEdit, onDelete }) {
   return (
-    <Box display="flex" justifyContent="space-between" alignItems="center">
-      <Typography fontWeight={600}>{value || "— Not Added —"}</Typography>
+    <Box
+      display="flex"
+      flexDirection={{ xs: "column", sm: "row" }}
+      justifyContent="space-between"
+      alignItems={{ xs: "flex-start", sm: "center" }}
+      gap={1}
+    >
+      <Typography
+        fontWeight={600}
+        sx={{
+          wordBreak: "break-word",
+        }}
+      >
+        {value || "— Not Added —"}
+      </Typography>
 
       <Box display="flex" gap={1}>
-        <Button onClick={onEdit}>✏️</Button>
-        {value && <Button onClick={onDelete}>🗑️</Button>}
+        <Button size="small" onClick={onEdit}>
+          ✏️
+        </Button>
+
+        {value && (
+          <Button size="small" onClick={onDelete}>
+            🗑️
+          </Button>
+        )}
       </Box>
     </Box>
   );
@@ -574,6 +549,7 @@ function ActionButtons({ onCancel, onSave }) {
       <Button fullWidth variant="outlined" onClick={onCancel}>
         Cancel
       </Button>
+
       <Button fullWidth variant="contained" onClick={onSave}>
         Save
       </Button>
@@ -589,18 +565,36 @@ function UploadCard({ title, preview, loading, onRemove, onUpload }) {
         border: "1px solid #e2e8f0",
         borderRadius: 3,
         textAlign: "center",
+        width: "100%",
       }}
     >
       <Typography fontWeight={600}>{title}</Typography>
 
       {loading ? (
-        <CircularProgress size={24} />
+        <Box mt={2}>
+          <CircularProgress size={24} />
+        </Box>
       ) : preview ? (
-        <Box position="relative">
-          <img src={preview} style={{ height: 80, borderRadius: 8 }} />
+        <Box position="relative" mt={2} display="flex" justifyContent="center">
+          <img
+            src={preview}
+            alt={title}
+            style={{
+              maxWidth: "100%",
+              height: "80px",
+              objectFit: "contain",
+              borderRadius: 8,
+            }}
+          />
+
           <Button
             onClick={onRemove}
-            sx={{ position: "absolute", top: -10, right: -10 }}
+            sx={{
+              position: "absolute",
+              top: -10,
+              right: 0,
+              minWidth: "unset",
+            }}
           >
             ✕
           </Button>

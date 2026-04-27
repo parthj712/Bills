@@ -38,7 +38,6 @@ import { getBills } from "@/service/billsService";
 import { getExpense } from "@/service/expenseService";
 
 export default function ProfitReport() {
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
@@ -217,8 +216,9 @@ export default function ProfitReport() {
     doc.setFontSize(11);
     doc.setFont("helvetica", "normal");
 
-    const dateRangeText = `Date Range: ${fromDate ? dayjs(fromDate).format("DD MMM YYYY") : "All Time"
-      } to ${toDate ? dayjs(toDate).format("DD MMM YYYY") : "All Time"}`;
+    const dateRangeText = `Date Range: ${
+      fromDate ? dayjs(fromDate).format("DD MMM YYYY") : "All Time"
+    } to ${toDate ? dayjs(toDate).format("DD MMM YYYY") : "All Time"}`;
     doc.text(dateRangeText, 14, 40);
 
     doc.text(`Generated On: ${dayjs().format("DD MMM YYYY hh:mm A")}`, 14, 47);
@@ -373,10 +373,11 @@ export default function ProfitReport() {
               onClick={() => handleQuickRange(range)}
               className={`
           px-4 py-1.5 rounded-full text-sm cursor-pointer transition-all
-          ${activeRange === range.label
-                  ? "bg-blue-600 text-white shadow-md"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }
+          ${
+            activeRange === range.label
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          }
         `}
             >
               {range.label}
@@ -387,7 +388,6 @@ export default function ProfitReport() {
         {/* DATE + ACTIONS */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <Box className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-
             {/* FROM DATE */}
             <Box className="bg-white rounded-xl border border-slate-200 px-3 py-2 shadow-sm">
               <Typography className="text-xs text-slate-400 mb-1">
@@ -452,7 +452,6 @@ export default function ProfitReport() {
             >
               Export PDF
             </Button>
-
           </Box>
         </LocalizationProvider>
       </Paper>
@@ -461,16 +460,15 @@ export default function ProfitReport() {
         <>
           {/* Summary Cards */}
           <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-
             {reportCards.map((card, index) => (
               <Box
                 key={index}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 
+                className="bg-white  rounded-2xl p-4 shadow-sm border border-slate-200 
       hover:shadow-lg transition-all duration-300 flex items-center justify-between"
               >
                 {/* LEFT */}
                 <Box>
-                  <Typography className="text-sm text-slate-500">
+                  <Typography className="text-sm text-black">
                     {card.title}
                   </Typography>
 
@@ -494,7 +492,6 @@ export default function ProfitReport() {
                 </Box>
               </Box>
             ))}
-
           </Box>
 
           {/* Profit Margin */}
@@ -508,7 +505,11 @@ export default function ProfitReport() {
               textAlign: "center",
             }}
           >
-            <Typography fontSize={20} fontWeight={600} className="text-slate-500 mb-2">
+            <Typography
+              fontSize={20}
+              fontWeight={600}
+              className="text-slate-500 mb-2"
+            >
               Profit Margin
             </Typography>
 
@@ -516,8 +517,7 @@ export default function ProfitReport() {
               fontWeight={600}
               className="text-5xl font-extrabold"
               sx={{
-                color:
-                  profitSummary.netProfit >= 0 ? "#16a34a" : "#dc2626",
+                color: profitSummary.netProfit >= 0 ? "#16a34a" : "#dc2626",
               }}
             >
               {profitSummary.profitMargin}%
@@ -563,7 +563,7 @@ export default function ProfitReport() {
                         ₹{amount.toFixed(2)}
                       </Typography>
                     </Box>
-                  )
+                  ),
                 )}
               </Box>
             )}

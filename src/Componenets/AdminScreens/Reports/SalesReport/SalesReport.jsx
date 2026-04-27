@@ -77,12 +77,12 @@ export default function SalesReport() {
     // show ONLY if shop supports tables
     ...(isDineIn
       ? [
-        {
-          label: "Dine-In",
-          value: "DINEIN",
-          icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
-        },
-      ]
+          {
+            label: "Dine-In",
+            value: "DINEIN",
+            icon: <RestaurantIcon sx={{ fontSize: 18 }} />,
+          },
+        ]
       : []),
 
     {
@@ -112,7 +112,6 @@ export default function SalesReport() {
   useEffect(() => {
     fetchShopData();
   }, []);
-  console.log("billData", billsData);
 
   const filteredBills = useMemo(() => {
     return billsData.filter((b) => {

@@ -12,17 +12,20 @@ import {
   MenuBook,
 } from "@mui/icons-material";
 import FeedbackIcon from "@mui/icons-material/Feedback";
-import Inventory2Icon from "@mui/icons-material/Inventory2";
 import CloseIcon from "@mui/icons-material/Close";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import LocalAtmIcon from "@mui/icons-material/LocalAtm";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { getShopInfo } from "@/service/shopService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
-import LockIcon from "@mui/icons-material/Lock";
+
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import { Box, Dialog, IconButton, Typography } from "@mui/material";
 import NewReleasesIcon from "@mui/icons-material/NewReleases";
@@ -32,32 +35,42 @@ const reportItems = [
   {
     label: "Sales Report",
     href: "/admin/reports/salesreport",
-    icon: <Assessment fontSize="small" />,
+    icon: <ReceiptLongIcon fontSize="small" />, // sales invoices/report
   },
   {
     label: "Item Report",
     href: "/admin/reports/itemsreport",
-    icon: <Inventory2Icon fontSize="small" />,
+    icon: <Inventory2Icon fontSize="small" />, // inventory/items
   },
   {
     label: "Expense Report",
     href: "/admin/reports/expensereport",
-    icon: <AccountBalanceWalletIcon fontSize="small" />,
+    icon: <AccountBalanceWalletIcon fontSize="small" />, // expenses
   },
   {
     label: "Gst Report",
     href: "/admin/reports/gstreport",
-    icon: <AccountBalanceWalletIcon fontSize="small" />,
+    icon: <LocalAtmIcon fontSize="small" />, // tax/money
   },
   {
     label: "Daily Sales Report",
     href: "/admin/reports/dailyreport",
-    icon: <Assessment fontSize="small" />,
+    icon: <Assessment fontSize="small" />, // daily summary
   },
   {
     label: "Profit Report",
     href: "/admin/reports/profitreport",
-    icon: <Assessment fontSize="small" />,
+    icon: <TrendingUpIcon fontSize="small" />, // profit growth
+  },
+  {
+    label: "Orders Report",
+    href: "/admin/reports/ordersreport",
+    icon: <ShoppingCartIcon fontSize="small" />, // orders
+  },
+  {
+    label: "Discount Report",
+    href: "/admin/reports/discountreport",
+    icon: <LocalOfferIcon fontSize="small" />, // orders
   },
 ];
 
