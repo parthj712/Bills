@@ -39,11 +39,10 @@ const cardStyle = {
 };
 
 export default function DailyReport() {
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "lg"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("lg"));
 
   const [billsData, setBillsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -282,7 +281,6 @@ export default function DailyReport() {
     );
   }
 
-
   const breakdownCardStyle = {
     p: 3,
     borderRadius: "20px",
@@ -334,22 +332,22 @@ export default function DailyReport() {
             Analyze your daily sales performance
           </Typography>
         </Box>
- {isDesktop && (
-        <Button
-          startIcon={<PictureAsPdf />}
-          variant="contained"
-          onClick={handleExportPDF}
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
-            px: 3,
-            py: 1
-          }}
-        >
-          Export PDF
-        </Button>
-      )}
+        {isDesktop && (
+          <Button
+            startIcon={<PictureAsPdf />}
+            variant="contained"
+            onClick={handleExportPDF}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              background: "linear-gradient(135deg,#0b3c5d,#1976d2)",
+              px: 3,
+              py: 1,
+            }}
+          >
+            Export PDF
+          </Button>
+        )}
       </Box>
 
       <Paper
@@ -366,7 +364,6 @@ export default function DailyReport() {
         }}
       >
         <Box className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-
           {[
             {
               label: "Total Sales",
@@ -393,10 +390,7 @@ export default function DailyReport() {
               icon: <Payments />,
             },
           ].map((item, i) => (
-            <Box
-              key={i}
-              className="flex items-center gap-3 p-3 rounded-xl "
-            >
+            <Box key={i} className="flex items-center gap-3 p-3 rounded-xl ">
               {/* Icon */}
               <Avatar
                 sx={{
@@ -410,7 +404,11 @@ export default function DailyReport() {
 
               {/* Text */}
               <Box>
-                <Typography fontSize={20} fontWeight={600} className="text-slate-500">
+                <Typography
+                  fontSize={20}
+                  fontWeight={600}
+                  className="text-slate-500"
+                >
                   {item.label}
                 </Typography>
 
@@ -423,15 +421,13 @@ export default function DailyReport() {
               </Box>
             </Box>
           ))}
-
         </Box>
       </Paper>
 
       {/* BREAKDOWN CARDS */}
       <Box className="grid grid-cols-1 gap-4">
-
         {/* PAYMENT BREAKDOWN */}
-        <Paper elevation={0} sx={{ ...breakdownCardStyle, cursor: 'default' }}>
+        <Paper elevation={0} sx={{ ...breakdownCardStyle, cursor: "default" }}>
           <Typography fontSize={20} fontWeight={600} mb={2}>
             💳 Payment Breakdown
           </Typography>
@@ -443,10 +439,7 @@ export default function DailyReport() {
             { label: "Card", value: summary.card, icon: "💳" },
             { label: "UPI", value: summary.upi, icon: "📱" },
           ].map((item, index) => (
-            <Box
-              key={index}
-              className="flex justify-between items-center py-2"
-            >
+            <Box key={index} className="flex justify-between items-center py-2">
               <Typography className="text-slate-600">
                 {item.icon} {item.label}
               </Typography>
@@ -459,7 +452,7 @@ export default function DailyReport() {
         </Paper>
 
         {/* ORDER BREAKDOWN */}
-        <Paper elevation={0} sx={{ ...breakdownCardStyle, cursor: 'default' }}>
+        <Paper elevation={0} sx={{ ...breakdownCardStyle, cursor: "default" }}>
           <Typography fontSize={20} fontWeight={600} mb={2}>
             🍽️ Order Breakdown
           </Typography>
@@ -470,10 +463,7 @@ export default function DailyReport() {
             { label: "Dine-In", value: summary.dineIn, icon: "🍴" },
             { label: "Takeaway", value: summary.takeaway, icon: "🥡" },
           ].map((item, index) => (
-            <Box
-              key={index}
-              className="flex justify-between items-center py-2"
-            >
+            <Box key={index} className="flex justify-between items-center py-2">
               <Typography className="text-slate-600">
                 {item.icon} {item.label}
               </Typography>
@@ -484,7 +474,6 @@ export default function DailyReport() {
             </Box>
           ))}
         </Paper>
-
       </Box>
 
       {/* HOURLY SALES */}
@@ -522,7 +511,7 @@ export default function DailyReport() {
                 <Box
                   className="bg-blue-500 h-full"
                   style={{
-                    width: `${Math.min(item.sales / 1000 * 100, 100)}%`,
+                    width: `${Math.min((item.sales / 1000) * 100, 100)}%`,
                   }}
                 />
               </Box>
@@ -535,29 +524,41 @@ export default function DailyReport() {
         ))}
       </Paper>
 
-
-      {(isMobile || isTablet) && (
+      {/* Floating Export Button */}
+      {!isDesktop && (
         <motion.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 200 }}
+          transition={{
+            type: "spring",
+            stiffness: 200,
+          }}
           className="fixed bottom-6 right-6 z-50"
         >
           <Box
             onClick={handleExportPDF}
-            className="
-        h-14 w-14
-        rounded-full
-        bg-gradient-to-br from-[#2563eb] to-[#1e3a8a]
-        flex items-center justify-center
-        shadow-xl
-        cursor-pointer
-        active:scale-95
-        transition-all duration-300
-        hover:shadow-2xl
-      "
+            sx={{
+              height: 60,
+              width: 60,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg,#dc2626,#ef4444)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0px 10px 25px rgba(220,38,38,0.35)",
+              transition: "0.3s ease",
+              "&:hover": {
+                transform: "scale(1.05)",
+              },
+            }}
           >
-            <PictureAsPdf sx={{ color: "#fff", fontSize: 26 }} />
+            <PictureAsPdf
+              sx={{
+                color: "#fff",
+                fontSize: 28,
+              }}
+            />
           </Box>
         </motion.div>
       )}
