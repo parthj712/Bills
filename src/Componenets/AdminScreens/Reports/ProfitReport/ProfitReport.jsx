@@ -366,13 +366,13 @@ export default function ProfitReport() {
         </Typography>
 
         {/* QUICK FILTERS */}
-        <Box className="flex flex-wrap gap-2 mb-4">
+        <Box className="flex gap-2.5 mb-4">
           {quickRanges.map((range) => (
             <Box
               key={range.label}
               onClick={() => handleQuickRange(range)}
               className={`
-          px-4 py-1.5 rounded-full text-sm cursor-pointer transition-all
+          px-2.5 py-1.5 rounded-full text-sm cursor-pointer transition-all
           ${
             activeRange === range.label
               ? "bg-blue-600 text-white shadow-md"

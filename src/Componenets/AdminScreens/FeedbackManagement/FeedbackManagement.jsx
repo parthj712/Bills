@@ -23,10 +23,14 @@ import {
   useTheme,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
+import FeedbackCard from "./FeedbackCard";
 
 const FeedbackManagement = () => {
   const theme = useTheme();
+
+  // BREAKPOINTS
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const { showSnackbar } = useAppSnackbar();
   const [feedbacks, setFeedbacks] = useState(null);
@@ -228,6 +232,28 @@ const FeedbackManagement = () => {
             </TableBody>
           </Table>
         </TableContainer>
+      )}
+
+
+      {/* MOBILE + TABLET CARDS */}
+      {!isDesktop && (
+        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {feedbacks?.data?.map((fb) => (
+            <FeedbackCard
+              key={fb._id}
+              feedback={fb}
+              onToggle={handleResolveToggle}
+            />
+          ))}
+
+          {feedbacks?.data?.length === 0 && (
+            <Box className="col-span-full text-center py-10">
+              <Typography fontWeight={700} color="text.secondary">
+                No feedbacks found
+              </Typography>
+            </Box>
+          )}
+        </Box>
       )}
     </Box>
   );

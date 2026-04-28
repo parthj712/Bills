@@ -307,9 +307,10 @@ const GstReport = () => {
           }}
         >
           <TextField
+            fullWidth
             type="date"
             label="From Date"
-            fullWidth={isMobile}
+            // fullWidth={isMobile}
             InputLabelProps={{ shrink: true }}
             value={fromDate}
             onChange={(e) => setFromDate(e.target.value)}
@@ -317,9 +318,10 @@ const GstReport = () => {
           />
 
           <TextField
+            fullWidth
             type="date"
             label="To Date"
-            fullWidth={isMobile}
+            // fullWidth={isMobile}
             InputLabelProps={{ shrink: true }}
             value={toDate}
             onChange={(e) => setToDate(e.target.value)}

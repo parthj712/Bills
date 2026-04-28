@@ -33,28 +33,37 @@ const NotificationBell = ({ onClick }) => {
         onClick={onClick}
         sx={{
           position: "relative",
-          width: 48,
-          height: 48,
-          borderRadius: "14px",
-          background: "rgba(255,255,255,0.7)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(15,23,42,0.08)",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-          transition: "all 0.25s ease",
+          width: 40,
+          height: 40,
+          borderRadius: "12px",
+
+          // CLEAN BACKGROUND
+          backgroundColor: "#ffffff",
+
+          // SOFT BORDER (instead of heavy shadow)
+          border: "1px solid #e2e8f0",
+
+          // VERY LIGHT SHADOW
+          boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+
+          transition: "all 0.2s ease",
 
           "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 12px 30px rgba(0,0,0,0.12)",
+            backgroundColor: "#f8fafc",
+            transform: "translateY(1px)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
           },
         }}
       >
         <Badge
           badgeContent={unread}
-          color="error"
-          overlap="circular"
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "right",
+          sx={{
+            "& .MuiBadge-badge": {
+              fontSize: 10,
+              height: 18,
+              minWidth: 18,
+              borderRadius: "50%",
+            },
           }}
         >
           <motion.div
@@ -65,8 +74,9 @@ const NotificationBell = ({ onClick }) => {
           >
             <NotificationsRoundedIcon
               sx={{
-                fontSize: 26,
-                color: "#edc01c",
+                fontSize: 20,
+                color: "#0f172a",
+                ":hover": { color: "#edc01c", transition: "color 0.2s ease" },
               }}
             />
           </motion.div>
@@ -84,7 +94,7 @@ const NotificationBell = ({ onClick }) => {
               borderRadius: "50%",
               background: "#ef4444",
               boxShadow: "0 0 0 4px rgba(239,68,68,0.3)",
-              animation: "pulse 1.5s infinite",
+              // animation: "pulse 1.5s infinite",
             }}
           />
         )}
