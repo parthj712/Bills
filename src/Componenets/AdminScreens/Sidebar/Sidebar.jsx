@@ -41,6 +41,7 @@ import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Badge } from "@mui/material";
 import { getShopInfo } from "@/service/shopService";
 import LiquorIcon from "@mui/icons-material/Liquor";
+import IncomingChangesDialog from "../IncomingChangesDialog/IncomingChangesDialog";
 
 const reportItems = [
   {
@@ -130,12 +131,12 @@ export default function Sidebar() {
     // show only for restaurants
     ...(showTables
       ? [
-          {
-            label: "Table Management",
-            href: "/admin/tables",
-            icon: <TableBar fontSize="small" />,
-          },
-        ]
+        {
+          label: "Table Management",
+          href: "/admin/tables",
+          icon: <TableBar fontSize="small" />,
+        },
+      ]
       : []),
 
     // change label dynamically
@@ -164,12 +165,12 @@ export default function Sidebar() {
 
     ...(isBar
       ? [
-          {
-            label: "Bar Inventory",
-            href: "/admin/bar-inventory",
-            icon: <LiquorIcon fontSize="small" />,
-          },
-        ]
+        {
+          label: "Bar Inventory",
+          href: "/admin/bar-inventory",
+          icon: <LiquorIcon fontSize="small" />,
+        },
+      ]
       : []),
 
     {
@@ -414,24 +415,24 @@ export default function Sidebar() {
             />
 
             {/* Animated Left Indicator */}
-            <span
+            {/* <span
               className={`
       absolute left-0 top-0 h-full w-1 rounded-l-xl transition-all duration-300
       bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.8)]
     `}
-            />
+            /> */}
 
             {/* Icon */}
-            <motion.div
+            {/* <motion.div
               animate={{ rotate: [0, 8, -8, 0] }}
               transition={{ repeat: Infinity, duration: 3 }}
               className="text-orange-500 relative z-10"
             >
               <UpdateIcon fontSize="small" />
-            </motion.div>
+            </motion.div> */}
 
             {/* Label */}
-            <Box
+            {/* <Box
               display="flex"
               flexDirection="column"
               textAlign="left"
@@ -441,21 +442,20 @@ export default function Sidebar() {
               <span className="text-[15px] font-semibold tracking-wide">
                 {incomingChangesItem.label}
               </span>
-            </Box>
+            </Box> */}
           </motion.div>
         </Box>
 
-        <Box display={"flex"} flexDirection={"row-reverse"} gap={2}>
+        <Box display={"flex"} flexDirection={"column-reverse"} gap={1}>
           <Link href={helpItem.href}>
             <motion.div
               whileHover={{ y: 4 }}
               className={`bg-gray-100 flex items-center gap-3 px-3 py-2 rounded-lg
       text-[14px] cursor-pointer
-      ${
-        pathname === helpItem.href
-          ? "font-semibold text-orange-600"
-          : "text-black"
-      }`}
+      ${pathname === helpItem.href
+                  ? "font-semibold text-orange-600"
+                  : "text-black"
+                }`}
             >
               {helpItem.icon}
               {helpItem.label}
@@ -467,98 +467,23 @@ export default function Sidebar() {
               whileHover={{ y: 4 }}
               className={`bg-gray-100 ${pathname === settingsItem.href ? "bg-orange-100" : ""} flex items-center gap-3 px-3 py-2 rounded-lg
           text-[15px] cursor-pointer
-          ${
-            pathname === settingsItem.href
-              ? "font-semibold text-orange-600"
-              : "text-black"
-          }
+          ${pathname === settingsItem.href
+                  ? "font-semibold text-orange-600"
+                  : "text-black"
+                }
         `}
             >
               {settingsItem.icon}
-              {/* {settingsItem.label} */}
+              {settingsItem.label}
             </motion.div>
           </Link>
         </Box>
       </div>
 
-      <Dialog
+      <IncomingChangesDialog
         open={openIncoming}
         onClose={() => setOpenIncoming(false)}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: "hidden",
-          },
-        }}
-      >
-        {/* HEADER */}
-        <DialogTitle
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontWeight: 600,
-            color: "#ea580c",
-            background: "#fff7ed",
-            borderBottom: "1px solid #fde3c8",
-          }}
-        >
-          <Typography fontSize={16} fontWeight={600}>
-            Exciting new features arriving soon to enhance your business
-            operations.
-          </Typography>
-
-          <IconButton onClick={() => setOpenIncoming(false)}>
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-
-        <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} my={3}>
-            {[
-              "Swiggy/Zomato Integration",
-              "Advanced Inventory Alerts",
-              "Auto Daily Profit Summary on WhatsApp",
-              "Staff Performance Tracking",
-              "CRM",
-              "QR Table Ordering",
-            ].map((feature, index) => (
-              <Box
-                key={feature}
-                sx={{
-                  p: 2.2,
-                  borderRadius: 3,
-                  background: "linear-gradient(135deg, #fff7ed, #ffffff)",
-                  border: "1px solid #fde3c8",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)", // 👈 Default soft shadow
-                  transition: "all 0.3s ease",
-                  cursor: "pointer",
-                  "&:hover": {
-                    transform: "translateY(-3px) scale(1.02)", // 👈 Lift up instead of side move
-                    boxShadow: "0 8px 20px rgba(249,115,22,0.2)", // 👈 Orange glow shadow
-                    borderColor: "#fb923c",
-                    background: "linear-gradient(135deg, #ffedd5, #ffffff)",
-                  },
-                }}
-              >
-                <Typography
-                  fontWeight={600}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    transition: "color 0.3s ease",
-                  }}
-                >
-                  🚀 {feature}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </DialogContent>
-      </Dialog>
+      />
 
       <Dialog
         open={openReportsDialog}

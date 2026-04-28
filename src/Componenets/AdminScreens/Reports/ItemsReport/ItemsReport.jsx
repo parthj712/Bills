@@ -197,9 +197,8 @@ const ItemsReport = () => {
               {/* Quick Date Shortcuts */}
               <Box
                 display="flex"
-                justifyContent={isMobile || isTablet ? "space-between" : null}
-                gap={2}
-                flexWrap="wrap"
+                justifyContent={"space-between"}
+                gap={1.2}
               >
                 {quickRanges.map((range) => (
                   <Chip
@@ -225,7 +224,7 @@ const ItemsReport = () => {
                       setShowReport(false);
                     }}
                     sx={{
-                      fontSize: 14,
+                      fontSize: 13,
                       px: isMobile ? 0 : 0.5,
                       py: isMobile ? 0 : 1.5,
                       borderRadius: 2,

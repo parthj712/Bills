@@ -22,6 +22,7 @@ import {
 import LiquorIcon from "@mui/icons-material/Liquor";
 import AddIcon from "@mui/icons-material/Add";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
+import { motion } from "framer-motion";
 
 import { useEffect, useState } from "react";
 
@@ -31,6 +32,7 @@ import { deleteBarInventory, getBarInventory } from "@/service/barInventory";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
+import BarInventoryCard from "./BarInventoryCard";
 
 export default function BarInventory() {
   const { showSnackbar } = useAppSnackbar();
@@ -160,171 +162,202 @@ export default function BarInventory() {
       </Box>
 
       {/* INVENTORY TABLE */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          borderRadius: 2,
-          overflow: "auto",
-          // boxShadow: "0 10px 45px rgba(0,0,0,0.10)",
-        }}
-      >
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              {[
-                "Item",
-                "Bottle Size",
-                "Stock (ML)",
-                "Bottles Left",
-                "Stock Level",
-                "Actions",
-              ].map((head) => (
-                <TableCell
-                  key={head}
-                  sx={{
-                    backgroundColor: "#0b3c5d",
-                    color: "white",
-                    fontWeight: 600,
-                    borderBottom: "none",
-                    py: 2,
-                  }}
-                >
-                  {head}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {loading &&
-              Array.from({ length: 7 }).map((_, i) => (
-                <TableRow key={i}>
-                  {Array.from({ length: 6 }).map((__, j) => (
-                    <TableCell key={j}>
-                      <Skeleton animation="wave" height={25} />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-
-            {!loading &&
-              inventory.map((item) => {
-                // const stockPercent =
-                //   (item.currentStockML /
-                //     (item.bottleSizeML * item.remainingBottles || 1)) *
-                //   100;
-
-                const stockPercent =
-                  item.totalStockML > 0
-                    ? (item.currentStockML / item.totalStockML) * 100
-                    : 0;
-
-                return (
-                  <TableRow
-                    key={item._id}
+      {isDesktop && (
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 2,
+            overflow: "auto",
+            // boxShadow: "0 10px 45px rgba(0,0,0,0.10)",
+          }}
+        >
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow>
+                {[
+                  "Item",
+                  "Bottle Size",
+                  "Stock (ML)",
+                  "Bottles Left",
+                  "Stock Level",
+                  "Actions",
+                ].map((head) => (
+                  <TableCell
+                    key={head}
                     sx={{
-                      "&:hover": {
-                        bgcolor: "#f8fafc",
-                      },
+                      backgroundColor: "#0b3c5d",
+                      color: "white",
+                      fontWeight: 600,
+                      borderBottom: "none",
+                      py: 2,
                     }}
                   >
-                    {/* ITEM */}
-                    <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
-                        <Inventory2Icon sx={{ color: "#64748b" }} />
-
-                        <Typography fontWeight={500}>
-                          {item.menuItemId?.name}
-                        </Typography>
-                      </Stack>
-                    </TableCell>
-
-                    {/* BOTTLE SIZE */}
-                    <TableCell>
-                      <Chip
-                        label={`${item.bottleSizeML} ml`}
-                        size="small"
-                        color="info"
-                        variant="outlined"
-                      />
-                    </TableCell>
-
-                    {/* STOCK ML */}
-                    <TableCell>
-                      <Typography fontWeight={500}>
-                        {item.currentStockML} ml
-                      </Typography>
-                    </TableCell>
-
-                    {/* BOTTLES */}
-                    <TableCell>
-                      <Chip
-                        label={`${item.remainingBottles} bottles`}
-                        size="small"
-                        color={item.remainingBottles < 3 ? "error" : "success"}
-                      />
-                    </TableCell>
-
-                    {/* PROGRESS */}
-                    <TableCell width={200}>
-                      <LinearProgress
-                        variant="determinate"
-                        value={Math.min(stockPercent, 100)}
-                        color={getColor(stockPercent)}
-                        sx={{
-                          height: 8,
-                          borderRadius: 5,
-                        }}
-                      />
-                    </TableCell>
-
-                    {/* ACTION */}
-                    <TableCell>
-                      <Stack direction="row" spacing={1}>
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => {
-                            setSelectedItem(item);
-                            setOpenStock(true);
-                          }}
-                          sx={{
-                            textTransform: "none",
-                            fontWeight: 600,
-                          }}
-                        >
-                          Add Stock
-                        </Button>
-
-                        <Button
-                          size="small"
-                          color="error"
-                          variant="outlined"
-                          startIcon={<DeleteIcon />}
-                          onClick={() => handleDelete(item._id)}
-                          sx={{
-                            textTransform: "none",
-                            fontWeight: 600,
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-
-            {!loading && inventory.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  No Inventory Found
-                </TableCell>
+                    {head}
+                  </TableCell>
+                ))}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+
+            <TableBody>
+              {loading &&
+                Array.from({ length: 7 }).map((_, i) => (
+                  <TableRow key={i}>
+                    {Array.from({ length: 6 }).map((__, j) => (
+                      <TableCell key={j}>
+                        <Skeleton animation="wave" height={25} />
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+
+              {!loading &&
+                inventory.map((item) => {
+                  // const stockPercent =
+                  //   (item.currentStockML /
+                  //     (item.bottleSizeML * item.remainingBottles || 1)) *
+                  //   100;
+
+                  const stockPercent =
+                    item.totalStockML > 0
+                      ? (item.currentStockML / item.totalStockML) * 100
+                      : 0;
+
+                  return (
+                    <TableRow
+                      key={item._id}
+                      sx={{
+                        "&:hover": {
+                          bgcolor: "#f8fafc",
+                        },
+                      }}
+                    >
+                      {/* ITEM */}
+                      <TableCell>
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Inventory2Icon sx={{ color: "#64748b" }} />
+
+                          <Typography fontWeight={500}>
+                            {item.menuItemId?.name}
+                          </Typography>
+                        </Stack>
+                      </TableCell>
+
+                      {/* BOTTLE SIZE */}
+                      <TableCell>
+                        <Chip
+                          label={`${item.bottleSizeML} ml`}
+                          size="small"
+                          color="info"
+                          variant="outlined"
+                        />
+                      </TableCell>
+
+                      {/* STOCK ML */}
+                      <TableCell>
+                        <Typography fontWeight={500}>
+                          {item.currentStockML} ml
+                        </Typography>
+                      </TableCell>
+
+                      {/* BOTTLES */}
+                      <TableCell>
+                        <Chip
+                          label={`${item.remainingBottles} bottles`}
+                          size="small"
+                          color={item.remainingBottles < 3 ? "error" : "success"}
+                        />
+                      </TableCell>
+
+                      {/* PROGRESS */}
+                      <TableCell width={200}>
+                        <LinearProgress
+                          variant="determinate"
+                          value={Math.min(stockPercent, 100)}
+                          color={getColor(stockPercent)}
+                          sx={{
+                            height: 8,
+                            borderRadius: 5,
+                          }}
+                        />
+                      </TableCell>
+
+                      {/* ACTION */}
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={() => {
+                              setSelectedItem(item);
+                              setOpenStock(true);
+                            }}
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Add Stock
+                          </Button>
+
+                          <Button
+                            size="small"
+                            color="error"
+                            variant="outlined"
+                            startIcon={<DeleteIcon />}
+                            onClick={() => handleDelete(item._id)}
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+
+              {!loading && inventory.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    No Inventory Found
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+
+      {/* MOBILE + TABLET CARDS */}
+      {!isDesktop && (
+        <Box className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {loading &&
+            Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} height={160} />
+            ))}
+
+          {!loading &&
+            inventory.map((item) => (
+              <BarInventoryCard
+                key={item._id}
+                item={item}
+                onDelete={handleDelete}
+                onAddStock={(item) => {
+                  setSelectedItem(item);
+                  setOpenStock(true);
+                }}
+              />
+            ))}
+
+          {!loading && inventory.length === 0 && (
+            <Box className="col-span-full text-center py-10">
+              <Typography>No Inventory Found</Typography>
+            </Box>
+          )}
+        </Box>
+      )}
 
       {/* DIALOGS */}
       <AddBarInventoryDialog
@@ -339,6 +372,41 @@ export default function BarInventory() {
         onClose={() => setOpenStock(false)}
         onSuccess={loadInventory}
       />
+
+      {isMobile && (
+        <motion.div
+          initial={{ y: 80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 200 }}
+          className="fixed bottom-9 right-8 z-50"
+        >
+          <Box
+            onClick={() => setOpenAdd(true)}
+            sx={{
+              height: 56,
+              width: 56,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #0b3c5d, #2563eb)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 12px 30px rgba(37,99,235,0.35)",
+              cursor: "pointer",
+              transition: "0.2s",
+
+              "&:hover": {
+                transform: "scale(1.08)",
+              },
+
+              "&:active": {
+                transform: "scale(0.95)",
+              },
+            }}
+          >
+            <AddIcon sx={{ color: "#fff", fontSize: 28 }} />
+          </Box>
+        </motion.div>
+      )}
     </Box>
   );
 }

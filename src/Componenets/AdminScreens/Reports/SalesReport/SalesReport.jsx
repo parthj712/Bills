@@ -274,7 +274,7 @@ export default function SalesReport() {
             gap={4}
           >
             {/* Quick Date Shortcuts */}
-            <Box display="flex" gap={1} flexWrap="wrap">
+            <Box display="flex" gap={1} >
               {quickRanges.map((range) => (
                 <Chip
                   key={range.label}
@@ -297,9 +297,8 @@ export default function SalesReport() {
                     setShowReport(false);
                   }}
                   sx={{
-                    fontSize: 14,
-                    px: isMobile ? 0.5 : 1.5,
-                    fontWeight: activeRange === range.label ? 600 : 500,
+                    fontSize: 13,
+                    px: isMobile ? 0 : 1.5,
                     borderRadius: 2,
                   }}
                 />
