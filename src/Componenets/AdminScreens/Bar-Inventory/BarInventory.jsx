@@ -33,7 +33,6 @@ import AppButton from "@/Componenets/CommonComponents/AppButton";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 
 export default function BarInventory() {
-
   const { showSnackbar } = useAppSnackbar();
 
   const theme = useTheme();
@@ -55,8 +54,8 @@ export default function BarInventory() {
       setLoading(true);
 
       const res = await getBarInventory();
+      console.log(res.data.data);
       setInventory(res.data.data || []);
-
     } catch (error) {
       console.error(error);
     } finally {
@@ -79,11 +78,9 @@ export default function BarInventory() {
     loadInventory();
   };
 
-
   const hasAccess =
     subscription?.status === "ACTIVE" &&
     allowedPlans.includes(subscription.planType);
-
 
   const getColor = (percent) => {
     if (percent < 30) return "error";
@@ -103,7 +100,6 @@ export default function BarInventory() {
         mb={4}
         gap={isMobile ? 2 : 0}
       >
-
         {/* <LiquorIcon sx={{ fontSize: 32 }} /> */}
         <Typography
           fontSize={isMobile ? 24 : 30}
@@ -112,7 +108,6 @@ export default function BarInventory() {
         >
           Bar Inventory
         </Typography>
-
 
         <Box className="flex gap-4">
           {/* <AppButton
@@ -148,7 +143,6 @@ export default function BarInventory() {
           )}
         </Box>
 
-
         {/* <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -164,7 +158,6 @@ export default function BarInventory() {
           Add Inventory
         </Button> */}
       </Box>
-
 
       {/* INVENTORY TABLE */}
       <TableContainer
@@ -214,115 +207,113 @@ export default function BarInventory() {
                 </TableRow>
               ))}
 
-            {!loading && inventory.map((item) => {
-              // const stockPercent =
-              //   (item.currentStockML /
-              //     (item.bottleSizeML * item.remainingBottles || 1)) *
-              //   100;
+            {!loading &&
+              inventory.map((item) => {
+                // const stockPercent =
+                //   (item.currentStockML /
+                //     (item.bottleSizeML * item.remainingBottles || 1)) *
+                //   100;
 
-              const totalCapacity =
-                item.bottleSizeML * item.remainingBottles;
+                const stockPercent =
+                  item.totalStockML > 0
+                    ? (item.currentStockML / item.totalStockML) * 100
+                    : 0;
 
-              const stockPercent =
-                totalCapacity > 0
-                  ? (item.currentStockML / totalCapacity) * 100
-                  : 0;
+                return (
+                  <TableRow
+                    key={item._id}
+                    sx={{
+                      "&:hover": {
+                        bgcolor: "#f8fafc",
+                      },
+                    }}
+                  >
+                    {/* ITEM */}
+                    <TableCell>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Inventory2Icon sx={{ color: "#64748b" }} />
 
-              return (
-                <TableRow
-                  key={item._id}
-                  sx={{
-                    "&:hover": {
-                      bgcolor: "#f8fafc",
-                    },
-                  }}
-                >
-                  {/* ITEM */}
-                  <TableCell>
-                    <Stack direction="row" spacing={1} alignItems="center">
-                      <Inventory2Icon sx={{ color: "#64748b" }} />
+                        <Typography fontWeight={500}>
+                          {item.menuItemId?.name}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
 
+                    {/* BOTTLE SIZE */}
+                    <TableCell>
+                      <Chip
+                        label={`${item.bottleSizeML} ml`}
+                        size="small"
+                        color="info"
+                        variant="outlined"
+                      />
+                    </TableCell>
+
+                    {/* STOCK ML */}
+                    <TableCell>
                       <Typography fontWeight={500}>
-                        {item.menuItemId?.name}
+                        {item.currentStockML} ml
                       </Typography>
-                    </Stack>
-                  </TableCell>
+                    </TableCell>
 
-                  {/* BOTTLE SIZE */}
-                  <TableCell>
-                    <Chip
-                      label={`${item.bottleSizeML} ml`}
-                      size="small"
-                      color="info"
-                      variant="outlined"
-                    />
-                  </TableCell>
-
-                  {/* STOCK ML */}
-                  <TableCell>
-                    <Typography fontWeight={500}>
-                      {item.currentStockML} ml
-                    </Typography>
-                  </TableCell>
-
-                  {/* BOTTLES */}
-                  <TableCell>
-                    <Chip
-                      label={`${item.remainingBottles} bottles`}
-                      size="small"
-                      color={item.remainingBottles < 3 ? "error" : "success"}
-                    />
-                  </TableCell>
-
-                  {/* PROGRESS */}
-                  <TableCell width={200}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min(stockPercent, 100)}
-                      color={getColor(stockPercent)}
-                      sx={{
-                        height: 8,
-                        borderRadius: 5,
-                      }}
-                    />
-                  </TableCell>
-
-                  {/* ACTION */}
-                  <TableCell>
-                    <Stack direction="row" spacing={1}>
-                      <Button
+                    {/* BOTTLES */}
+                    <TableCell>
+                      <Chip
+                        label={`${item.remainingBottles} bottles`}
                         size="small"
-                        variant="outlined"
-                        onClick={() => {
-                          setSelectedItem(item);
-                          setOpenStock(true);
-                        }}
-                        sx={{
-                          textTransform: "none",
-                          fontWeight: 600,
-                        }}
-                      >
-                        Add Stock
-                      </Button>
+                        color={item.remainingBottles < 3 ? "error" : "success"}
+                      />
+                    </TableCell>
 
-                      <Button
-                        size="small"
-                        color="error"
-                        variant="outlined"
-                        startIcon={<DeleteIcon />}
-                        onClick={() => handleDelete(item._id)}
+                    {/* PROGRESS */}
+                    <TableCell width={200}>
+                      <LinearProgress
+                        variant="determinate"
+                        value={Math.min(stockPercent, 100)}
+                        color={getColor(stockPercent)}
                         sx={{
-                          textTransform: "none",
-                          fontWeight: 600,
+                          height: 8,
+                          borderRadius: 5,
                         }}
-                      >
-                        Delete
-                      </Button>
-                    </Stack>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+                      />
+                    </TableCell>
+
+                    {/* ACTION */}
+                    <TableCell>
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setSelectedItem(item);
+                            setOpenStock(true);
+                          }}
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Add Stock
+                        </Button>
+
+                        <Button
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDelete(item._id)}
+                          sx={{
+                            textTransform: "none",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
 
             {!loading && inventory.length === 0 && (
               <TableRow>

@@ -34,6 +34,7 @@ export default function AddStockDialog({ open, onClose, item, onSuccess }) {
 
     await addBarStock({
       menuItemId: item.menuItemId._id,
+      bottleSizeML: item.bottleSizeML, // important
       bottles: Number(bottles),
     });
 
