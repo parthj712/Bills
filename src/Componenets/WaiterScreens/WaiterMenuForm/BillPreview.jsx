@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Box, Divider, Typography } from "@mui/material";
 
@@ -23,6 +25,7 @@ const BillPreview = ({
       day: "numeric",
     },
   );
+  console.log("shopInfo", shopInfo);
 
   const formattedTime = new Date(date || new Date()).toLocaleTimeString(
     "en-IN",
@@ -33,180 +36,182 @@ const BillPreview = ({
   );
 
   return (
-    <div>
-      <div
-        id="print-bill"
-        style={{
-          width: "76mm",
-          fontSize: 12,
-          margin: "0 auto",
-          fontFamily: "'Inter', sans-serif",
-          color: "#1E293B",
-          padding: 8,
-          background: "#fff",
+    <div
+      id="print-bill"
+      style={{
+        width: shopInfo?.printerType === "58MM" ? "58mm" : "76mm",
+        fontSize: 12,
+        margin: "0 auto",
+        fontFamily: "monospace",
+        color: "#000",
+        padding: "10px",
+        background: "#fff",
+      }}
+    >
+      {/* LOGO */}
+      {shopInfo?.logo?.url && (
+        <Box display="flex" justifyContent="center" mb={2}>
+          <img
+            src={shopInfo.logo.url}
+            alt="Hotel Logo"
+            crossOrigin="anonymous"
+            style={{
+              width: 70,
+              height: 70,
+              objectFit: "contain",
+            }}
+          />
+        </Box>
+      )}
+
+      {/* SHOP NAME */}
+      <Typography
+        align="center"
+        sx={{
+          fontSize: "18px",
+          fontWeight: "bold",
         }}
       >
-        {/* Logo */}
-        {shopInfo?.logo?.url && (
-          <Box display="flex" justifyContent="center" mb={2}>
-            <img
-              src={shopInfo.logo.url}
-              alt="Hotel Logo"
-              style={{ maxWidth: 70, objectFit: "contain" }}
-            />
-          </Box>
-        )}
+        {shopInfo?.shopName}
+      </Typography>
 
-        {/* Shop Name */}
-        <Typography align="center" fontSize={20} fontWeight={700}>
-          {shopInfo?.shopName}
+      {/* TAGLINE */}
+      {shopInfo?.tagline && (
+        <Typography align="center" fontSize={12}>
+          {shopInfo.tagline}
+        </Typography>
+      )}
+
+      {/* WEBSITE */}
+      {shopInfo?.website && (
+        <Typography align="center" fontSize={11}>
+          {shopInfo.website}
+        </Typography>
+      )}
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* ORDER INFO */}
+      <Box sx={{ fontSize: 12 }}>
+        <Typography fontSize={12}>Order Type: {orderType}</Typography>
+
+        <Typography fontSize={12}>Date: {formattedDate}</Typography>
+
+        <Typography fontSize={12}>Time: {formattedTime}</Typography>
+
+        {customerName && (
+          <Typography fontSize={12}>Customer: {customerName}</Typography>
+        )}
+      </Box>
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* ITEMS */}
+      {items.map((item) => (
+        <Box key={`${item.menuItemId}-${item.addedAt}`} sx={{ mb: 1 }}>
+          <Typography fontSize={13} fontWeight={600}>
+            {item.name}
+          </Typography>
+
+          {(item.variantName || item.portion) && (
+            <Typography fontSize={11}>
+              {item.variantName} {item.portion}
+            </Typography>
+          )}
+
+          <Box display="flex" justifyContent="space-between">
+            <Typography fontSize={12}>
+              {item.qty} × ₹{Number(item.price).toFixed(2)}
+            </Typography>
+
+            <Typography fontSize={12}>
+              ₹{(item.qty * item.price).toFixed(2)}
+            </Typography>
+          </Box>
+        </Box>
+      ))}
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* SUBTOTAL */}
+      <Box display="flex" justifyContent="space-between">
+        <Typography fontSize={12}>Subtotal</Typography>
+        <Typography fontSize={12}>₹{subtotal.toFixed(2)}</Typography>
+      </Box>
+
+      {/* CGST */}
+      {cgst > 0 && (
+        <Box display="flex" justifyContent="space-between">
+          <Typography fontSize={12}>CGST (2.5%)</Typography>
+          <Typography fontSize={12}>₹{cgst.toFixed(2)}</Typography>
+        </Box>
+      )}
+
+      {/* SGST */}
+      {sgst > 0 && (
+        <Box display="flex" justifyContent="space-between">
+          <Typography fontSize={12}>SGST (2.5%)</Typography>
+          <Typography fontSize={12}>₹{sgst.toFixed(2)}</Typography>
+        </Box>
+      )}
+
+      {/* VAT */}
+      {vat > 0 && (
+        <Box display="flex" justifyContent="space-between">
+          <Typography fontSize={12}>VAT (10%)</Typography>
+          <Typography fontSize={12}>₹{vat.toFixed(2)}</Typography>
+        </Box>
+      )}
+
+      {/* DISCOUNT */}
+      {discountPercent > 0 && (
+        <Box display="flex" justifyContent="space-between">
+          <Typography fontSize={12}>Discount ({discountPercent}%)</Typography>
+        </Box>
+      )}
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* GRAND TOTAL */}
+      <Box display="flex" justifyContent="space-between">
+        <Typography fontWeight="bold" fontSize={16}>
+          TOTAL
         </Typography>
 
-        {shopInfo?.tagline && (
-          <Typography
-            align="center"
-            fontSize={12}
-            sx={{ color: "#64748B", mt: 0.5 }}
-          >
-            {shopInfo.tagline}
-          </Typography>
-        )}
-
-        {shopInfo?.website && (
-          <Typography
-            align="center"
-            fontSize={12}
-            sx={{ color: "#64748B", mt: 0.5 }}
-          >
-            {shopInfo.website}
-          </Typography>
-        )}
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Order Meta */}
-        <Box sx={{ fontSize: 12, color: "#64748B" }}>
-          <div>{orderType}</div>
-          <div>{formattedDate}</div>
-          <div>{formattedTime}</div>
-          <div>{customerName || "-"}</div>
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Items */}
-        {items.map((item) => (
-          <Box
-            key={`${item.menuItemId}-${item.portion}-${item.addedAt}`}
-            sx={{ mb: 1.5 }}
-          >
-            <Typography fontSize={14} fontWeight={500}>
-              {item.name}
-            </Typography>
-
-            <Box display="flex" justifyContent="space-between" my={0.5}>
-              <Typography fontSize={14}>
-                {item.qty} × ₹ {Number(item.price).toFixed(2)}
-              </Typography>
-
-              <Typography fontSize={14} fontWeight={500}>
-                ₹ {(item.price * item.qty).toFixed(2)}
-              </Typography>
-            </Box>
-          </Box>
-        ))}
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Subtotal */}
-        <Box display="flex" justifyContent="space-between" mb={1}>
-          <Typography fontSize={13} color="#64748B">
-            Subtotal
-          </Typography>
-          <Typography fontSize={13}>₹ {subtotal.toFixed(2)}</Typography>
-        </Box>
-
-        {/* GST */}
-        {cgst > 0 && (
-          <Box display="flex" justifyContent="space-between" mb={1}>
-            <Typography fontSize={13} color="#64748B">
-              CGST (2.5%)
-            </Typography>
-            <Typography fontSize={13}>₹ {Number(cgst).toFixed(2)}</Typography>
-          </Box>
-        )}
-
-        {/* SGST */}
-        {sgst > 0 && (
-          <Box display="flex" justifyContent="space-between" mb={1}>
-            <Typography fontSize={13} color="#64748B">
-              SGST (2.5%)
-            </Typography>
-            <Typography fontSize={13}>₹ {Number(sgst).toFixed(2)}</Typography>
-          </Box>
-        )}
-
-        {/* VAT */}
-        {vat > 0 && (
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography fontSize={13} color="#64748B">
-              VAT (10%)
-            </Typography>
-            <Typography fontSize={13}>₹ {Number(vat).toFixed(2)}</Typography>
-          </Box>
-        )}
-
-        {discountPercent > 0 && (
-          <Box display="flex" justifyContent="space-between" mb={2}>
-            <Typography fontSize={13} color="#dc2626" fontWeight={600}>
-              Discount ({discountPercent}%)
-            </Typography>
-          </Box>
-        )}
-
-        <Divider />
-
-        {/* Grand Total */}
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ mt: 2 }}
-        >
-          <Typography fontSize={18} fontWeight={700}>
-            Total
-          </Typography>
-
-          <Typography fontSize={20} fontWeight={800} sx={{ color: "#0F172A" }}>
-            ₹ {total.toFixed(2)}
-          </Typography>
-        </Box>
-
-        <Divider sx={{ my: 2 }} />
-
-        <Typography align="center" fontSize={12} sx={{ color: "#64748B" }}>
-          Thank You • Visit Again
+        <Typography fontWeight="bold" fontSize={16}>
+          ₹{total.toFixed(2)}
         </Typography>
+      </Box>
 
-        {/* QR */}
-        {shopInfo?.upiQr?.url && (
-          <Box mt={3} display="flex" flexDirection="column" alignItems="center">
-            <Typography fontSize={12} fontWeight={600} mb={1}>
-              Scan to Pay
-            </Typography>
+      <Divider sx={{ my: 2 }} />
 
-            <img
-              src={shopInfo.upiQr.url}
-              alt="UPI QR"
-              style={{ width: 80, height: 80 }}
-            />
+      {/* QR */}
+      {shopInfo?.upiQr?.url && (
+        <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+          <Typography fontSize={12} fontWeight={600}>
+            Scan & Pay
+          </Typography>
 
-            <Typography fontSize={11} mt={1} sx={{ color: "#64748B" }}>
-              UPI Accepted
-            </Typography>
-          </Box>
-        )}
-      </div>
+          <img
+            src={shopInfo.upiQr.url}
+            alt="UPI QR"
+            crossOrigin="anonymous"
+            style={{
+              width: 90,
+              height: 90,
+              objectFit: "contain",
+            }}
+          />
+
+          <Typography fontSize={11}>UPI Accepted</Typography>
+        </Box>
+      )}
+
+      <Divider sx={{ my: 2 }} />
+
+      <Typography align="center" fontSize={12}>
+        Thank You • Visit Again
+      </Typography>
     </div>
   );
 };
