@@ -14,9 +14,10 @@ import {
   TextField,
   Chip,
 } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+
 import DeleteIcon from "@mui/icons-material/Delete";
 import AppButton from "@/Componenets/CommonComponents/AppButton";
+import QRCode from "qrcode";
 
 import { updateTableStatus } from "@/service/tableService";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -28,40 +29,33 @@ import {
   fetchActiveTakaway,
   finalizeBillAndOrder,
   itemDecrement,
-  itemIncrement,
   printKot,
 } from "@/service/orderService";
 import { Suspense, useState, useMemo, useEffect } from "react";
-import { getShopInfo } from "@/service/shopService";
+import { getFeedbackLink, getShopInfo } from "@/service/shopService";
 import { socket } from "@/app/lib/socket";
 import BillPreviewKOT from "./BillPreviewKOT";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import CircularProgress from "@mui/material/CircularProgress";
 export default function OrderCart() {
   const { showSnackbar } = useAppSnackbar();
-
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [openConfirm, setOpenConfirm] = useState(false);
   const tableId = searchParams.get("tableId");
   const tableNo = searchParams.get("tableNo");
-
   const orderType = searchParams.get("orderType") || "DINE-IN";
   const isDineIn = orderType === "DINE-IN";
   const [shopInfo, setShopInfo] = useState([]);
   const [orderId, setOrderId] = useState(null);
   const [discountPercent, setDiscountPercent] = useState(0);
-
-  // ✅ cartKey: tableId for DINE-IN, else orderType
-  const cartKey = isDineIn ? tableId : orderType;
-
+  const [feedbackLink, setFeedbackLink] = useState("");
+  const [feedbackQr, setFeedbackQr] = useState("");
   const [cartItems, setCartItems] = useState([]);
   const [kotMessage, setKotMessage] = useState("");
-
   const [customerName, setCustomerName] = useState("");
-
   const [openKOT, setOpenKOT] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("CASH");
+  const [paperSize, setPaperSize] = useState("58"); // "58" or "80"
 
   const currentDate = new Date().toLocaleString("en-IN", {
     dateStyle: "medium",
@@ -131,8 +125,31 @@ export default function OrderCart() {
       console.log(error);
     }
   };
+
+  const fetchFeedbackLink = async () => {
+    try {
+      const res = await getFeedbackLink();
+
+      const url = res.data?.feedbackUrl;
+
+      if (url) {
+        setFeedbackLink(url);
+
+        // generate QR image
+        const qrBase64 = await QRCode.toDataURL(url, {
+          width: 190,
+          margin: 1,
+        });
+
+        setFeedbackQr(qrBase64);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   useEffect(() => {
     handleFecthShopInfo();
+    fetchFeedbackLink();
   }, []);
 
   const loadOrder = async () => {
@@ -182,14 +199,6 @@ export default function OrderCart() {
     };
   }, [tableId, orderType]);
 
-  // const handleIncrease = async (item) => {
-  //   await itemIncrement({
-  //     tableId,
-  //     menuItemId: item.menuItemId,
-  //     portion: item.portion || null,
-  //     variantName: item.variantName || null,
-  //   });
-  // };
   const handleDecrease = async (item) => {
     const key = item.menuItemId + "_" + item.addedAt;
 
@@ -216,110 +225,330 @@ export default function OrderCart() {
 
   const formatBillForPrint = () => {
     return `
-  <div style="text-align:center; font-weight:bold; font-size:18px;">
+    <div style="
+       width: ${paperSize === "80" ? "72mm" : "52mm"}
+      font-family: monospace;
+      padding: 0 8px;
+      box-sizing: border-box;
+    ">
+
+      <!-- Header -->
+     <div style="text-align:left;">
+
+  ${
+    shopInfo?.logoUrl
+      ? `
+      <div style="text-align:center;">
+        <img 
+          src="${shopInfo.logoUrl}" 
+          style="
+            width:80px;
+            max-height:60px;
+            object-fit:contain;
+            margin-bottom:6px;
+          "
+        />
+      </div>
+    `
+      : ""
+  }
+
+  <div style="
+    text-align:center;
+    font-weight:bold;
+    font-size:16px;
+  ">
     ${shopInfo?.shopName || ""}
   </div>
 
-  <div style="text-align:center; font-size:12px;">
-    ${shopInfo?.tagline || ""}
-  </div>
-
-  <div class="divider"></div>
-
-  <div style="text-align:center;">
-    ${orderType}
-  </div>
-
-  <div style="text-align:center; font-size:12px;">
-    ${new Date().toLocaleString("en-IN")}
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- ITEMS -->
-  ${cartItems
-    .map(
-      (item) => `
-      <div style="margin-bottom:6px;">
-        <div>${item.name}</div>
-
-        <table style="width:100%; font-size:12px;">
-          <tr>
-            <td>${item.qty} x ₹${item.price.toFixed(2)}</td>
-            <td style="text-align:right;">
-              ₹${(item.qty * item.price).toFixed(2)}
-            </td>
-          </tr>
-        </table>
+  ${
+    shopInfo?.tagline
+      ? `
+      <div style="
+        text-align:center;
+        font-size:11px;
+        margin-top:2px;
+      ">
+        ${shopInfo.tagline}
       </div>
-    `,
-    )
-    .join("")}
+    `
+      : ""
+  }
 
-  <div class="divider"></div>
+  <!-- NEW: Address + Contact Info -->
+  <div style="
+    text-align:center;
+    font-size:10px;
+    margin-top:4px;
+    line-height:1.4;
+  ">
 
-  <!-- TOTALS (TABLE FIX) -->
-  <table style="width:100%; font-size:13px;">
-    <tr>
-      <td>Subtotal</td>
-      <td style="text-align:right;">₹${Number(subtotal.toFixed(2))}</td>
-    </tr>
+    ${shopInfo?.address ? `<div>Address: ${shopInfo.address}</div>` : ""}
 
-   ${
-     foodSubtotal > 0 && hasGST
-       ? `
-    <tr>
-      <td>CGST (2.5%)</td>
-      <td style="text-align:right;">₹${cgst.toFixed(2)}</td>
-    </tr>
-    <tr>
-      <td>SGST (2.5%)</td>
-      <td style="text-align:right;">₹${sgst.toFixed(2)}</td>
-    </tr>
-  `
-       : ""
-   }
+    ${shopInfo?.phone ? `<div>Phone: ${shopInfo.phone}</div>` : ""}
 
-    ${
-      liquorSubtotal > 0 && hasVAT
-        ? `
-        <tr>
-          <td>VAT (10%)</td>
-          <td style="text-align:right;">₹${vatAmount.toFixed(2)}</td>
-        </tr>
-      `
-        : ""
-    }
+    ${shopInfo?.gstNumber ? `<div>GST: ${shopInfo.gstNumber}</div>` : ""}
 
-    ${
-      discountPercent > 0
-        ? `
-    <tr>
-      <td style="color:red;">Discount (${discountPercent}%)</td>
-      <td style="text-align:right; color:red;">
-        -₹${discountAmount.toFixed(2)}
-      </td>
-    </tr>
-  `
-        : ""
-    }
-  </table>
+    ${shopInfo?.fssaiNumber ? `<div>FSSAI: ${shopInfo.fssaiNumber}</div>` : ""}
 
-  <div class="divider"></div>
-
-  <!-- GRAND TOTAL -->
-  <table style="width:100%; font-size:16px; font-weight:bold;">
-    <tr>
-      <td>TOTAL</td>
-      <td style="text-align:right;">₹${grandTotal.toFixed(2)}</td>
-    </tr>
-  </table>
-
-  <div class="divider"></div>
-
-  <div style="text-align:center;">
-    Thank You • Visit Again
   </div>
+
+</div>
+
+      <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+      <!-- Order Type -->
+      <div style="
+        text-align:center;
+        font-weight:bold;
+        font-size:12px;
+      ">
+        ${orderType}
+      </div>
+
+      <div style="
+           text-align:center;
+        font-size:11px;
+        margin-top:4px;
+         font-weight:semi-bold;
+      ">
+        ${new Date().toLocaleString("en-IN")}
+      </div>
+
+      <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+      <!-- Items -->
+      ${cartItems
+        .map(
+          (item) => `
+            <div style="margin-bottom:8px;">
+
+              <div style="
+                font-size:12px;
+                font-weight:bold;
+                margin-bottom:3px;
+                word-wrap: break-word;
+              ">
+                ${item.name}
+                ${item.variantName ? ` (${item.variantName})` : ""}
+                ${item.portion ? ` (${item.portion})` : ""}
+              </div>
+
+              <div style="
+                display:flex;
+                justify-content:space-between;
+                width:92%;
+                margin:0 auto;
+                font-size:11px;
+              ">
+                <span>
+                  ${item.qty} x Rs.${Number(item.price).toFixed(2)}
+                </span>
+
+                <span style="
+                  min-width:65px;
+                  text-align:right;
+                ">
+                  Rs.${Number(item.qty * item.price).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          `,
+        )
+        .join("")}
+
+      <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+      <div style="
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:6px;
+  font-size:12px;
+  font-weight:bold;
+">
+  <span>Total Items</span>
+  <span>${totalItemsCount} (${totalQty} qty)</span>
+</div>
+
+  <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+      <!-- Subtotal, Taxes, Discount -->
+      <div style="
+        width:92%;
+        margin:0 auto;
+        font-size:12px;
+          font-weight:bold;
+      ">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          margin-bottom:4px;
+        ">
+          <span>Subtotal</span>
+          <span>Rs.${Number(subtotal).toFixed(2)}</span>
+        </div>
+
+        ${
+          discountAmount > 0
+            ? `
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              margin-bottom:4px;
+            ">
+              <span>Discount (${discountPercent}%)</span>
+              <span>-Rs.${Number(discountAmount).toFixed(2)}</span>
+            </div>
+          `
+            : ""
+        }
+
+        ${
+          hasGST
+            ? `
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              margin-bottom:4px;
+            ">
+              <span>CGST (2.5%)</span>
+              <span>Rs.${Number(cgst).toFixed(2)}</span>
+            </div>
+
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              margin-bottom:4px;
+            ">
+              <span>SGST (2.5%)</span>
+              <span>Rs.${Number(sgst).toFixed(2)}</span>
+            </div>
+          `
+            : ""
+        }
+
+        ${
+          liquorSubtotal > 0 && hasVAT
+            ? `
+            <div style="
+              display:flex;
+              justify-content:space-between;
+              margin-bottom:4px;
+            ">
+              <span>VAT (10%)</span>
+              <span>Rs.${Number(vatAmount).toFixed(2)}</span>
+            </div>
+          `
+            : ""
+        }
+      </div>
+
+      <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+      <!-- Total -->
+      <div style="
+        width:92%;
+        margin:0 auto;
+        display:flex;
+        justify-content:space-between;
+        font-size:13px;
+        font-weight:bold;
+      ">
+        <span>Total</span>
+        <span>Rs.${Number(grandTotal).toFixed(2)}</span>
+      </div>
+
+      <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+
+    <!-- Payment Mode -->
+    <div style="
+      width:92%;
+      margin:6px auto;
+      font-size:12px;
+      display:flex;
+      justify-content:space-between;
+    ">
+      <span>Pay Mode</span>
+      <span style="font-weight:bold;">
+        ${paymentMethod}
+      </span>
+    </div>
+
+    <div class="divider" style="
+      border-top:1px dashed black;
+      margin:8px 0;
+    "></div>
+
+      <!-- Feedback QR -->
+      ${
+        feedbackQr
+          ? `
+          <div style="
+            text-align:center;
+            margin-top:8px;
+          ">
+            <div style="
+              font-size:11px;
+              font-weight:bold;
+            ">
+              Scan For Feedback
+            </div>
+
+            <img 
+              src="${feedbackQr}" 
+              style="
+                width:95px;
+                height:95px;
+                object-fit:contain;
+                margin-top:6px;
+              "
+            />
+
+            <div style="
+              font-size:10px;
+              margin-top:4px;
+            ">
+              We value your feedback ❤️
+            </div>
+          </div>
+        `
+          : ""
+      }
+
+      <div class="divider" style="
+        border-top:1px dashed black;
+        margin:8px 0;
+      "></div>
+
+      <!-- Footer -->
+      <div style="
+        text-align:center;
+        font-size:11px;
+      ">
+        Thank You • Visit Again
+      </div>
+
+    </div>
   `;
   };
 
@@ -329,17 +558,17 @@ export default function OrderCart() {
     );
 
     return `
-    <div class="center bold" style="font-size:20px;">
-      🔥 KOT
+    <div class="center bold" style="font-size:20px; text-align:left;">
+      KOT
     </div>
 
-    <div class="center bold" style="font-size:16px; margin-top:4px;">
+    <div class="center bold" style="font-size:16px; margin-top:4px; text-align:left;">
       ${shopInfo?.shopName || ""}
     </div>
 
     <div class="divider"></div>
 
-    <div class="center bold" style="font-size:15px;">
+    <div class="center bold" style="font-size:15px; text-align:left;">
       ${
         isDineIn
           ? `TABLE NO: ${tableNo}`
@@ -349,16 +578,26 @@ export default function OrderCart() {
       }
     </div>
 
-    <div class="center" style="margin-top:4px;">
+    <div style="margin-top:4px; text-align:left; font-size:15px;">
       ${orderType}
     </div>
 
-    <div class="center" style="font-size:12px;">
+    <div  style="font-size:12px; text-align:left; font-size:15px">
       ${new Date().toLocaleString("en-IN")}
     </div>
 
     <div class="divider"></div>
 
+    <div style="
+  font-size:14px;
+  font-weight:bold;
+  margin-top:6px;
+">
+  Items: ${newItems.length}
+</div>
+
+    <div class="divider"></div>
+    
     ${newItems
       .map((item) => {
         const itemDetails = [
@@ -372,7 +611,7 @@ export default function OrderCart() {
 
         return `
           <div style="margin-bottom:10px;">
-            <div class="bold" style="font-size:15px;">
+            <div class="bold" style="font-size:17px;">
               ${item.name}
               ${
                 itemDetails
@@ -381,7 +620,7 @@ export default function OrderCart() {
               }
             </div>
 
-            <div style="font-size:14px;">
+            <div style="font-size:15px;">
               Qty: ${item.qty}
             </div>
           </div>
@@ -394,13 +633,13 @@ export default function OrderCart() {
         ? `
         <div class="divider"></div>
 
-        <div class="bold center" style="font-size:14px;">
+        <div class="bold center" style="font-size:16px;">
           SPECIAL INSTRUCTION
         </div>
 
         <div 
           style="
-            text-align:center;
+            text-align:left;
             font-size:14px;
             font-weight:bold;
             margin-top:6px;
@@ -414,11 +653,12 @@ export default function OrderCart() {
 
     <div class="divider"></div>
 
-    <div class="center" style="font-size:12px;">
+    <div  style="font-size:12px; text-align:left;">
       --- END OF KOT ---
     </div>
   `;
   };
+
   const printThermalKOT = () => {
     const printWindow = window.open("", "_blank", "width=400,height=600");
 
@@ -473,6 +713,8 @@ export default function OrderCart() {
     const billElement = document.getElementById("print-bill");
     if (!billElement) return;
 
+    const width = paperSize === "80" ? "80mm" : "58mm";
+
     const printWindow = window.open("", "_blank", "width=400,height=600");
 
     printWindow.document.write(`
@@ -483,7 +725,7 @@ export default function OrderCart() {
   body {
     margin: 0;
     padding: 10px;
-    width: 58mm;
+    width:  ${width};
     font-family: monospace;
     font-size: 13px;
   }
@@ -511,7 +753,7 @@ export default function OrderCart() {
   }
 
   @page {
-    size: 58mm auto;
+    size: ${width} auto;
     margin: 0;
   }
 </style>
@@ -614,6 +856,13 @@ export default function OrderCart() {
 
   // New items (not printed)
   const newItems = cartItems.filter((item) => !item.kotPrinted);
+
+  // NOW safe to use
+  const totalItemsCount = cartItems.length;
+  const newItemsCount = newItems.length;
+
+  const totalQty = cartItems.reduce((sum, item) => sum + item.qty, 0);
+  const newQty = newItems.reduce((sum, item) => sum + item.qty, 0);
 
   useEffect(() => {
     if (!socket) return;
@@ -779,10 +1028,44 @@ export default function OrderCart() {
           </>
         )}
 
-        <Divider className="my-4" />
+        {/* <Divider className="my-4" /> */}
 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+            p: 1.5,
+            borderRadius: 2,
+            backgroundColor: "#F8FAFC",
+            border: "1px solid #E5E7EB",
+          }}
+        >
+          {/* Total Items */}
+          <Typography fontSize={14} fontWeight={600}>
+            🧾 Items: {totalItemsCount} ({totalQty} qty)
+          </Typography>
+
+          {/* New Items */}
+          {newItemsCount > 0 && (
+            <Typography
+              fontSize={13}
+              sx={{
+                color: "#dc2626",
+                fontWeight: 700,
+                backgroundColor: "#fee2e2",
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 1,
+              }}
+            >
+              🔥 New: {newItemsCount} ({newQty})
+            </Typography>
+          )}
+        </Box>
         {/* Totals */}
-        <div className="my-2 space-y-2 text-sm">
+        {/* <div className="my-2 space-y-2 text-sm">
           <div className="flex justify-between">
             <span>Subtotal</span>
             <span>₹ {subtotal.toFixed(2)}</span>
@@ -820,7 +1103,7 @@ export default function OrderCart() {
               backgroundColor: "#F8FAFC",
             }}
           >
-            <Box display="flex" justifyContent="space-between" mb={1}>
+            <Box display="flex" justifyContent="space-between"  mb={0.5}>
               <Typography color="text.secondary">Subtotal</Typography>
               <Typography>₹ {subtotal.toFixed(2)}</Typography>
             </Box>
@@ -843,7 +1126,7 @@ export default function OrderCart() {
 
             <Box display="flex" justifyContent="space-between">
               <Typography fontWeight={700} fontSize={18}>
-                Grand Total
+                Grand Totale
               </Typography>
               <Typography
                 fontWeight={700}
@@ -854,7 +1137,7 @@ export default function OrderCart() {
               </Typography>
             </Box>
           </Box>
-        </div>
+        </div> */}
       </Card>
 
       {/* Buttons */}
@@ -862,7 +1145,7 @@ export default function OrderCart() {
         <div className="flex flex-col lg:flex-row md:flex-row  justify-end gap-4 mt-6">
           {isDineIn ? (
             <AppButton
-              label="Print KOT"
+              label="Send to Kitchen"
               // onClick={() => setOpenKOT(true)}
               sx={{
                 backgroundColor: "#F1F5F9",
@@ -1061,7 +1344,7 @@ export default function OrderCart() {
       <Dialog
         open={openConfirm}
         onClose={() => setOpenConfirm(false)}
-        maxWidth="xs"
+        maxWidth="sm"
         fullWidth
         PaperProps={{
           sx: {
@@ -1092,7 +1375,7 @@ export default function OrderCart() {
 
           <Typography
             fontWeight={600}
-            mb={1.5}
+            my={1.5}
             sx={{ color: "#334155", fontSize: 14 }}
           >
             Select Discount
@@ -1123,33 +1406,119 @@ export default function OrderCart() {
           {/* TOTAL CARD */}
           <Box
             sx={{
-              background: "linear-gradient(135deg, #1E293B, #334155)",
+              background: "linear-gradient(135deg, #0F172A, #1E293B)",
               color: "#fff",
               borderRadius: 3,
-              p: 2,
-              textAlign: "center",
-              mb: 3,
+              px: 2.5,
+              py: 2,
+              boxShadow: "0 4px 30px rgba(0,0,0,0.2)",
             }}
           >
-            <Typography fontSize={13} sx={{ opacity: 0.8 }}>
-              Final Bill
+            {/* Title */}
+            <Typography
+              fontSize={13}
+              sx={{ opacity: 0.7, textAlign: "center", mb: 1 }}
+            >
+              Final Bill Summary
             </Typography>
 
-            {/* {discountPercent > 0 && (
-              <Typography fontSize={14}>
-                Discount ({discountPercent}%): -₹ {discountAmount.toFixed(2)}
+            {/* Subtotal */}
+            <Box display="flex" justifyContent="space-between" mb={0.5}>
+              <Typography fontSize={14} sx={{ opacity: 0.85 }}>
+                Subtotal
               </Typography>
-            )} */}
+              <Typography fontSize={14}>₹ {subtotal.toFixed(2)}</Typography>
+            </Box>
 
-            <Typography fontSize={26} fontWeight={700}>
-              ₹ {grandTotal.toFixed(2)}
-            </Typography>
+            {/* Discount */}
+            {discountPercent > 0 && (
+              <Box display="flex" justifyContent="space-between" mb={0.5}>
+                <Typography
+                  fontSize={14}
+                  sx={{ color: "#f87171", fontWeight: 600 }}
+                >
+                  Discount ({discountPercent}%)
+                </Typography>
+                <Typography
+                  fontSize={14}
+                  sx={{ color: "#f87171", fontWeight: 600 }}
+                >
+                  -₹ {discountAmount.toFixed(2)}
+                </Typography>
+              </Box>
+            )}
+
+            {/* CGST */}
+            {hasGST && (
+              <>
+                <Box display="flex" justifyContent="space-between" mb={0.5}>
+                  <Typography fontSize={13} sx={{ opacity: 0.7 }}>
+                    CGST (2.5%)
+                  </Typography>
+                  <Typography fontSize={13}>₹ {cgst.toFixed(2)}</Typography>
+                </Box>
+
+                <Box display="flex" justifyContent="space-between" mb={0.5}>
+                  <Typography fontSize={13} sx={{ opacity: 0.7 }}>
+                    SGST (2.5%)
+                  </Typography>
+                  <Typography fontSize={13}>₹ {sgst.toFixed(2)}</Typography>
+                </Box>
+              </>
+            )}
+
+            {/* VAT */}
+            {vatAmount > 0 && (
+              <Box display="flex" justifyContent="space-between" mb={0.5}>
+                <Typography fontSize={13} sx={{ opacity: 0.7 }}>
+                  VAT (10%)
+                </Typography>
+                <Typography fontSize={13}>₹ {vatAmount.toFixed(2)}</Typography>
+              </Box>
+            )}
+
+            {/* Divider */}
+            <Divider sx={{ my: 2, backgroundColor: "rgba(255,255,255,0.2)" }} />
+
+            {/* Savings */}
+            {discountAmount > 0 && (
+              <Typography
+                sx={{
+                  textAlign: "center",
+                  fontSize: 13,
+                  color: "#22c55e",
+                  fontWeight: 600,
+                }}
+              >
+                🎉 You saved ₹ {discountAmount.toFixed(2)}
+              </Typography>
+            )}
+
+            {/* Final Total */}
+            <Box
+              textAlign="center"
+              display={"flex"}
+              alignItems={"center"}
+              justifyContent={"space-between"}
+            >
+              <Typography fontSize={12} sx={{ opacity: 0.7 }}>
+                Total Payable
+              </Typography>
+
+              <Typography
+                fontSize={22}
+                fontWeight={700}
+                sx={{ letterSpacing: 1 }}
+              >
+                ₹ {grandTotal.toFixed(2)}
+              </Typography>
+            </Box>
           </Box>
 
           {/* PAYMENT METHOD */}
           <Typography
             fontWeight={600}
-            mb={1.5}
+            my={1.5}
             sx={{ color: "#334155", fontSize: 14 }}
           >
             Payment Method
