@@ -235,9 +235,8 @@ export default function OrderCart() {
       <!-- Header -->
      <div style="text-align:left;">
 
-  ${
-    shopInfo?.logoUrl
-      ? `
+  ${shopInfo?.logoUrl
+        ? `
       <div style="text-align:center;">
         <img 
           src="${shopInfo.logoUrl}" 
@@ -250,8 +249,8 @@ export default function OrderCart() {
         />
       </div>
     `
-      : ""
-  }
+        : ""
+      }
 
   <div style="
     text-align:center;
@@ -261,9 +260,8 @@ export default function OrderCart() {
     ${shopInfo?.shopName || ""}
   </div>
 
-  ${
-    shopInfo?.tagline
-      ? `
+  ${shopInfo?.tagline
+        ? `
       <div style="
         text-align:center;
         font-size:11px;
@@ -272,8 +270,8 @@ export default function OrderCart() {
         ${shopInfo.tagline}
       </div>
     `
-      : ""
-  }
+        : ""
+      }
 
   <!-- NEW: Address + Contact Info -->
   <div style="
@@ -401,9 +399,8 @@ export default function OrderCart() {
           <span>Rs.${Number(subtotal).toFixed(2)}</span>
         </div>
 
-        ${
-          discountAmount > 0
-            ? `
+        ${discountAmount > 0
+        ? `
             <div style="
               display:flex;
               justify-content:space-between;
@@ -413,12 +410,11 @@ export default function OrderCart() {
               <span>-Rs.${Number(discountAmount).toFixed(2)}</span>
             </div>
           `
-            : ""
-        }
+        : ""
+      }
 
-        ${
-          hasGST
-            ? `
+        ${hasGST
+        ? `
             <div style="
               display:flex;
               justify-content:space-between;
@@ -437,12 +433,11 @@ export default function OrderCart() {
               <span>Rs.${Number(sgst).toFixed(2)}</span>
             </div>
           `
-            : ""
-        }
+        : ""
+      }
 
-        ${
-          liquorSubtotal > 0 && hasVAT
-            ? `
+        ${liquorSubtotal > 0 && hasVAT
+        ? `
             <div style="
               display:flex;
               justify-content:space-between;
@@ -452,8 +447,8 @@ export default function OrderCart() {
               <span>Rs.${Number(vatAmount).toFixed(2)}</span>
             </div>
           `
-            : ""
-        }
+        : ""
+      }
       </div>
 
       <div class="divider" style="
@@ -500,9 +495,8 @@ export default function OrderCart() {
     "></div>
 
       <!-- Feedback QR -->
-      ${
-        feedbackQr
-          ? `
+      ${feedbackQr
+        ? `
           <div style="
             text-align:center;
             margin-top:8px;
@@ -532,7 +526,7 @@ export default function OrderCart() {
             </div>
           </div>
         `
-          : ""
+        : ""
       }
 
       <div class="divider" style="
@@ -569,12 +563,11 @@ export default function OrderCart() {
     <div class="divider"></div>
 
     <div class="center bold" style="font-size:15px; text-align:left;">
-      ${
-        isDineIn
-          ? `TABLE NO: ${tableNo}`
-          : orderType === "TAKEAWAY"
-            ? "TAKEAWAY ORDER"
-            : "QUICK ORDER"
+      ${isDineIn
+        ? `TABLE NO: ${tableNo}`
+        : orderType === "TAKEAWAY"
+          ? "TAKEAWAY ORDER"
+          : "QUICK ORDER"
       }
     </div>
 
@@ -599,25 +592,24 @@ export default function OrderCart() {
     <div class="divider"></div>
     
     ${newItems
-      .map((item) => {
-        const itemDetails = [
-          item.variantName,
-          item.portion && item.portion !== "full" && item.portion !== "null"
-            ? item.portion
-            : null,
-        ]
-          .filter(Boolean)
-          .join(" • ");
+        .map((item) => {
+          const itemDetails = [
+            item.variantName,
+            item.portion && item.portion !== "full" && item.portion !== "null"
+              ? item.portion
+              : null,
+          ]
+            .filter(Boolean)
+            .join(" • ");
 
-        return `
+          return `
           <div style="margin-bottom:10px;">
             <div class="bold" style="font-size:17px;">
               ${item.name}
-              ${
-                itemDetails
-                  ? `<span style="font-size:12px;">(${itemDetails})</span>`
-                  : ""
-              }
+              ${itemDetails
+              ? `<span style="font-size:12px;">(${itemDetails})</span>`
+              : ""
+            }
             </div>
 
             <div style="font-size:15px;">
@@ -625,11 +617,10 @@ export default function OrderCart() {
             </div>
           </div>
         `;
-      })
-      .join("")}
+        })
+        .join("")}
 
-    ${
-      kotMessage?.trim()
+    ${kotMessage?.trim()
         ? `
         <div class="divider"></div>
 
@@ -649,7 +640,7 @@ export default function OrderCart() {
         </div>
       `
         : ""
-    }
+      }
 
     <div class="divider"></div>
 
@@ -903,10 +894,10 @@ export default function OrderCart() {
           item.kotPrinted
             ? item
             : {
-                ...item,
-                kotPrinted: true,
-                kotNumber: kotNumber,
-              },
+              ...item,
+              kotPrinted: true,
+              kotNumber: kotNumber,
+            },
         ),
       );
     };
