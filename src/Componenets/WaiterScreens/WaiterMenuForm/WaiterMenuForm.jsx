@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import OrderForm from "./OrderForm";
-
+import CloseIcon from "@mui/icons-material/Close";
 import OrderCart from "./OrderCart";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
@@ -128,46 +128,91 @@ export default function WaiterMenuForm() {
           <RestaurantMenuIcon />
         </Fab>
 
-        <Dialog
-          open={openCategoryDialog}
-          onClose={() => setOpenCategoryDialog(false)}
-          fullWidth
-          maxWidth="xs"
-        >
-          <DialogTitle>Select Category</DialogTitle>
-          <DialogContent
-            sx={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 1.5,
-              pb: 3,
-            }}
-          >
-            <Chip
-              label="All"
-              clickable
-              color={category === "" ? "primary" : "default"}
-              onClick={() => {
-                setCategory("");
-                setOpenCategoryDialog(false);
-              }}
-            />
+       <Dialog
+  open={openCategoryDialog}
+  onClose={() => setOpenCategoryDialog(false)}
+  fullWidth
+  maxWidth="sm"
+>
+  <DialogTitle
+    sx={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      pb: 1,
+    }}
+  >
+    <Typography variant="h6" fontWeight={600}>
+      Select Category
+    </Typography>
 
-            {categories.map((cat) => (
-              <Chip
-                key={cat}
-                label={cat}
-                clickable
-                color={category === cat ? "primary" : "default"}
-                onClick={() => {
-                  setCategory(cat);
-                  setSubCategory("");
-                  setOpenCategoryDialog(false);
-                }}
-              />
-            ))}
-          </DialogContent>
-        </Dialog>
+    <IconButton onClick={() => setOpenCategoryDialog(false)}>
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <DialogContent>
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 1.5,
+        py: 1,
+      }}
+    >
+      <Chip
+        label="All Categories"
+        clickable
+        onClick={() => {
+          setCategory("");
+          setOpenCategoryDialog(false);
+        }}
+        sx={{
+          px: 1,
+          py: 2.5,
+          borderRadius: "12px",
+          fontWeight: 600,
+          bgcolor: category === "" ? "primary.main" : "grey.100",
+          color: category === "" ? "#fff" : "text.primary",
+          "&:hover": {
+            bgcolor: category === "" ? "primary.dark" : "grey.200",
+          },
+        }}
+      />
+
+      {categories.map((cat) => (
+        <Chip
+          key={cat}
+          label={cat}
+          clickable
+          onClick={() => {
+            setCategory(cat);
+            setSubCategory("");
+            setOpenCategoryDialog(false);
+          }}
+          sx={{
+            px: 1,
+            py: 2.5,
+            borderRadius: "12px",
+            fontWeight: 500,
+            bgcolor:
+              category === cat ? "primary.main" : "background.paper",
+            color: category === cat ? "#fff" : "text.primary",
+            border:
+              category === cat
+                ? "1px solid transparent"
+                : "1px solid #e0e0e0",
+            transition: "all 0.2s ease",
+            "&:hover": {
+              transform: "translateY(-2px)",
+              boxShadow: 2,
+            },
+          }}
+        />
+      ))}
+    </Box>
+  </DialogContent>
+</Dialog>
       </Box>
     </Suspense>
   );
