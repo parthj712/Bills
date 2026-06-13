@@ -48,7 +48,7 @@ const BillPreview = ({
         background: "#fff",
       }}
     >
-      {/* LOGO */}
+      {/* LOGO *//}
       {shopInfo?.logo?.url && (
         <Box display="flex" justifyContent="center" mb={2}>
           <img
