@@ -16,20 +16,19 @@ import {
   InputLabel,
   Select,
 } from "@mui/material";
-import Image from "next/image";
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import WaiterNavbar from "../WaiterNavbar/WaiterNavbar";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-
-import { TopProductsCard } from "@/Componenets/AdminScreens/AdminDashboard/TopProductsCard/TopProductsCard";
 import { getRecentBills } from "@/service/billsService";
 import { getShopInfo } from "@/service/shopService";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
+import { getSubscriptionExpiry } from "@/service/subscriptionService";
 
 const tableStyles = {
   AVAILABLE: `
@@ -60,27 +59,36 @@ export default function WaiterHomePage() {
   const [loading, setLoading] = useState(true);
   const initialCount = 5;
   const [visibleCount, setVisibleCount] = useState(initialCount);
-  const [expanded, setExpanded] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
   const [selectedTable, setSelectedTable] = useState(null);
-
   const [shopData, setShopData] = useState(null);
-
   const [selectedSection, setSelectedSection] = useState("ALL");
-
   const [billsLoading, setBillsLoading] = useState(false);
   const [billsLoaded, setBillsLoaded] = useState(false);
   const [billsCache, setBillsCache] = useState(null);
+  const [subscription, setSubscription] = useState([])
 
   // keyboard states
   const [keyBuffer, setKeyBuffer] = useState("");
   const [highlightTableNo, setHighlightTableNo] = useState(null);
   // const isDineIn = shopData?.businessCategory === "DINE_IN";
   // const isBar = shopData?.businessCategory === "RESTO_BAR";.
-
+  const isSubscriptionExpired = subscription?.daysLeft <= 0;
   const showTables =
     shopData?.businessCategory === "DINE_IN" ||
     shopData?.businessCategory === "RESTO_BAR";
+
+
+  const fetchSubscriptionExpiry = async () => {
+    try {
+      const res = await getSubscriptionExpiry();
+      setSubscription(res.data);
+    } catch (error) {
+      console.log(error?.message || error);
+    } finally {
+      setLoadingSub(false); // ✅ stop loading
+    }
+  };
 
   const fecthShopData = async () => {
     try {
@@ -154,6 +162,10 @@ export default function WaiterHomePage() {
   }, []);
 
   useEffect(() => {
+    fetchSubscriptionExpiry()
+    // fetchRecentBills();
+  }, [])
+  useEffect(() => {
     if (showTables) {
       handleGetTables();
     }
@@ -171,6 +183,7 @@ export default function WaiterHomePage() {
   //   // clear auth
 
   const handleTableClick = (tableId, tableNo, section) => {
+    if (isSubscriptionExpired) return;
     router.push(
       `/waiter/order?tableId=${tableId}&tableNo=${tableNo}&section=${section}`,
     );
@@ -188,6 +201,8 @@ export default function WaiterHomePage() {
   let keyTimeout = null;
 
   const handleKeyPress = (event) => {
+    if (isSubscriptionExpired) return;
+
     //these blocks everything
     if (!showTables) return;
     // ❌ Disable keyboard when menu is open
@@ -240,6 +255,7 @@ export default function WaiterHomePage() {
   };
 
   const handleOrderTypeClick = (orderType) => {
+    if (isSubscriptionExpired) return;
     router.push(`/waiter/order?orderType=${orderType}`);
   };
 
@@ -293,6 +309,98 @@ export default function WaiterHomePage() {
       {/* Navbar */}
       <WaiterNavbar />
 
+              {subscription && subscription.daysLeft <= 2 && (
+  <Box
+    sx={{
+      position: subscription.daysLeft <= 0 ? "fixed" : "relative",
+      top: subscription.daysLeft <= 0 ? 0 : "auto",
+      left: subscription.daysLeft <= 0 ? 0 : "auto",
+      width: subscription.daysLeft <= 0 ? "100vw" : "100%",
+      height: subscription.daysLeft <= 0 ? "100vh" : "auto",
+      zIndex: subscription.daysLeft <= 0 ? 9999 : 1,
+      background:
+        subscription.daysLeft <= 0
+          ? "rgba(0,0,0,0.65)"
+          : "transparent",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: subscription.daysLeft <= 0 ? "center" : "flex-start",
+      p: subscription.daysLeft <= 0 ? 2 : 0,
+      backdropFilter:
+        subscription.daysLeft <= 0 ? "blur(4px)" : "none",
+    }}
+  >
+    <Card
+      className="!rounded-2xl"
+      sx={{
+        p: 3,
+        mx:3,
+        maxWidth: subscription.daysLeft <= 0 ? 500 : "100%",
+        width: "100%",
+        background:
+          subscription.daysLeft <= 0
+            ? "linear-gradient(90deg,#991b1b,#ef4444)"
+            : subscription.daysLeft === 1
+              ? "linear-gradient(90deg,#92400e,#f59e0b)"
+              : "linear-gradient(90deg,#1e3a8a,#3b82f6)",
+        color: "white",
+      }}
+    >
+      <Typography fontWeight={700} fontSize={18}>
+        {subscription.daysLeft > 1 && "⚠️ Subscription Expiring Soon"}
+        {subscription.daysLeft === 1 &&
+          "⏰ Subscription Expires Tomorrow"}
+        {subscription.daysLeft <= 0 && "❌ Subscription Expired"}
+      </Typography>
+
+      <Typography fontSize={14} sx={{ mt: 1, opacity: 0.95 }}>
+        {subscription.daysLeft > 1 &&
+          `Your ${subscription.plan} plan will expire in ${subscription.daysLeft} days.`}
+        {subscription.daysLeft === 1 &&
+          `Your subscription expires tomorrow.`}
+        {subscription.daysLeft <= 0 &&
+          `Your subscription has expired.`}
+        {" "}Please contact our support team for renewal assistance.
+      </Typography>
+
+      <Box mt={3} display="flex" gap={2} flexWrap="wrap">
+        <a href="tel:+918855036596" style={{ textDecoration: "none" }}>
+          <Card
+            sx={{
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              background: "white",
+              color: "#991b1b",
+              fontWeight: 600,
+            }}
+          >
+            📞 Call Support
+          </Card>
+        </a>
+
+        <a
+          href="mailto:billflowpos37@gmail.com?subject=Subscription Renewal"
+          style={{ textDecoration: "none" }}
+        >
+          <Card
+            sx={{
+              px: 3,
+              py: 1,
+              borderRadius: "10px",
+              background: "white",
+              color: "#991b1b",
+              fontWeight: 600,
+            }}
+          >
+            📧 Send Query via Email
+          </Card>
+        </a>
+      </Box>
+    </Card>
+  </Box>
+)}
+
       <div>
         <Box
           display="flex"
@@ -300,6 +408,8 @@ export default function WaiterHomePage() {
           flexDirection={isDesktop ? "row" : "column-reverse"}
           gap={4}
         >
+
+
           {/* LEFT PANEL */}
           <div className="flex-1 flex flex-col gap-4 ">
             {/* Recent Bills */}
@@ -378,6 +488,7 @@ export default function WaiterHomePage() {
           <div className="flex-1">
             <div className="flex justify-end mb-4">
               <AppButton
+                disabled={isSubscriptionExpired}
                 label={showTables ? "Takeaway" : "Add Order"}
                 onClick={() => handleOrderTypeClick("TAKEAWAY")}
                 sx={{
@@ -396,7 +507,10 @@ export default function WaiterHomePage() {
               />
             </div>
             {showTables && (
-              <Card className="p-7 shadow-md ">
+              <Card className="p-7 shadow-md " sx={{
+                pointerEvents: isSubscriptionExpired ? "none" : "auto",
+                opacity: isSubscriptionExpired ? 0.6 : 1,
+              }}>
                 <div className="flex items-center justify-between  mb-4">
                   <Typography fontSize={isMobile ? 20 : 24} fontWeight={600}>
                     Dine-In Orders
@@ -485,13 +599,19 @@ export default function WaiterHomePage() {
                                   placement="bottom"
                                 >
                                   <div
-                                    onClick={() =>
+                                    onClick={() => {
+                                      if (isSubscriptionExpired) return;
+
                                       handleTableClick(
                                         table._id,
                                         table.tableNo,
                                         table.sectionId?.name,
-                                      )
-                                    }
+                                      );
+                                    }}
+                                    style={{
+                                      pointerEvents: isSubscriptionExpired ? "none" : "auto",
+                                      opacity: isSubscriptionExpired ? 0.6 : 1,
+                                    }}
                                     className={`
                   relative
                   h-28 w-full
@@ -505,17 +625,17 @@ export default function WaiterHomePage() {
                   transition-all duration-300
                   hover:shadow-lg hover:scale-[1.0]
                   ${tableStyles[table.status]}
-                  ${
-                    highlightTableNo === table.tableNo
-                      ? table.status === "OCCUPIED"
-                        ? "ring-4 ring-red-500 ring-offset-2"
-                        : "ring-4 ring-green-500 ring-offset-2"
-                      : ""
-                  }
+                  ${highlightTableNo === table.tableNo
+                                        ? table.status === "OCCUPIED"
+                                          ? "ring-4 ring-red-500 ring-offset-2"
+                                          : "ring-4 ring-green-500 ring-offset-2"
+                                        : ""
+                                      }
                 `}
                                   >
                                     <IconButton
                                       size="small"
+                                      disabled={isSubscriptionExpired}
                                       onClick={(e) => handleMenuOpen(e, table)}
                                       sx={{
                                         position: "absolute",
@@ -547,11 +667,10 @@ export default function WaiterHomePage() {
                                         table.status === "OCCUPIED" ? 700 : 600
                                       }
                                       className={`px-2 py-[2px] rounded-full
-                    ${
-                      table.status === "OCCUPIED"
-                        ? "bg-red-100 text-red-700 border border-red-500"
-                        : "bg-green-100 text-green-700 border border-green-500"
-                    }`}
+                    ${table.status === "OCCUPIED"
+                                          ? "bg-red-100 text-red-700 border border-red-500"
+                                          : "bg-green-100 text-green-700 border border-green-500"
+                                        }`}
                                     >
                                       {table.status}
                                     </Typography>
@@ -589,7 +708,10 @@ export default function WaiterHomePage() {
             >
               {/* AVAILABLE */}
               <MenuItem
-                disabled={selectedTable?.status === "AVAILABLE"}
+                disabled={
+                  isSubscriptionExpired ||
+                  selectedTable?.status === "AVAILABLE"
+                }
                 onClick={() => {
                   handleTableStatus(selectedTable._id, "AVAILABLE");
                   handleMenuClose();
@@ -609,7 +731,10 @@ export default function WaiterHomePage() {
 
               {/* OCCUPIED */}
               <MenuItem
-                disabled={selectedTable?.status === "OCCUPIED"}
+                disabled={
+                  isSubscriptionExpired ||
+                  selectedTable?.status === "OCCUPIED"
+                }
                 onClick={() => {
                   handleTableStatus(selectedTable._id, "OCCUPIED");
                   handleMenuClose();

@@ -12,18 +12,17 @@ import {
 import {
   ShoppingCart,
   CurrencyRupee,
-  EmojiEmotions,
+
   HomeWork,
-  TrendingUp,
-  AccessTime,
+
 } from "@mui/icons-material";
 import { StatCard } from "./StatCard";
 import { useEffect, useState } from "react";
-import { getBills, getDashboardSummary } from "@/service/billsService";
+import { getDashboardSummary } from "@/service/billsService";
 import { getSubscriptionExpiry } from "@/service/subscriptionService";
 import { TopProductsCard } from "./TopProductsCard/TopProductsCard";
 import { QuickInsights } from "./QuickInsights/QuickInsights";
-import { Skeleton, CircularProgress } from "@mui/material";
+import { Skeleton } from "@mui/material";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
@@ -41,18 +40,10 @@ import { socket } from "@/app/lib/socket";
 import { useAppSnackbar } from "@/Componenets/CommonComponents/SnackbarProvider/SnackbarProvider";
 import { useRefreshData } from "@/hooks/useRefreshData";
 
-// const topProducts = [
-//   { name: "Paneer Butter Masala", percent: 72 },
-//   { name: "Veg Biryani", percent: 65 },
-//   { name: "Butter Naan", percent: 54 },
-//   { name: "Cold Coffee", percent: 41 },
-// ];
 
 export default function AdminDashboard() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  // const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
-  // const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
