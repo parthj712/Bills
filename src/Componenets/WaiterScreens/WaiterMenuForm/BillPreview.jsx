@@ -64,7 +64,7 @@ const BillPreview = ({
         </Box>
       )}
 
-      {/* SHOP NAME */}
+      {/* SHOP NAME... */}
       <Typography
         align="center"
         sx={{
